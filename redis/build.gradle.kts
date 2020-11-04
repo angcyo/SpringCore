@@ -3,14 +3,9 @@ dependencies {
         exclude("org.junit.vintage", "junit-vintage-engine")
     }
 
-    //lombok
-    /*compileOnly("org.projectlombok:lombok")
-    developmentOnly("org.springframework.boot:spring-boot-devtools")
-    annotationProcessor("org.projectlombok:lombok")*/
-
     api(project(":SpringCore:core"))
-    api(project(":SpringCore:mysql"))
-    api(project(":SpringCore:redis"))
+
+    api("org.springframework.boot:spring-boot-starter-data-redis")
 }
 
 tasks.getByName<org.springframework.boot.gradle.tasks.bundling.BootJar>("bootJar") {

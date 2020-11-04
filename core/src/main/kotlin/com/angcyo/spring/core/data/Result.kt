@@ -26,10 +26,10 @@ data class Result<T>(
         var data: T? = null
 )
 
-fun <T> Any.ok(msg: String? = "Success") = when {
+fun <T> Any?.ok(msg: String? = "Success") = when {
     else -> Result(msg = msg, data = this as T)
 }
 
-fun <T> Any.error(msg: String? = "Error", code: Int = 800) = when {
+fun <T> Any?.error(msg: String? = "Error", code: Int = 800) = when {
     else -> Result(code = code, msg = msg, data = this as T)
 }

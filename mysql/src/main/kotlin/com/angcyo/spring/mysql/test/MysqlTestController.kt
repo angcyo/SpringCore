@@ -15,17 +15,17 @@ import org.springframework.web.bind.annotation.RestController
  */
 
 @RestController
-@RequestMapping("/test")
-class TestController {
+@RequestMapping("/mysql")
+class MysqlTestController {
 
     @Autowired
-    lateinit var testRepository: TestRepository
+    lateinit var mysqlTestRepository: MysqlTestRepository
 
     @RequestMapping("/save")
     @Transactional
     fun saveOne(): Result<TestEntity> {
         val entity = TestEntity(data = nowTimeString())
-        val result = testRepository.save(entity)
+        val result = mysqlTestRepository.save(entity)
         return result.ok()
     }
 
@@ -36,6 +36,6 @@ class TestController {
 
     @RequestMapping("/all")
     fun findAll(): Result<List<TestEntity>> {
-        return testRepository.findAll().ok()
+        return mysqlTestRepository.findAll().ok()
     }
 }
