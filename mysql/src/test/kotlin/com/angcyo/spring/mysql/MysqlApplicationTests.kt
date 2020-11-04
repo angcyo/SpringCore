@@ -1,13 +1,13 @@
-package com.angcyo.spring.core
+package com.angcyo.spring.mysql
 
 import org.junit.jupiter.api.Test
 import org.springframework.boot.test.context.SpringBootTest
 
 @SpringBootTest
-class CoreApplicationTests {
+class MysqlApplicationTests {
 
-    @Test
-    fun contextLoads() {
-    }
+	@Test
+	fun contextLoads() {
+	}
 
 }
