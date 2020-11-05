@@ -36,6 +36,11 @@ class MysqlTestController {
 
     @RequestMapping("/all")
     fun findAll(): Result<List<TestEntity>> {
-        return mysqlTestRepository.findAll().ok()
+        return try {
+            mysqlTestRepository.findAll()
+        } catch (e: Exception) {
+            e.printStackTrace()
+            emptyList<TestEntity>()
+        }.ok()
     }
 }
