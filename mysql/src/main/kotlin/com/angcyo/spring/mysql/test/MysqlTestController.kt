@@ -2,6 +2,7 @@ package com.angcyo.spring.mysql.test
 
 import com.angcyo.spring.core.data.Result
 import com.angcyo.spring.core.data.ok
+import com.angcyo.spring.core.log.RecordLog
 import com.angcyo.spring.core.nowTimeString
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.transaction.annotation.Transactional
@@ -35,6 +36,7 @@ class MysqlTestController {
     }
 
     @RequestMapping("/all")
+    @RecordLog("RecordLog测试")
     fun findAll(): Result<List<TestEntity>> {
         return try {
             mysqlTestRepository.findAll()

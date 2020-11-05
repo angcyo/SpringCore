@@ -2,6 +2,9 @@ package com.angcyo.spring.core
 
 import java.sql.Date
 import java.text.SimpleDateFormat
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
+import java.util.*
 
 /**
  * Email:angcyo@126.com
@@ -43,4 +46,11 @@ fun Long.toTime(pattern: String = "yyyy-MM-dd HH:mm"): String {
     return format.format(java.util.Date(this))
 }
 
+/**2020-11-05 15:07:16.265363*/
+fun LocalDateTime.toTime(pattern: String = "yyyy-MM-dd HH:mm"): String {
+    return format(DateTimeFormatter.ofPattern(pattern, Locale.CHINA))
+}
+
 /*----------------------------------------------------------------------------------*/
+
+fun uuid() = UUID.randomUUID().toString()
