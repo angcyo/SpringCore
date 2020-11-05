@@ -23,28 +23,35 @@ import org.springframework.data.redis.serializer.StringRedisSerializer
 @Configuration
 class RedisConfiguration {
 
-    /**https://segmentfault.com/a/1190000020314044*/
+    /**
+     * https://segmentfault.com/a/1190000020314044
+     * https://blog.csdn.net/jiangyu1013/article/details/106623913
+     * */
     @Bean(name = ["redisTemplate"])
-    fun redisTemplate(redisConnectionFactory: RedisConnectionFactory?): RedisTemplate<String, Any?>? {
+    fun redisTemplate(redisConnectionFactory: RedisConnectionFactory): RedisTemplate<String, Any?>? {
         val template = RedisTemplate<String, Any?>()
-        template.setConnectionFactory(redisConnectionFactory!!)
+        template.setConnectionFactory(redisConnectionFactory)
+
         //使用Jackson2JsonRedisSerializer来序列化和反序列化redis的value值
         val jackson2JsonRedisSerializer = Jackson2JsonRedisSerializer(Any::class.java)
         val mapper = ObjectMapper()
         mapper.setVisibility(PropertyAccessor.ALL, JsonAutoDetect.Visibility.ANY)
-        mapper.enableDefaultTyping(ObjectMapper.DefaultTyping.NON_FINAL)
+        // 指定序列化输入的类型，类必须是非final修饰的，final修饰的类，比如String,Integer等会跑出异常
+        //mapper.enableDefaultTyping(ObjectMapper.DefaultTyping.EVERYTHING)
         jackson2JsonRedisSerializer.setObjectMapper(mapper)
         template.valueSerializer = jackson2JsonRedisSerializer
+
         val stringRedisSerializer = StringRedisSerializer()
         //使用StringRedisSerializer来序列化和反序列化redis的key值
         template.keySerializer = stringRedisSerializer
-        template.keySerializer = stringRedisSerializer
+
         // hash的key也采用String的序列化方式
         template.hashKeySerializer = stringRedisSerializer
         // value序列化方式采用jackson
         template.valueSerializer = jackson2JsonRedisSerializer
         // hash的value序列化方式采用jackson
         template.hashValueSerializer = jackson2JsonRedisSerializer
+
         template.afterPropertiesSet()
         return template
     }
@@ -58,7 +65,7 @@ class RedisConfiguration {
         val jackson2JsonRedisSerializer: Jackson2JsonRedisSerializer<*> = Jackson2JsonRedisSerializer(Any::class.java)
         val objectMapper = ObjectMapper()
         objectMapper.setVisibility(PropertyAccessor.ALL, JsonAutoDetect.Visibility.ANY)
-        objectMapper.enableDefaultTyping(ObjectMapper.DefaultTyping.NON_FINAL)
+        //objectMapper.enableDefaultTyping(ObjectMapper.DefaultTyping.NON_FINAL)
         jackson2JsonRedisSerializer.setObjectMapper(objectMapper)
 
         // 设置value的序列化规则和 key的序列化规则
@@ -75,7 +82,7 @@ class RedisConfiguration {
          val jackson2JsonRedisSerializer = Jackson2JsonRedisSerializer(Any::class.java)
          val om = ObjectMapper()
          om.setVisibility(PropertyAccessor.ALL, JsonAutoDetect.Visibility.ANY)
-         om.enableDefaultTyping(DefaultTyping.NON_FINAL)
+         //om.enableDefaultTyping(DefaultTyping.NON_FINAL)
          jackson2JsonRedisSerializer.setObjectMapper(om)
          // 配置redisTemplate
          val redisTemplate = RedisTemplate<String, Any>()
