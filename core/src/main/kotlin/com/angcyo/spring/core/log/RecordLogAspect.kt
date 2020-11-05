@@ -63,7 +63,7 @@ class RecordLogAspect {
         // 请求IP
         L.i("请求IP：", IPUtil.getIpAddress(request))
         // 请求头
-        request.headerNames.asIterator().forEach {
+        request.headerNames.iterator().forEach {
             L.i(it, request.getHeader(it))
         }
         // 请求参数
