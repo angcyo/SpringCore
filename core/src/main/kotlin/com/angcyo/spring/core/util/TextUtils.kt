@@ -27,3 +27,6 @@ object TextUtils {
         } else false
     }
 }
+
+/**移除字符串中的换行符, 空格符*/
+fun String.trimAll() = replace("\n", "").replace(" ", "")

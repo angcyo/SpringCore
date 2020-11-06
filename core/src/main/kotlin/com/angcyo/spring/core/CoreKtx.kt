@@ -1,5 +1,6 @@
 package com.angcyo.spring.core
 
+import java.nio.charset.Charset
 import java.sql.Date
 import java.text.SimpleDateFormat
 import java.time.LocalDateTime
@@ -54,3 +55,6 @@ fun LocalDateTime.toTime(pattern: String = "yyyy-MM-dd HH:mm"): String {
 /*----------------------------------------------------------------------------------*/
 
 fun uuid() = UUID.randomUUID().toString()
+
+fun ByteArray.toString(charset: Charset = Charset.defaultCharset()) = String(this, charset)
+fun ByteArray.toString(charset: String? = null) = String(this, Charset.forName(charset ?: "UTF-8"))

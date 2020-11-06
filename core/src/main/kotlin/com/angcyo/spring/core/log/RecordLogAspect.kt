@@ -20,11 +20,22 @@ import org.springframework.web.context.request.ServletRequestAttributes
  * @date 2020/11/05
  *
  * 定义一个切面
+ *
+ * https://www.cnblogs.com/xiao-lei/p/11707222.html
  */
 
 @Aspect
 @Component
 class RecordLogAspect {
+
+    /**
+     * 指定切点
+     * 匹配所有Controller类的所有方法
+     */
+    @Pointcut("execution(* com.angcyo.spring..*.*Controller*(..))")
+    fun recordAll() {
+
+    }
 
     /**切入点*/
     @Pointcut("@annotation(com.angcyo.spring.core.log.RecordLog)")
