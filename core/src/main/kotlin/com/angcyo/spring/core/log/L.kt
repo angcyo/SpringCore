@@ -16,6 +16,7 @@ object L {
     val _logAngcyo: Logger = LoggerFactory.getLogger("angcyo")
     val _logHttp: Logger = LoggerFactory.getLogger("http")
     val _logTemp: Logger = LoggerFactory.getLogger("temp")
+    val _logDb: Logger = LoggerFactory.getLogger("db")
 
     /*----------------angcyo.log----------------------*/
 
@@ -57,5 +58,11 @@ object L {
 
     fun et(vararg log: Any?) {
         _logTemp.error(log.joinToString(" "))
+    }
+
+    /*----------------db.log----------------------*/
+
+    fun db(vararg log: Any?) {
+        _logDb.info(log.joinToString(" "))
     }
 }

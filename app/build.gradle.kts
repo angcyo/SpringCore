@@ -11,6 +11,7 @@ dependencies {
     api(project(":SpringCore:core"))
     api(project(":SpringCore:mysql"))
     api(project(":SpringCore:redis"))
+    api(project(":SpringCore:security"))
 }
 
 tasks.getByName<org.springframework.boot.gradle.tasks.bundling.BootJar>("bootJar") {

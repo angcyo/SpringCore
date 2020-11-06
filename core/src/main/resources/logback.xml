@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration>
     <!--
+        http://logback.qos.ch/manual/index.html
+        http://logback.qos.ch/apidocs/index.html
         https://juejin.im/entry/6844903705641402376
         https://github.com/L316476844/springbootexample
        说明：
@@ -201,6 +203,17 @@
         </encoder>
     </appender>
 
+    <!--http://logback.qos.ch/manual/appenders.html#DBAppender-->
+    <appender name="DB_LOG" class="ch.qos.logback.classic.db.DBAppender">
+        <connectionSource class="ch.qos.logback.core.db.DriverManagerConnectionSource">
+            <driverClass>com.mysql.jdbc.Driver</driverClass>
+            <url>jdbc:mysql://39.108.53.184:33060/spmt?useSSL=false&amp;useUnicode=true&amp;characterEncoding=UTF-8&amp;serverTimezone=UTC</url>
+            <user>root</user>
+            <password></password>
+        </connectionSource>
+        <!--<sqlDialect class="ch.qos.logback.core.db.dialect.MySQLDialect"/>-->
+    </appender>
+
     <!-- <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
          &lt;!&ndash;encoder 默认配置为PatternLayoutEncoder&ndash;&gt;
          <encoder>
@@ -247,6 +260,10 @@
 
     <logger name="temp">
         <appender-ref ref="FILE_TEMP"/>
+    </logger>
+
+    <logger name="db">
+        <appender-ref ref="DB_LOG"/>
     </logger>
 
     <!-- 生产环境下，将此级别配置为适合的级别，以免日志文件太多或影响程序性能 -->
