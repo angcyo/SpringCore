@@ -1,10 +1,8 @@
 package com.angcyo.spring.core.log
 
-import com.angcyo.spring.core.log.wrapper.RequestWrapper
-import com.angcyo.spring.core.log.wrapper.RequestWrapper2
-import com.angcyo.spring.core.log.wrapper.ResponseWrapper
-import com.angcyo.spring.core.log.wrapper.ResponseWrapper2
-import com.angcyo.spring.core.toString
+import com.angcyo.spring.core.log.wrapper.*
+import com.angcyo.spring.core.servlet.bytes
+import com.angcyo.spring.core.string
 import com.angcyo.spring.core.util.IPUtil
 import com.angcyo.spring.core.util.trimAll
 import com.angcyo.spring.core.uuid
@@ -21,6 +19,51 @@ import javax.servlet.http.HttpServletResponse
  */
 
 object ServletLog {
+
+    /**包装一下, 请求 返回日志输出*/
+    fun wrap(requestId: Long,
+             request: HttpServletRequest,
+             response: HttpServletResponse?,
+             requestBuilder: StringBuilder = StringBuilder(),
+             responseBuilder: StringBuilder = StringBuilder(),
+             wrap: Boolean = true,
+             action: (request: HttpServletRequest, response: HttpServletResponse?) -> Unit) {
+        // 开始时间
+        val startTime = System.currentTimeMillis()
+        val uuid = uuid()
+
+        val requestWrapper = if (wrap) RequestWrapper(request) else request
+        //val requestWrapper = RequestWrapper2(request)
+        //val responseWrapper = if (wrap && response != null) ResponseWrapper3(response) else response
+        //val responseWrapper = ResponseWrapper2(response)
+        val responseWrapper = if (wrap && response != null) ResponseWrapper(response) else response
+
+        try {
+            requestBuilder.apply {
+                appendLine()
+                append("-->$uuid $requestId")
+            }
+
+            L.ih(requestWrapper.log(requestBuilder))
+
+            //chain
+            action(requestWrapper, responseWrapper)
+        } catch (e: Exception) {
+            L.db(e.stackTraceToString())
+        } finally {
+            responseBuilder.apply {
+                appendLine()
+                append("<--$uuid")
+                append(" ")
+                append(responseWrapper?.status)
+                append(" ${System.currentTimeMillis() - startTime}ms")
+            }
+
+            L.ih(responseWrapper?.log(responseBuilder))
+        }
+    }
+
+    /**打印请求体*/
     fun logRequest(request: ServletRequest, builder: StringBuilder = StringBuilder()): String {
         builder.apply {
             if (request is HttpServletRequest) {
@@ -43,16 +86,15 @@ object ServletLog {
                     append(it.value.toList().toString())
                 }
 
-                //请求体
-                if (request is RequestWrapper) {
-                    val bytes = request.toByteArray()
+                fun _log(bytes: ByteArray?) {
                     appendLine()
-                    append("body(${DataSize.ofBytes(bytes.size.toLong())})↓")
-                    if (bytes.isNotEmpty()) {
+                    val size = bytes?.size?.toLong() ?: -1
+                    append("body(${DataSize.ofBytes(size)})↓")
+                    if (bytes?.isNotEmpty() == true) {
                         appendLine()
                         if (!request.isMultipart() && !request.isBinaryContent()) {
                             try {
-                                append(bytes.toString(request.characterEncoding).trimAll())
+                                append(bytes.string(request.characterEncoding).trimAll())
                             } catch (e: Exception) {
                                 append(e.stackTraceToString())
                             }
@@ -60,21 +102,25 @@ object ServletLog {
                             append("binary body.")
                         }
                     }
-                } else if (request is RequestWrapper2) {
-                    val bytes = request.body
-                    appendLine()
-                    append("body(${DataSize.ofBytes(bytes.size.toLong())})↓")
-                    if (bytes.isNotEmpty()) {
-                        appendLine()
-                        if (!request.isMultipart() && !request.isBinaryContent()) {
-                            try {
-                                append(bytes.toString(request.characterEncoding).trimAll())
-                            } catch (e: Exception) {
-                                append(e.stackTraceToString())
-                            }
-                        } else {
-                            append("binary body.")
-                        }
+                }
+
+                //请求体
+                when (request) {
+                    is RequestWrapper -> {
+                        val bytes = request.toByteArray()
+                        _log(bytes)
+                    }
+                    is RequestWrapper2 -> {
+                        val bytes = request.body
+                        _log(bytes)
+                    }
+                    is RequestWrapper3 -> {
+                        val bytes = request.toByteArray()
+                        _log(bytes)
+                    }
+                    else -> {
+                        val bytes = request.bytes()
+                        _log(bytes)
                     }
                 }
 
@@ -103,32 +149,15 @@ object ServletLog {
                     append(response.getHeader(it))
                 }
 
-                //返回体
-                if (response is ResponseWrapper) {
-                    val bytes = response.toByteArray()
+                fun _log(bytes: ByteArray?) {
                     appendLine()
-                    append("body(${DataSize.ofBytes(bytes.size.toLong())})↓")
-                    if (bytes.isNotEmpty()) {
+                    val size = bytes?.size?.toLong() ?: -1
+                    append("body(${DataSize.ofBytes(size)})↓")
+                    if (bytes?.isNotEmpty() == true) {
                         appendLine()
                         if (!response.isMultipart() && !response.isBinaryContent()) {
                             try {
-                                append(bytes.toString(response.characterEncoding).trimAll())
-                            } catch (e: Exception) {
-                                append(e.stackTraceToString())
-                            }
-                        } else {
-                            append("binary body.")
-                        }
-                    }
-                } else if (response is ResponseWrapper2) {
-                    val bytes = response.responseData
-                    appendLine()
-                    append("body(${DataSize.ofBytes(bytes.size.toLong())})↓")
-                    if (bytes.isNotEmpty()) {
-                        appendLine()
-                        if (!response.isMultipart() && !response.isBinaryContent()) {
-                            try {
-                                append(bytes.toString(response.characterEncoding).trimAll())
+                                append(bytes.string(response.characterEncoding).trimAll())
                             } catch (e: Exception) {
                                 append(e.stackTraceToString())
                             }
@@ -137,49 +166,26 @@ object ServletLog {
                         }
                     }
                 }
+
+                //返回体
+                when (response) {
+                    is ResponseWrapper -> {
+                        val bytes = response.toByteArray()
+                        _log(bytes)
+                    }
+                    is ResponseWrapper2 -> {
+                        val bytes = response.responseData
+                        _log(bytes)
+                    }
+                    is ResponseWrapper3 -> {
+                        val bytes = response.string().toByteArray()
+                        _log(bytes)
+                    }
+                }
                 appendLine()
             }
         }
         return builder.toString()
-    }
-
-    /**包装一下, 请求 返回日志输出*/
-    fun wrap(requestId: Long,
-             request: HttpServletRequest,
-             response: HttpServletResponse,
-             action: (request: HttpServletRequest, response: HttpServletResponse) -> Unit) {
-        // 开始时间
-        val startTime = System.currentTimeMillis()
-        val uuid = uuid()
-
-        val requestWrapper = RequestWrapper(request)
-        //val requestWrapper = RequestWrapper2(request)
-        val responseWrapper = ResponseWrapper(response)
-        //val responseWrapper = ResponseWrapper2(response)
-
-        try {
-            val requestBuilder = StringBuilder().apply {
-                appendLine()
-                append("-->$uuid $requestId")
-            }
-
-            L.ih(requestWrapper.log(requestBuilder))
-
-            //chain
-            action(requestWrapper, responseWrapper)
-        } catch (e: Exception) {
-            L.db(e.stackTraceToString())
-        } finally {
-            val responseBuilder = StringBuilder().apply {
-                appendLine()
-                append("<--$uuid")
-                append(" ")
-                append(responseWrapper.status)
-                append(" ${System.currentTimeMillis() - startTime}ms")
-            }
-
-            L.ih(responseWrapper.log(responseBuilder))
-        }
     }
 }
 

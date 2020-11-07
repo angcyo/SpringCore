@@ -1,4 +1,4 @@
-package com.angcyo.spring.app
+package com.angcyo.spring.app.test
 
 import com.angcyo.spring.core.bean
 import org.springframework.web.bind.annotation.PathVariable
@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.RestController
  * @date 2020/11/04
  */
 @RestController
+@RequestMapping("/test")
 class HelloController {
 
     @RequestMapping("/hello")

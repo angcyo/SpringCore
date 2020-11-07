@@ -206,7 +206,7 @@
     <!--http://logback.qos.ch/manual/appenders.html#DBAppender-->
     <appender name="DB_LOG" class="ch.qos.logback.classic.db.DBAppender">
         <connectionSource class="ch.qos.logback.core.db.DriverManagerConnectionSource">
-            <driverClass>com.mysql.jdbc.Driver</driverClass>
+            <driverClass>com.mysql.cj.jdbc.Driver</driverClass>
             <url>jdbc:mysql://39.108.53.184:33060/spmt?useSSL=false&amp;useUnicode=true&amp;characterEncoding=UTF-8&amp;serverTimezone=UTC</url>
             <user>root</user>
             <password></password>
@@ -295,7 +295,7 @@
         <connectionSource class="ch.qos.logback.core.db.DriverManagerConnectionSource">
            连接池
            <dataSource class="com.mchange.v2.c3p0.ComboPooledDataSource">
-              <driverClass>com.mysql.jdbc.Driver</driverClass>
+              <driverClass>com.mysql.cj.jdbc.Driver</driverClass>
               <url>jdbc:mysql://127.0.0.1:3306/databaseName</url>
               <user>root</user>
               <password>root</password>

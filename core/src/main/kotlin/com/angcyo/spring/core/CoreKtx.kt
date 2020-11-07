@@ -56,5 +56,8 @@ fun LocalDateTime.toTime(pattern: String = "yyyy-MM-dd HH:mm"): String {
 
 fun uuid() = UUID.randomUUID().toString()
 
-fun ByteArray.toString(charset: Charset = Charset.defaultCharset()) = String(this, charset)
-fun ByteArray.toString(charset: String? = null) = String(this, Charset.forName(charset ?: "UTF-8"))
+fun ByteArray.string(charset: Charset = Charset.defaultCharset()) = String(this, charset)
+fun ByteArray.string(charset: String?) = String(this, Charset.forName(charset ?: "UTF-8"))
+
+/**一天对应多少毫秒 [86400_000]*/
+val oneDay: Long get() = 1000L * 60 * 60 * 24

@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.RestController
  */
 
 @RestController
-@RequestMapping("/redis")
+@RequestMapping("/test/redis")
 class RedisTestController {
 
     @Autowired

@@ -17,7 +17,11 @@
  */
 package com.angcyo.spring.core.log.wrapper
 
+import org.apache.commons.io.input.TeeInputStream
 import java.io.ByteArrayOutputStream
+import java.io.IOException
+import javax.servlet.ReadListener
+import javax.servlet.ServletInputStream
 import javax.servlet.http.HttpServletRequest
 import javax.servlet.http.HttpServletRequestWrapper
 
@@ -25,15 +29,32 @@ import javax.servlet.http.HttpServletRequestWrapper
  * 2020-11-6
  * https://github.com/isrsal/spring-mvc-logger
  * */
+
 class RequestWrapper(request: HttpServletRequest) : HttpServletRequestWrapper(request) {
+    private val bos = ByteArrayOutputStream()
 
-    val byteArrayOutputStream: ByteArrayOutputStream = ByteArrayOutputStream()
+    @Throws(IOException::class)
+    override fun getInputStream(): ServletInputStream {
+        return object : ServletInputStream() {
+            override fun isFinished(): Boolean {
+                return false
+            }
 
-    init {
-        inputStream.transferTo(byteArrayOutputStream)
+            override fun isReady(): Boolean {
+                return false
+            }
+
+            override fun setReadListener(readListener: ReadListener) {}
+            private val tee = TeeInputStream(super@RequestWrapper.getInputStream(), bos)
+
+            @Throws(IOException::class)
+            override fun read(): Int {
+                return tee.read()
+            }
+        }
     }
 
     fun toByteArray(): ByteArray {
-        return byteArrayOutputStream.toByteArray()
+        return bos.toByteArray()
     }
 }

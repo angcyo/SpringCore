@@ -18,14 +18,14 @@ import javax.servlet.http.HttpServletResponse
 
 @Component
 @Order(Ordered.HIGHEST_PRECEDENCE)
-/*@Deprecated("可以拿到403, 404")*/
 class LoggerDispatcherServlet : DispatcherServlet() {
     private val id = AtomicLong(1)
 
     override fun doDispatch(request: HttpServletRequest, response: HttpServletResponse) {
         val requestId = id.incrementAndGet()
-        ServletLog.wrap(requestId, request, response) { requestWrap, responseWrap ->
-            super.doDispatch(requestWrap, responseWrap)
-        }
+        /*ServletLog.wrap(requestId, request, response) { requestWrap, responseWrap ->
+            super.doDispatch(requestWrap, responseWrap!!)
+        }*/
+        super.doDispatch(request, response)
     }
 }

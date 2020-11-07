@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.RestController
  */
 
 @RestController
-@RequestMapping("/security")
+@RequestMapping("/test/security")
 class SecurityTestController {
 
     @RequestMapping("/")

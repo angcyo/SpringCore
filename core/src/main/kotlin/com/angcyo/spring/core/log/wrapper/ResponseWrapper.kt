@@ -34,6 +34,7 @@ import javax.servlet.http.HttpServletResponseWrapper
 class ResponseWrapper(response: HttpServletResponse) : HttpServletResponseWrapper(response) {
     private val bos = ByteArrayOutputStream()
     private val writer = PrintWriter(bos)
+
     override fun getResponse(): ServletResponse {
         return this
     }
