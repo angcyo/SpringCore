@@ -1,6 +1,5 @@
 package com.angcyo.spring.swagger
 
-import io.swagger.annotations.ApiOperation
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import springfox.documentation.builders.ApiInfoBuilder
@@ -38,7 +37,9 @@ class Swagger3Configuration {
         return Docket(DocumentationType.OAS_30)
                 .apiInfo(apiInfo())
                 .select()
-                .apis(RequestHandlerSelectors.withMethodAnnotation(ApiOperation::class.java))
+                //.apis(RequestHandlerSelectors.withMethodAnnotation(ApiOperation::class.java))
+                .apis(RequestHandlerSelectors.basePackage("com.angcyo.spring"))
+                //.paths(PathSelectors.regex("/public.*"))
                 .paths(PathSelectors.any()) // 可以根据url路径设置哪些请求加入文档，忽略哪些请求
                 .build()
     }
