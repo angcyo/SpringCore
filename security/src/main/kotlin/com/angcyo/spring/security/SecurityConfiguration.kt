@@ -48,6 +48,7 @@ class SecurityConfiguration : WebSecurityConfigurerAdapter() {
                 "/webjars/**",
                 "/v2/api-docs/**",
                 "/v3/api-docs/**",
+                "/doc.html"
         )
     }
 

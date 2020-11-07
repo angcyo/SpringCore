@@ -53,6 +53,7 @@ class JwtAuthorizationFilter(authenticationManager: AuthenticationManager?,
 
         if (authToken == null) {
             L.e("无权限访问: ${request.requestURL}")
+            //authToken = UsernamePasswordAuthenticationToken(JWT.TEMP_USER, null, JWT.TEMP_USER_ROLES)
         }
 
         return authToken

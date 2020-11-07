@@ -10,6 +10,15 @@ dependencies {
 
     api("io.springfox:springfox-boot-starter:$version")
 
+    //https://doc.xiaominfo.com/
+    //https://mvnrepository.com/artifact/com.github.xiaoymin
+    api("com.github.xiaoymin:knife4j-spring-boot-starter:3.0.1")
+    //api("com.github.xiaoymin:knife4j-spring-boot-starter:2.0.7")
+
+    //https://mvnrepository.com/artifact/com.github.xiaoymin/knife4j-spring-ui
+    //api("com.github.xiaoymin:knife4j-springdoc-ui:3.0.1")
+    //api("com.github.xiaoymin:swagger-bootstrap-ui:1.9.6")
+
     testImplementation("org.springframework.boot:spring-boot-starter-test") {
         exclude("org.junit.vintage", "junit-vintage-engine")
     }
