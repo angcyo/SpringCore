@@ -1,5 +1,5 @@
 dependencies {
-    api(project(":SpringCore:swagger2"))
+    api(project(":SpringCore:swagger"))
 
     //spring web
     api("org.springframework.boot:spring-boot-starter-web")
