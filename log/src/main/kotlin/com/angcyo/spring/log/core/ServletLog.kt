@@ -83,7 +83,13 @@ object ServletLog {
                 request.session?.apply {
                     appendLine()
                     append(id)
-                    append(" ${creationTime.fullTime()}/${lastAccessedTime.fullTime()}")
+                    append(" ${creationTime.fullTime()}/${lastAccessedTime.fullTime("HH:mm:ss.SSS")}")
+                    attributeNames.iterator().forEach {
+                        appendLine()
+                        append(it)
+                        append(":")
+                        append(getAttribute(it))
+                    }
                 }
 
                 //参数
