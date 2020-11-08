@@ -1,7 +1,8 @@
 dependencies {
     api(project(":SpringCore:base"))
-    api(project(":SpringCore:log"))
-    api(project(":SpringCore:swagger"))
+
+    //slf4j
+    //implementation("org.springframework.boot:spring-boot-starter-logging")
 
     testImplementation("org.springframework.boot:spring-boot-starter-test") {
         exclude("org.junit.vintage", "junit-vintage-engine")

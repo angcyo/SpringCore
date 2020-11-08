@@ -1,6 +1,6 @@
 package com.angcyo.spring.app.test
 
-import com.angcyo.spring.core.bean
+import com.angcyo.spring.base.bean
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController

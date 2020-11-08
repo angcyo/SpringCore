@@ -1,9 +1,9 @@
 package com.angcyo.spring.mysql.test
 
-import com.angcyo.spring.core.data.Result
+import com.angcyo.spring.base.nowTimeString
 import com.angcyo.spring.core.data.ok
-import com.angcyo.spring.core.log.RecordLog
-import com.angcyo.spring.core.nowTimeString
+import com.angcyo.spring.core.data.Result
+import com.angcyo.spring.log.core.RecordLog
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.transaction.annotation.Transactional
 import org.springframework.web.bind.annotation.RequestMapping

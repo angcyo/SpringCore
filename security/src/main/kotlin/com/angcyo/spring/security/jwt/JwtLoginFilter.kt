@@ -1,6 +1,6 @@
 package com.angcyo.spring.security.jwt
 
-import com.angcyo.spring.core.servlet.body
+import com.angcyo.spring.base.servlet.body
 import com.angcyo.spring.security.SecurityConstants
 import org.springframework.security.authentication.AuthenticationManager
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken

@@ -1,7 +1,7 @@
 package com.angcyo.spring.security.jwt
 
-import com.angcyo.spring.core.log.L
-import com.angcyo.spring.core.oneDay
+import com.angcyo.spring.base.oneDay
+import com.angcyo.spring.base.util.L
 import com.angcyo.spring.security.SecurityConstants
 import io.jsonwebtoken.*
 import io.jsonwebtoken.security.Keys
