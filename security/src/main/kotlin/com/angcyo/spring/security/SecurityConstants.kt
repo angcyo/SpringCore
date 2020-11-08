@@ -9,6 +9,7 @@ object SecurityConstants {
     const val AUTH_LOGOUT_URL = "/auth/logout"
     const val AUTH_LOGOUT_SUCCESS_URL = "$AUTH_LOGIN_URL?logout"
     const val AUTH_REGISTER_URL = "/auth/register"
+    const val AUTH_REGISTER_CODE_URL = "/auth/code"
 
     // Signing key for HS512 algorithm
     // You can use the page http://www.allkeysgenerator.com/ to generate all kinds of keys
