@@ -1,5 +1,6 @@
 package com.angcyo.spring.security.jwt
 
+import com.angcyo.spring.base.util.L
 import org.springframework.security.access.AccessDeniedException
 import org.springframework.security.web.access.AccessDeniedHandler
 import java.io.IOException
@@ -21,5 +22,7 @@ class JwtAccessDeniedHandler : AccessDeniedHandler {
     override fun handle(request: HttpServletRequest, response: HttpServletResponse, accessDeniedException: AccessDeniedException) {
         val exception = AccessDeniedException("Sorry you don not enough permissions to access it!")
         response.sendError(HttpServletResponse.SC_FORBIDDEN, exception.message)
+
+        L.e("权限不足: ${request.requestURL}")
     }
 }

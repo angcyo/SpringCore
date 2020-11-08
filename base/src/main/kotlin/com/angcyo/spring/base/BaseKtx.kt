@@ -1,5 +1,6 @@
 package com.angcyo.spring.base
 
+import com.angcyo.spring.base.util.PrettyMemoryUtil
 import java.nio.charset.Charset
 import java.sql.Date
 import java.text.SimpleDateFormat
@@ -61,3 +62,5 @@ fun ByteArray.string(charset: String?) = String(this, Charset.forName(charset ?:
 
 /**一天对应多少毫秒 [86400_000]*/
 val oneDay: Long get() = 1000L * 60 * 60 * 24
+
+fun Long.prettyByteSize() = PrettyMemoryUtil.prettyByteSize(this)

@@ -34,11 +34,10 @@ class RecordLogAspect {
      */
     @Pointcut("execution(* com.angcyo.spring..*.*Controller*(..))")
     fun recordAll() {
-
     }
 
     /**切入点*/
-    @Pointcut("@annotation(com.angcyo.spring.core.log.RecordLog)")
+    @Pointcut("@annotation(com.angcyo.spring.log.core.RecordLog)")
     fun recordLog() {
     }
 

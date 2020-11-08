@@ -23,9 +23,9 @@ class LoggerDispatcherServlet : DispatcherServlet() {
 
     override fun doDispatch(request: HttpServletRequest, response: HttpServletResponse) {
         val requestId = id.incrementAndGet()
-        /*ServletLog.wrap(requestId, request, response) { requestWrap, responseWrap ->
+        ServletLog.wrap(requestId, request, response) { requestWrap, responseWrap ->
             super.doDispatch(requestWrap, responseWrap!!)
-        }*/
-        super.doDispatch(request, response)
+        }
+        //super.doDispatch(request, response)
     }
 }

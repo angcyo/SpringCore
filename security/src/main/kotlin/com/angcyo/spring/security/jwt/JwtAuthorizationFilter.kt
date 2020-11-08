@@ -1,6 +1,5 @@
 package com.angcyo.spring.security.jwt
 
-import com.angcyo.spring.base.util.L
 import com.angcyo.spring.security.SecurityConstants
 import com.angcyo.spring.security.UserDetailsServiceImpl
 import org.springframework.http.HttpHeaders
@@ -52,7 +51,6 @@ class JwtAuthorizationFilter(authenticationManager: AuthenticationManager?,
         }
 
         if (authToken == null) {
-            L.e("无权限访问: ${request.requestURL}")
             //authToken = UsernamePasswordAuthenticationToken(JWT.TEMP_USER, null, JWT.TEMP_USER_ROLES)
         }
 

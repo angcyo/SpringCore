@@ -1,5 +1,6 @@
 package com.angcyo.spring.log.core
 
+import com.angcyo.spring.base.prettyByteSize
 import com.angcyo.spring.base.servlet.bytes
 import com.angcyo.spring.base.string
 import com.angcyo.spring.base.util.IPUtil
@@ -90,7 +91,7 @@ object ServletLog {
                 fun _log(bytes: ByteArray?) {
                     appendLine()
                     val size = bytes?.size?.toLong() ?: -1
-                    append("body(${DataSize.ofBytes(size)})↓")
+                    append("body(${DataSize.ofBytes(size)} ${size.prettyByteSize()})↓")
                     if (bytes?.isNotEmpty() == true) {
                         appendLine()
                         if (!request.isMultipart() && !request.isBinaryContent()) {
@@ -153,7 +154,7 @@ object ServletLog {
                 fun _log(bytes: ByteArray?) {
                     appendLine()
                     val size = bytes?.size?.toLong() ?: -1
-                    append("body(${DataSize.ofBytes(size)})↓")
+                    append("body(${DataSize.ofBytes(size)} ${size.prettyByteSize()})↓")
                     if (bytes?.isNotEmpty() == true) {
                         appendLine()
                         if (!response.isMultipart() && !response.isBinaryContent()) {

@@ -1,5 +1,6 @@
 package com.angcyo.spring.security.jwt
 
+import com.angcyo.spring.base.util.L
 import org.springframework.security.core.AuthenticationException
 import org.springframework.security.web.AuthenticationEntryPoint
 import java.io.IOException
@@ -23,5 +24,7 @@ class JwtAuthenticationEntryPoint : AuthenticationEntryPoint {
                           response: HttpServletResponse,
                           authException: AuthenticationException) {
         response.sendError(HttpServletResponse.SC_UNAUTHORIZED, authException.message)
+
+        L.e("未授权: ${request.requestURL}")
     }
 }
