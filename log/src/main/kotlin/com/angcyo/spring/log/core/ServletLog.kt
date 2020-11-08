@@ -1,5 +1,6 @@
 package com.angcyo.spring.log.core
 
+import com.angcyo.spring.base.fullTime
 import com.angcyo.spring.base.prettyByteSize
 import com.angcyo.spring.base.servlet.bytes
 import com.angcyo.spring.base.string
@@ -77,6 +78,13 @@ object ServletLog {
                 append(" ")
                 append(IPUtil.getIpAddress(request))
                 append(" ${request.localAddr}/${request.remoteAddr}")
+
+                //session
+                request.session?.apply {
+                    appendLine()
+                    append(id)
+                    append(" ${creationTime.fullTime()}/${lastAccessedTime.fullTime()}")
+                }
 
                 //参数
                 appendLine()
