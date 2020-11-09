@@ -1,10 +1,10 @@
 package com.angcyo.spring.security.controller
 
+import com.angcyo.spring.base.data.Result
+import com.angcyo.spring.base.data.result
 import com.angcyo.spring.base.servlet.send
 import com.angcyo.spring.base.util.ImageCode
 import com.angcyo.spring.base.util.L
-import com.angcyo.spring.core.data.Result
-import com.angcyo.spring.core.data.ok
 import com.angcyo.spring.redis.Redis
 import com.angcyo.spring.security.SecurityConstants
 import com.angcyo.spring.security.entity.AuthEntity
@@ -14,6 +14,7 @@ import io.swagger.annotations.ApiImplicitParam
 import io.swagger.annotations.ApiImplicitParams
 import io.swagger.annotations.ApiOperation
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.validation.BindingResult
 import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PostMapping
@@ -75,8 +76,10 @@ class AuthController {
 
     @PostMapping(SecurityConstants.AUTH_REGISTER_URL)
     @ApiOperation("注册用户")
-    fun register(@Validated @RequestBody bean: RegisterBean): Result<AuthEntity> {
-        val entity = authService.register(bean)
-        return entity.ok()
+    fun register(@Validated @RequestBody bean: RegisterBean, bindingResult: BindingResult): Result<AuthEntity?> {
+        return bindingResult.result {
+            val entity = authService.register(bean)
+            entity
+        }
     }
 }

@@ -17,6 +17,11 @@ dependencies {
     testImplementation("org.springframework.boot:spring-boot-starter-test") {
         exclude("org.junit.vintage", "junit-vintage-engine")
     }
+
+    //数据校验
+    api("org.springframework.boot:spring-boot-starter-validation")
+    //https://mvnrepository.com/artifact/com.h2database
+    //runtimeOnly("com.h2database:h2:1.4.200")
 }
 
 tasks.getByName<org.springframework.boot.gradle.tasks.bundling.BootJar>("bootJar") {

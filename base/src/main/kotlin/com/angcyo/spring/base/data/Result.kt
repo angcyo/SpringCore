@@ -1,4 +1,6 @@
-package com.angcyo.spring.core.data
+package com.angcyo.spring.base.data
+
+import org.springframework.validation.BindingResult
 
 /**
  * Email:angcyo@126.com
@@ -30,6 +32,14 @@ fun <T> Any?.ok(msg: String? = "Success") = when {
     else -> Result(msg = msg, data = this as T)
 }
 
-fun <T> Any?.error(msg: String? = "Error", code: Int = 800) = when {
+fun <T> Any?.error(msg: String? = "Error", code: Int = 501) = when {
     else -> Result(code = code, msg = msg, data = this as T)
+}
+
+fun <T> BindingResult.result(responseEntity: () -> T): Result<T> {
+    return if (hasErrors()) {
+        null.error(allErrors.toString())
+    } else {
+        responseEntity().ok()
+    }
 }

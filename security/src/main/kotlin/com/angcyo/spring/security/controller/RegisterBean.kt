@@ -2,35 +2,36 @@ package com.angcyo.spring.security.controller
 
 import io.swagger.annotations.ApiModel
 import io.swagger.annotations.ApiModelProperty
-import javax.validation.constraints.Min
 import javax.validation.constraints.NotBlank
+import javax.validation.constraints.Size
 
 /**
  * Email:angcyo@126.com
  * @author angcyo
  * @date 2020/11/07
  *
- * 注册需要用的参数
+ * 注册需要用的参数, Data Class 编译之后会丢失java注解, 所以换成 class
  */
 
 @ApiModel("注册信息")
-data class RegisterBean(
-        @ApiModelProperty("注册用户名")
-        @NotBlank(message = "用户名不能为空")
-        @Min(value = 4, message = "用户名至少4个字符")
-        var username: String = "",
+class RegisterBean {
 
-        @ApiModelProperty("注册用户密码")
-        @NotBlank(message = "密码不能为空")
-        @Min(value = 6, message = "密码至少6个字符")
-        var password: String = "",
+    @ApiModelProperty("注册用户名")
+    @NotBlank(message = "用户名不能为空")
+    @Size(min = 4, message = "用户名至少4个字符")
+    var username: String? = null
 
-        @ApiModelProperty("注册用户的类型")
-        var type: String? = null,
+    @ApiModelProperty("注册用户密码")
+    @NotBlank(message = "密码不能为空")
+    @Size(min = 6, message = "密码至少6个字符")
+    var password: String? = null
 
-        @ApiModelProperty("注册时的验证码")
-        var code: String? = null,
-)
+    @ApiModelProperty("注册用户的类型")
+    var type: String? = null
+
+    @ApiModelProperty("注册时的验证码")
+    var code: String? = null
+}
 
 /**注册类型*/
 sealed class RegisterType(val value: String)

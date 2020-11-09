@@ -1,7 +1,7 @@
 package com.angcyo.spring.redis.test
 
-import com.angcyo.spring.core.data.Result
-import com.angcyo.spring.core.data.ok
+import com.angcyo.spring.base.data.Result
+import com.angcyo.spring.base.data.ok
 import com.angcyo.spring.redis.Redis
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.web.bind.annotation.RequestBody
