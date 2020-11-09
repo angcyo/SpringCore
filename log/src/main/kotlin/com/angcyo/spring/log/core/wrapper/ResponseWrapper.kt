@@ -36,6 +36,10 @@ class ResponseWrapper(response: HttpServletResponse) : HttpServletResponseWrappe
     private val writer = PrintWriter(bos)
     var isWrite = false
 
+    init {
+        characterEncoding = Charsets.UTF_8.toString()
+    }
+
     override fun getResponse(): ServletResponse {
         return this
     }

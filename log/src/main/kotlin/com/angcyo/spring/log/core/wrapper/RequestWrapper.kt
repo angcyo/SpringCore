@@ -34,6 +34,10 @@ class RequestWrapper(request: HttpServletRequest) : HttpServletRequestWrapper(re
     private val bos = ByteArrayOutputStream()
     var isRead = false
 
+    init {
+        characterEncoding = Charsets.UTF_8.toString()
+    }
+
     @Throws(IOException::class)
     override fun getInputStream(): ServletInputStream {
         return object : ServletInputStream() {

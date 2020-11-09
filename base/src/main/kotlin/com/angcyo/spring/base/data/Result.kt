@@ -1,5 +1,6 @@
 package com.angcyo.spring.base.data
 
+import com.angcyo.spring.base.str
 import org.springframework.validation.BindingResult
 
 /**
@@ -38,7 +39,8 @@ fun <T> Any?.error(msg: String? = "Error", code: Int = 501) = when {
 
 fun <T> BindingResult.result(responseEntity: () -> T): Result<T> {
     return if (hasErrors()) {
-        null.error(allErrors.toString())
+        //null.error(allErrors.toString())
+        null.error(allErrors.joinToString { it.defaultMessage.str() })
     } else {
         responseEntity().ok()
     }

@@ -64,3 +64,13 @@ fun ByteArray.string(charset: String?) = String(this, Charset.forName(charset ?:
 val oneDay: Long get() = 1000L * 60 * 60 * 24
 
 fun Long.prettyByteSize() = PrettyMemoryUtil.prettyByteSize(this)
+
+/*----------------------------------------------------------------------------------*/
+
+fun Any?.str(): String {
+    return if (this is String) {
+        this
+    } else {
+        this.toString()
+    }
+}
