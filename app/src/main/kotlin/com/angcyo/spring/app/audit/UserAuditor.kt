@@ -16,12 +16,17 @@ class UserAuditor : AuditorAware<String> {
      * 获取当前创建或修改的用户
      */
     override fun getCurrentAuditor(): Optional<String> {
+        val authentication = SecurityContextHolder.getContext().authentication ?: return Optional.ofNullable("empty")
         val user: UserDetails
         return try {
-            user = SecurityContextHolder.getContext().authentication.principal as UserDetails
+            user = authentication.principal as UserDetails
             Optional.ofNullable(user.username)
         } catch (e: Exception) {
-            Optional.empty()
+            if (authentication.principal is String) {
+                Optional.ofNullable("${authentication.principal}")
+            } else {
+                Optional.ofNullable("default")
+            }
         }
     }
 }
