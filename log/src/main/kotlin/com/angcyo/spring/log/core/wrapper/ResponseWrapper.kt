@@ -34,6 +34,7 @@ import javax.servlet.http.HttpServletResponseWrapper
 class ResponseWrapper(response: HttpServletResponse) : HttpServletResponseWrapper(response) {
     private val bos = ByteArrayOutputStream()
     private val writer = PrintWriter(bos)
+    var isWrite = false
 
     override fun getResponse(): ServletResponse {
         return this
@@ -52,6 +53,7 @@ class ResponseWrapper(response: HttpServletResponse) : HttpServletResponseWrappe
 
             @Throws(IOException::class)
             override fun write(b: Int) {
+                isWrite = true
                 tee.write(b)
             }
         }
@@ -66,6 +68,21 @@ class ResponseWrapper(response: HttpServletResponse) : HttpServletResponseWrappe
         super.flushBuffer()
         //bos.flush()
         //writer.flush()
+    }
+
+    var _contentLengthLong: Long = -1
+
+    override fun setContentLength(len: Int) {
+        super.setContentLength(len)
+    }
+
+    override fun setContentLengthLong(length: Long) {
+        super.setContentLengthLong(length)
+        _contentLengthLong = length
+    }
+
+    override fun setContentType(type: String?) {
+        super.setContentType(type)
     }
 
     fun toByteArray(): ByteArray {

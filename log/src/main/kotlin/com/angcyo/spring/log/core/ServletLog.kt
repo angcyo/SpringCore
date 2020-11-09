@@ -6,7 +6,6 @@ import com.angcyo.spring.base.servlet.bytes
 import com.angcyo.spring.base.string
 import com.angcyo.spring.base.util.IPUtil
 import com.angcyo.spring.base.util.L
-import com.angcyo.spring.base.util.trimAll
 import com.angcyo.spring.base.uuid
 import com.angcyo.spring.log.core.wrapper.*
 import org.springframework.util.unit.DataSize
@@ -30,7 +29,8 @@ object ServletLog {
              requestBuilder: StringBuilder = StringBuilder(),
              responseBuilder: StringBuilder = StringBuilder(),
              wrap: Boolean = true,
-             action: (request: HttpServletRequest, response: HttpServletResponse?) -> Unit) {
+             action: (request: HttpServletRequest, response: HttpServletResponse?,
+                      requestBuilder: StringBuilder?, responseBuilder: StringBuilder?) -> Unit) {
         // 开始时间
         val startTime = System.currentTimeMillis()
         val uuid = uuid()
@@ -47,10 +47,11 @@ object ServletLog {
                 append("-->$uuid $requestId")
             }
 
-            L.ih(requestWrapper.log(requestBuilder))
+            //在之前之前打印Request Body, 可能为空. 所以这里放在后面执行
+            //L.ih(requestWrapper.log(requestBuilder))
 
             //chain
-            action(requestWrapper, responseWrapper)
+            action(requestWrapper, responseWrapper, null, null)
         } catch (e: Exception) {
             L.db(e.stackTraceToString())
         } finally {
@@ -62,12 +63,16 @@ object ServletLog {
                 append(" ${System.currentTimeMillis() - startTime}ms")
             }
 
-            L.ih(responseWrapper?.log(responseBuilder))
+            requestWrapper.log(requestBuilder, true)
+            responseWrapper?.log(responseBuilder)
+
+            //打印
+            action(requestWrapper, responseWrapper, requestBuilder, responseBuilder)
         }
     }
 
     /**打印请求体*/
-    fun logRequest(request: ServletRequest, builder: StringBuilder = StringBuilder()): String {
+    fun logRequest(request: ServletRequest, builder: StringBuilder = StringBuilder(), readStream: Boolean = false): String {
         builder.apply {
             if (request is HttpServletRequest) {
                 //入站
@@ -80,7 +85,7 @@ object ServletLog {
                 append(" ${request.localAddr}/${request.remoteAddr}")
 
                 //session
-                request.session?.apply {
+                request.getSession(false)?.apply {
                     appendLine()
                     append(id)
                     append(" ${creationTime.fullTime()}/${lastAccessedTime.fullTime("HH:mm:ss.SSS")}")
@@ -93,8 +98,10 @@ object ServletLog {
                 }
 
                 //参数
-                appendLine()
-                append(request.queryString)
+                request.queryString?.let {
+                    appendLine()
+                    append(it)
+                }
                 request.parameterMap.onEach {
                     appendLine()
                     append(it.key)
@@ -102,41 +109,47 @@ object ServletLog {
                     append(it.value.toList().toString())
                 }
 
-                fun _log(bytes: ByteArray?) {
+                val bodySize: Long = request.contentLengthLong
+                append("body(${DataSize.ofBytes(bodySize)} ${bodySize.prettyByteSize()})")
+                if (request.isMultipart() || request.isBinaryContent()) {
+                    append("↓")
                     appendLine()
-                    val size = bytes?.size?.toLong() ?: -1
-                    append("body(${DataSize.ofBytes(size)} ${size.prettyByteSize()})↓")
-                    if (bytes?.isNotEmpty() == true) {
+                    append("binary body.")
+                } else {
+                    fun _log(bytes: ByteArray?) {
+                        val size = bytes?.size?.toLong() ?: -1
+                        append(" $size")
+                        append("↓")
                         appendLine()
-                        if (!request.isMultipart() && !request.isBinaryContent()) {
+
+                        if (bytes?.isNotEmpty() == true) {
                             try {
-                                append(bytes.string(request.characterEncoding).trimAll())
+                                val body = bytes.string(request.characterEncoding)
+                                append(body)
                             } catch (e: Exception) {
                                 append(e.stackTraceToString())
                             }
-                        } else {
-                            append("binary body.")
                         }
                     }
-                }
 
-                //请求体
-                when (request) {
-                    is RequestWrapper -> {
-                        val bytes = request.toByteArray()
-                        _log(bytes)
-                    }
-                    is RequestWrapper2 -> {
-                        val bytes = request.body
-                        _log(bytes)
-                    }
-                    is RequestWrapper3 -> {
-                        val bytes = request.toByteArray()
-                        _log(bytes)
-                    }
-                    else -> {
-                        val bytes = request.bytes()
-                        _log(bytes)
+                    //请求体
+                    when (request) {
+                        is RequestWrapper -> {
+                            val bytes = request.toByteArray(readStream)
+                            _log(bytes)
+                        }
+                        is RequestWrapper2 -> {
+                            val bytes = request.body
+                            _log(bytes)
+                        }
+                        is RequestWrapper3 -> {
+                            val bytes = request.toByteArray()
+                            _log(bytes)
+                        }
+                        else -> {
+                            val bytes = request.bytes()
+                            _log(bytes)
+                        }
                     }
                 }
 
@@ -173,7 +186,8 @@ object ServletLog {
                         appendLine()
                         if (!response.isMultipart() && !response.isBinaryContent()) {
                             try {
-                                append(bytes.string(response.characterEncoding).trimAll())
+                                val body = bytes.string(response.characterEncoding)
+                                append(body)
                             } catch (e: Exception) {
                                 append(e.stackTraceToString())
                             }
@@ -231,6 +245,6 @@ fun HttpServletResponse.isMultipart(): Boolean {
     return contentType != null && contentType.startsWith("multipart/form-data")
 }
 
-fun ServletRequest.log(builder: StringBuilder = StringBuilder()): String = ServletLog.logRequest(this, builder)
+fun ServletRequest.log(builder: StringBuilder = StringBuilder(), readStream: Boolean = false): String = ServletLog.logRequest(this, builder, readStream)
 
 fun ServletResponse.log(builder: StringBuilder = StringBuilder()): String = ServletLog.logResponse(this, builder)

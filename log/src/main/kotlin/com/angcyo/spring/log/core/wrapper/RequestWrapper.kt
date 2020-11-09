@@ -32,6 +32,7 @@ import javax.servlet.http.HttpServletRequestWrapper
 
 class RequestWrapper(request: HttpServletRequest) : HttpServletRequestWrapper(request) {
     private val bos = ByteArrayOutputStream()
+    var isRead = false
 
     @Throws(IOException::class)
     override fun getInputStream(): ServletInputStream {
@@ -49,12 +50,18 @@ class RequestWrapper(request: HttpServletRequest) : HttpServletRequestWrapper(re
 
             @Throws(IOException::class)
             override fun read(): Int {
+                isRead = true
                 return tee.read()
             }
         }
     }
 
-    fun toByteArray(): ByteArray {
+    fun toByteArray(needRead: Boolean = false): ByteArray {
+        if (needRead) {
+            if (!isRead) {
+                return inputStream.readBytes()
+            }
+        }
         return bos.toByteArray()
     }
 }

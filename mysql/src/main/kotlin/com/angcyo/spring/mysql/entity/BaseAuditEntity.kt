@@ -2,6 +2,7 @@ package com.angcyo.spring.mysql.entity
 
 import com.fasterxml.jackson.annotation.JsonFormat
 import com.fasterxml.jackson.annotation.JsonIgnore
+import io.swagger.annotations.ApiModel
 import io.swagger.annotations.ApiModelProperty
 import org.springframework.data.annotation.CreatedBy
 import org.springframework.data.annotation.CreatedDate
@@ -17,6 +18,7 @@ import javax.persistence.*
 
 @MappedSuperclass
 @EntityListeners(value = [AuditingEntityListener::class])
+@ApiModel("基础表结构信息")
 abstract class BaseAuditEntity {
 
     @Id

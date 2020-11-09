@@ -32,6 +32,10 @@ object L {
         _logAngcyo.info(log.joinToString(" "))
     }
 
+    fun d(vararg log: Any?) {
+        _logAngcyo.debug(log.joinToString(" "))
+    }
+
     fun w(vararg log: Any?) {
         _logAngcyo.warn(log.joinToString(" "))
     }

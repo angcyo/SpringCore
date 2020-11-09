@@ -1,5 +1,10 @@
 package com.angcyo.spring.security.controller
 
+import io.swagger.annotations.ApiModel
+import io.swagger.annotations.ApiModelProperty
+import javax.validation.constraints.Min
+import javax.validation.constraints.NotBlank
+
 /**
  * Email:angcyo@126.com
  * @author angcyo
@@ -8,7 +13,27 @@ package com.angcyo.spring.security.controller
  * 注册需要用的参数
  */
 
+@ApiModel("注册信息")
 data class RegisterBean(
-        var username: String? = null,
-        var password: String? = null,
+        @ApiModelProperty("注册用户名")
+        @NotBlank(message = "用户名不能为空")
+        @Min(value = 4, message = "用户名至少4个字符")
+        var username: String = "",
+
+        @ApiModelProperty("注册用户密码")
+        @NotBlank(message = "密码不能为空")
+        @Min(value = 6, message = "密码至少6个字符")
+        var password: String = "",
+
+        @ApiModelProperty("注册用户的类型")
+        var type: String? = null,
+
+        @ApiModelProperty("注册时的验证码")
+        var code: String? = null,
 )
+
+/**注册类型*/
+sealed class RegisterType(val value: String)
+object AndroidType : RegisterType("android")
+object IosType : RegisterType("ios")
+object WebType : RegisterType("web")

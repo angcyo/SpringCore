@@ -74,7 +74,7 @@ class RecordLogAspect {
                         append(result)
                     }
                 },
-                wrap = false) { _, _ ->
+                wrap = false) { _, _, _, _ ->
         }
 
         return result

@@ -9,8 +9,12 @@ import com.angcyo.spring.redis.Redis
 import com.angcyo.spring.security.SecurityConstants
 import com.angcyo.spring.security.entity.AuthEntity
 import com.angcyo.spring.security.service.AuthService
+import io.swagger.annotations.Api
+import io.swagger.annotations.ApiImplicitParam
+import io.swagger.annotations.ApiImplicitParams
 import io.swagger.annotations.ApiOperation
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
@@ -27,6 +31,7 @@ import javax.servlet.http.HttpServletResponse
  */
 
 @RestController
+@Api(value = "授权控制器value")
 class AuthController {
 
     @Autowired
@@ -36,7 +41,12 @@ class AuthController {
     lateinit var redis: Redis
 
     @GetMapping(SecurityConstants.AUTH_REGISTER_CODE_URL)
-    @ApiOperation("获取注册时的验证码")
+    @ApiOperation("获取注册时的图形验证码")
+    @ApiImplicitParams(
+            ApiImplicitParam(name = "l", value = "验证码的长度"),
+            ApiImplicitParam(name = "w", value = "验证码的宽度"),
+            ApiImplicitParam(name = "h", value = "验证码的高度")
+    )
     fun imageCode(request: HttpServletRequest, response: HttpServletResponse) {
 
         val length: Int = request.getParameter("l")?.toIntOrNull() ?: 4
@@ -64,7 +74,8 @@ class AuthController {
     }
 
     @PostMapping(SecurityConstants.AUTH_REGISTER_URL)
-    fun register(@RequestBody bean: RegisterBean): Result<AuthEntity> {
+    @ApiOperation("注册用户")
+    fun register(@Validated @RequestBody bean: RegisterBean): Result<AuthEntity> {
         val entity = authService.register(bean)
         return entity.ok()
     }

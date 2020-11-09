@@ -1,5 +1,9 @@
 package com.angcyo.spring.log.core
 
+import com.angcyo.spring.base.util.L
+import org.springframework.core.Ordered
+import org.springframework.core.annotation.Order
+import org.springframework.stereotype.Component
 import org.springframework.web.filter.OncePerRequestFilter
 import java.util.concurrent.atomic.AtomicLong
 import javax.servlet.FilterChain
@@ -19,12 +23,14 @@ import javax.servlet.http.HttpServletResponse
  *
  * https://blog.csdn.net/weixin_44515491/article/details/98906392
  *
- * 似乎拦截不了Spring返回的404, 401, 403等返回体信息
+ * 拦截所有请求.
+ * 拦截不了Spring返回的404, 401, 403等返回体信息
+ *
+ * [404, 401, 403]等信息, 需要使用[LoggerDispatcherServlet]拦截
  */
 
-/*@Component
-@Order(Ordered.HIGHEST_PRECEDENCE)*/
-@Deprecated("401,403,404拿不到")
+@Component
+@Order(Ordered.HIGHEST_PRECEDENCE)
 class LoggerFilter : OncePerRequestFilter() {
 
     private val id = AtomicLong(1)
@@ -33,8 +39,13 @@ class LoggerFilter : OncePerRequestFilter() {
     override fun doFilterInternal(request: HttpServletRequest, response: HttpServletResponse, filterChain: FilterChain) {
         val requestId = id.incrementAndGet()
 
-        ServletLog.wrap(requestId, request, response) { requestWrap, responseWrap ->
-            filterChain.doFilter(requestWrap, responseWrap)
+        ServletLog.wrap(requestId, request, response) { requestWrap, responseWrap, requestBuilder, responseBuilder ->
+            if (requestBuilder == null) {
+                filterChain.doFilter(requestWrap, responseWrap)
+            } else {
+                L.ih(requestBuilder)
+                L.ih(responseBuilder)
+            }
         }
     }
 }

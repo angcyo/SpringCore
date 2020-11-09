@@ -1,7 +1,11 @@
 package com.angcyo.spring.log
 
+import com.angcyo.spring.log.core.CoreLoggerFilter
+import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.ComponentScan
 import org.springframework.context.annotation.Configuration
+import org.springframework.web.filter.CommonsRequestLoggingFilter
+
 
 /**
  * Email:angcyo@126.com
@@ -15,4 +19,8 @@ import org.springframework.context.annotation.Configuration
 @Configuration
 @ComponentScan(basePackages = ["com.angcyo.spring.log"])
 class LogAutoConfiguration {
+    /*@Bean
+    fun logFilter(): CommonsRequestLoggingFilter {
+        return CoreLoggerFilter()
+    }*/
 }

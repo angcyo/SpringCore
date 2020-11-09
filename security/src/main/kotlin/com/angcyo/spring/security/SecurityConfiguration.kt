@@ -36,7 +36,7 @@ class SecurityConfiguration : WebSecurityConfigurerAdapter() {
 
     companion object {
         /**认证白名单, 不需要验证*/
-        val SECURITY_WHITE_LIST = listOf(
+        val SECURITY_WHITE_LIST = arrayOf(
                 "/test/**",
                 "/auth/**",
                 "/swagger**",
@@ -48,7 +48,7 @@ class SecurityConfiguration : WebSecurityConfigurerAdapter() {
                 "/webjars/**",
                 "/v2/api-docs/**",
                 "/v3/api-docs/**",
-                "/doc.html"
+                "/doc.html",
         )
     }
 
@@ -95,13 +95,9 @@ class SecurityConfiguration : WebSecurityConfigurerAdapter() {
                 .and()
                 .csrf().disable()
                 .authorizeRequests()
-                .run {
-                    SECURITY_WHITE_LIST.forEach {
-                        antMatchers(it).permitAll()
-                    }
-                    this
-                }
+                .antMatchers(*SECURITY_WHITE_LIST).permitAll()
                 .anyRequest().authenticated()
+                //.and().formLogin().loginPage().failureUrl()
                 .and()
                 .addFilter(JwtLoginFilter(authenticationManager()))
                 .addFilter(JwtAuthorizationFilter(authenticationManager(), userDetailsServiceImpl))
@@ -109,8 +105,8 @@ class SecurityConfiguration : WebSecurityConfigurerAdapter() {
                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 .and()
                 .logout()
-                .logoutSuccessUrl(SecurityConstants.AUTH_LOGOUT_SUCCESS_URL)
                 .logoutUrl(SecurityConstants.AUTH_LOGOUT_URL)
+                .logoutSuccessUrl(SecurityConstants.AUTH_LOGOUT_SUCCESS_URL)
                 .logoutSuccessHandler(SecurityLogoutSuccessHandler())
                 .addLogoutHandler(SecurityLogoutHandler())
                 .and()
