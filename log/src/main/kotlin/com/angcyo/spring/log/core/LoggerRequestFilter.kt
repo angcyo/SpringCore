@@ -27,11 +27,14 @@ import javax.servlet.http.HttpServletResponse
  * 拦截不了Spring返回的404, 401, 403等返回体信息
  *
  * [404, 401, 403]等信息, 需要使用[LoggerDispatcherServlet]拦截
+ *
+ * https://juejin.im/post/6844903624187854862#heading-6
+ * Filter 对 用户请求 进行 预处理，接着将请求交给 Servlet 进行 处理 并 生成响应，最后 Filter 再对 服务器响应 进行 后处理。
  */
 
 @Component
 @Order(Ordered.HIGHEST_PRECEDENCE)
-class LoggerFilter : OncePerRequestFilter() {
+class LoggerRequestFilter : OncePerRequestFilter() {
 
     private val id = AtomicLong(1)
 
