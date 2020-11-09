@@ -1,5 +1,6 @@
 package com.angcyo.spring.base.data
 
+import com.angcyo.spring.base.data.Result.Companion.ERROR_CODE
 import com.angcyo.spring.base.str
 import org.springframework.validation.BindingResult
 
@@ -27,17 +28,31 @@ data class Result<T>(
         var code: Int = 200,
         var msg: String? = "Success",
         var data: T? = null
-)
+) {
+    companion object {
+
+        /**错误码*/
+        const val ERROR_CODE = 501
+
+        fun <T> error(msg: String? = "Error", code: Int = ERROR_CODE, data: T? = null): Result<T?> {
+            return data.error(msg, code)
+        }
+    }
+}
 
 fun <T> Any?.ok(msg: String? = "Success") = when {
     else -> Result(msg = msg, data = this as T)
 }
 
-fun <T> Any?.error(msg: String? = "Error", code: Int = 501) = when {
+/**error*/
+fun <T> error(msg: String? = "Error", code: Int = ERROR_CODE) = Result.error<T>(msg, code)
+
+/**error*/
+fun <T> Any?.error(msg: String? = "Error", code: Int = ERROR_CODE) = when {
     else -> Result(code = code, msg = msg, data = this as T)
 }
 
-fun <T> BindingResult.result(responseEntity: () -> T): Result<T> {
+inline fun <T> BindingResult.result(responseEntity: () -> T): Result<T> {
     return if (hasErrors()) {
         //null.error(allErrors.toString())
         null.error(allErrors.joinToString { it.defaultMessage.str() })

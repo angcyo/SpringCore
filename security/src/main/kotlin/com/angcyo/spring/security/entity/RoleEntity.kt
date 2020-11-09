@@ -15,11 +15,13 @@ import javax.persistence.Table
 
 @Entity
 @Table(name = "role_entity")
-data class RoleEntity(
-        @ApiModelProperty("授权的用户Id")
-        var authId: Long = 0,
-        @ApiModelProperty("授权的用户角色")
-        var role: String? = null,
-        @ApiModelProperty("角色描述")
-        var des: String? = null,
-) : BaseAuditEntity()
+class RoleEntity : BaseAuditEntity() {
+    @ApiModelProperty("授权的用户Id")
+    var authId: Long = 0
+
+    @ApiModelProperty("授权的用户角色")
+    var role: String? = null
+
+    @ApiModelProperty("角色描述")
+    var des: String? = null
+}

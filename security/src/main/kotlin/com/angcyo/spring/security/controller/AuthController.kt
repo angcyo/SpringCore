@@ -3,6 +3,7 @@ package com.angcyo.spring.security.controller
 import com.angcyo.spring.base.data.Result
 import com.angcyo.spring.base.data.result
 import com.angcyo.spring.base.servlet.send
+import com.angcyo.spring.base.str
 import com.angcyo.spring.base.util.ImageCode
 import com.angcyo.spring.base.util.L
 import com.angcyo.spring.redis.Redis
@@ -41,6 +42,25 @@ class AuthController {
     @Autowired
     lateinit var redis: Redis
 
+    private fun setImageCode(request: HttpServletRequest, code: String) {
+        //根据session id, 将code 存到redis
+        request.getSession(true)?.apply {
+            redis["IMAGE${id}CODE", code] = 1 * 60
+        }
+    }
+
+    private fun getImageCode(request: HttpServletRequest): String? {
+        return request.getSession(false)?.run {
+            redis["IMAGE${id}CODE"].str()
+        }
+    }
+
+    private fun clearImageCode(request: HttpServletRequest) {
+        request.getSession(false)?.run {
+            redis.del("IMAGE${id}CODE")
+        }
+    }
+
     @GetMapping(SecurityConstants.AUTH_REGISTER_CODE_URL)
     @ApiOperation("获取注册时的图形验证码")
     @ApiImplicitParams(
@@ -57,9 +77,7 @@ class AuthController {
         val pair = ImageCode.generate(length, width, height)
 
         //根据session id, 将code 存到redis
-        request.getSession(true)?.apply {
-            redis[id, pair.first] = 5 * 60
-        }
+        setImageCode(request, pair.first)
 
         //将VerifyCode绑定session
         request.session.setAttribute("code", pair.first)
@@ -76,8 +94,25 @@ class AuthController {
 
     @PostMapping(SecurityConstants.AUTH_REGISTER_URL)
     @ApiOperation("注册用户")
-    fun register(@Validated @RequestBody bean: RegisterBean, bindingResult: BindingResult): Result<AuthEntity?> {
+    fun register(@Validated @RequestBody bean: RegisterBean,
+                 request: HttpServletRequest,
+                 bindingResult: BindingResult): Result<AuthEntity?> {
         return bindingResult.result {
+
+            if (bean.type == WebType.value) {
+                //web 注册类型, 需要验证验证码
+
+                if (bean.code.isNullOrBlank() || bean.code != getImageCode(request)) {
+                    return Result.error("验证码错误")
+                }
+            }
+
+            val pair = authService.canRegister(bean)
+            if (!pair.first) {
+                clearImageCode(request)
+                return Result.error(pair.second)
+            }
+
             val entity = authService.register(bean)
             entity
         }

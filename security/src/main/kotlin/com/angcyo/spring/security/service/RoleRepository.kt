@@ -1,6 +1,6 @@
 package com.angcyo.spring.security.service
 
-import com.angcyo.spring.security.entity.AuthEntity
+import com.angcyo.spring.security.entity.RoleEntity
 import org.springframework.data.jpa.repository.JpaRepository
 
 /**
@@ -9,4 +9,4 @@ import org.springframework.data.jpa.repository.JpaRepository
  * @date 2020/11/07
  */
 
-interface RoleRepository :JpaRepository<AuthEntity, Long>
+interface RoleRepository : JpaRepository<RoleEntity, Long>

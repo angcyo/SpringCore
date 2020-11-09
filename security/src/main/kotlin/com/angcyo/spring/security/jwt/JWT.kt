@@ -3,6 +3,7 @@ package com.angcyo.spring.security.jwt
 import com.angcyo.spring.base.oneDay
 import com.angcyo.spring.base.util.L
 import com.angcyo.spring.security.SecurityConstants
+import com.angcyo.spring.security.entity.Roles
 import io.jsonwebtoken.*
 import io.jsonwebtoken.security.Keys
 import org.springframework.security.core.GrantedAuthority
@@ -23,9 +24,9 @@ object JWT {
     const val TEMP_GUEST = "TEMP_GUEST"
     const val TEMP_ADMIN = "TEMP_ADMIN"
 
-    val TEMP_USER_ROLES = listOf(SimpleGrantedAuthority("user"))
-    val TEMP_GUEST_ROLES = listOf(SimpleGrantedAuthority("user"))
-    val TEMP_ADMIN_ROLES = listOf(SimpleGrantedAuthority("user"), SimpleGrantedAuthority("admin"))
+    val TEMP_USER_ROLES = listOf(SimpleGrantedAuthority(Roles.USER))
+    val TEMP_GUEST_ROLES = listOf(SimpleGrantedAuthority(Roles.GUEST))
+    val TEMP_ADMIN_ROLES = listOf(SimpleGrantedAuthority(Roles.USER), SimpleGrantedAuthority(Roles.ADMIN))
 
     /**生成一个token
      * [username] token里面可以解析出来的用户名

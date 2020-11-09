@@ -10,5 +10,8 @@ import org.springframework.data.jpa.repository.JpaRepository
  */
 
 interface AuthRepository : JpaRepository<AuthEntity, Long> {
+
+    fun existsByUsername(username: String): Boolean
+
     fun findByUsername(username: String): AuthEntity?
 }
