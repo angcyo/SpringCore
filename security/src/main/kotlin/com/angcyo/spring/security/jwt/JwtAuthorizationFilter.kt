@@ -2,6 +2,7 @@ package com.angcyo.spring.security.jwt
 
 import com.angcyo.spring.security.SecurityConstants
 import com.angcyo.spring.security.UserDetailsServiceImpl
+import com.angcyo.spring.security.service.AuthService
 import org.springframework.http.HttpHeaders
 import org.springframework.security.authentication.AuthenticationManager
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
@@ -20,7 +21,8 @@ import javax.servlet.http.HttpServletResponse
  * 从请求头中[ecurityConstants.TOKEN_HEADER]获取token
  * */
 class JwtAuthorizationFilter(authenticationManager: AuthenticationManager?,
-                             val userDetailsService: UserDetailsServiceImpl) :
+                             val userDetailsService: UserDetailsServiceImpl,
+                             val authService: AuthService) :
         BasicAuthenticationFilter(authenticationManager) {
 
     override fun doFilterInternal(request: HttpServletRequest, response: HttpServletResponse, filterChain: FilterChain) {
@@ -35,25 +37,32 @@ class JwtAuthorizationFilter(authenticationManager: AuthenticationManager?,
 
     private fun getAuthentication(request: HttpServletRequest): UsernamePasswordAuthenticationToken? {
         val token = request.getHeader(SecurityConstants.TOKEN_HEADER)
-        var authToken = JWT.parseToken(token)?.run {
-            UsernamePasswordAuthenticationToken(first, null, second)
+        var authentication = JWT.parseToken(token)?.run {
+            if (authService._checkTokenValid(first, token)) {
+                UsernamePasswordAuthenticationToken(first, null, second)
+            } else {
+                null
+            }
         }
 
-        if (authToken == null) {
+        if (authentication == null) {
             //未传递token
             val accept = request.getHeader(HttpHeaders.ACCEPT)
             accept?.let {
                 if (it.startsWith("image") || it.startsWith("video")) {
                     //访问媒体, 给一个临时的token
-                    authToken = UsernamePasswordAuthenticationToken(JWT.TEMP_USER, null, JWT.TEMP_USER_ROLES)
+                    authentication = UsernamePasswordAuthenticationToken(JWT.TEMP_USER, null, JWT.TEMP_USER_ROLES)
                 }
             }
         }
 
-        if (authToken == null) {
-            //authToken = UsernamePasswordAuthenticationToken(JWT.TEMP_USER, null, JWT.TEMP_USER_ROLES)
+        if (authentication == null) {
+            if (request.getParameter("dev") == "truthy") {
+                //开发控制
+                authentication = UsernamePasswordAuthenticationToken(JWT.TEMP_GUEST, null, JWT.TEMP_GUEST_ROLES)
+            }
         }
 
-        return authToken
+        return authentication
     }
 }

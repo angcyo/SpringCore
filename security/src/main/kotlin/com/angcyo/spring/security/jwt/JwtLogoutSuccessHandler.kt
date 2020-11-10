@@ -1,4 +1,4 @@
-package com.angcyo.spring.security
+package com.angcyo.spring.security.jwt
 
 import com.angcyo.spring.base.util.L
 import org.springframework.security.core.Authentication
@@ -16,7 +16,7 @@ import javax.servlet.http.HttpServletResponse
  */
 
 @Component
-class SecurityLogoutSuccessHandler : LogoutSuccessHandler {
+class JwtLogoutSuccessHandler : LogoutSuccessHandler {
 
     override fun onLogoutSuccess(request: HttpServletRequest,
                                  response: HttpServletResponse,

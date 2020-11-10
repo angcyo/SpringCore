@@ -47,6 +47,8 @@ object JWT {
 
     /**从token中解析数据
      * 格式:`Authorization: Bearer <token string>`
+     * [first] 用户名
+     * [second] 角色权限
      */
     fun parseToken(token: String?): Pair<String, Collection<GrantedAuthority>?>? {
         if (token?.startsWith(SecurityConstants.TOKEN_PREFIX) == true) {

@@ -111,8 +111,13 @@ class JwtLoginFilter(authManager: AuthenticationManager, val authService: AuthSe
 
             //4
             val roles = entity.roles.toAuthorities()
-            val token = JWT.generateToken(entity.username.str(), roles)
+            val username = entity.username.str()
+            val token = JWT.generateToken(username, roles)
             entity.token = /*SecurityConstants.TOKEN_PREFIX + */token
+
+            //5 将token保存至redis
+            authService._loginEnd(username, token)
+
             response.send(entity.ok<AuthEntity>().toJacksonIgnore("roles", "enable"))
             //response.send(entity.ok<AuthEntity>().toJacksonOnly("username", "token"))
         } else {

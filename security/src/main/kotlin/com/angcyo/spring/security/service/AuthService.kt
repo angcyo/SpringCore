@@ -1,10 +1,14 @@
 package com.angcyo.spring.security.service
 
+import com.angcyo.spring.base.oneDay
+import com.angcyo.spring.redis.Redis
+import com.angcyo.spring.security.SecurityConstants
 import com.angcyo.spring.security.controller.RegisterBean
 import com.angcyo.spring.security.entity.AuthEntity
 import com.angcyo.spring.security.entity.RoleEntity
 import com.angcyo.spring.security.entity.Roles
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.security.core.userdetails.UserDetailsService
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.stereotype.Service
@@ -29,6 +33,9 @@ class AuthService {
 
     @Autowired
     lateinit var passwordEncoder: PasswordEncoder
+
+    @Autowired
+    lateinit var redis: Redis
 
     /**[rawPassword] 实际的密码,比如angcyo
      * [encodedPassword] 加密后的密码, 数据库中的密码*/
@@ -73,5 +80,27 @@ class AuthService {
             roles = roleRepository.findAllByAuthId(id)
         }
         return authEntity
+    }
+
+    /**检查用户的token, 是否和redis里面的一样
+     * [token] 支持包含/不包含前缀的token*/
+    fun _checkTokenValid(username: String, token: String): Boolean {
+        val redisToken = redis["TOKEN$username"]
+        if (token.startsWith(SecurityConstants.TOKEN_PREFIX)) {
+            return SecurityConstants.TOKEN_PREFIX + redisToken == token
+        }
+        return redisToken == token
+    }
+
+    /**[token] 不含前缀的token*/
+    fun _loginEnd(username: String, token: String) {
+        //保存token, 一天超时
+        redis["TOKEN$username", token] = oneDay
+    }
+
+    /**退出登录*/
+    fun _logoutEnd(username: String) {
+        SecurityContextHolder.clearContext()
+        redis.del("TOKEN$username")
     }
 }
