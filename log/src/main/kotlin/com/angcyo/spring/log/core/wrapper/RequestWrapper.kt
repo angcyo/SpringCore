@@ -17,6 +17,7 @@
  */
 package com.angcyo.spring.log.core.wrapper
 
+import com.angcyo.spring.base.servlet.IStreamWrapper
 import org.apache.commons.io.input.TeeInputStream
 import java.io.ByteArrayOutputStream
 import java.io.IOException
@@ -30,7 +31,7 @@ import javax.servlet.http.HttpServletRequestWrapper
  * https://github.com/isrsal/spring-mvc-logger
  * */
 
-class RequestWrapper(request: HttpServletRequest) : HttpServletRequestWrapper(request) {
+class RequestWrapper(request: HttpServletRequest) : HttpServletRequestWrapper(request), IStreamWrapper {
     private val bos = ByteArrayOutputStream()
     var isRead = false
 
@@ -60,7 +61,7 @@ class RequestWrapper(request: HttpServletRequest) : HttpServletRequestWrapper(re
         }
     }
 
-    fun toByteArray(needRead: Boolean = false): ByteArray {
+    override fun toByteArray(needRead: Boolean): ByteArray {
         if (needRead) {
             if (!isRead) {
                 return inputStream.readBytes()

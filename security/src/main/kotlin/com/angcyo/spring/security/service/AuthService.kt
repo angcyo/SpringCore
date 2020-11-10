@@ -6,6 +6,7 @@ import com.angcyo.spring.security.entity.RoleEntity
 import com.angcyo.spring.security.entity.Roles
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.security.core.userdetails.UserDetailsService
+import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
@@ -26,8 +27,16 @@ class AuthService {
     @Autowired
     lateinit var roleRepository: RoleRepository
 
-    fun login(username: String, password: String) {
+    @Autowired
+    lateinit var passwordEncoder: PasswordEncoder
 
+    /**[rawPassword] 实际的密码,比如angcyo
+     * [encodedPassword] 加密后的密码, 数据库中的密码*/
+    fun validatePassword(rawPassword: CharSequence?, encodedPassword: String?): Boolean {
+        if (rawPassword.isNullOrEmpty() || encodedPassword.isNullOrEmpty()) {
+            return false
+        }
+        return passwordEncoder.matches(rawPassword, encodedPassword)
     }
 
     /**是否可以注册
@@ -46,7 +55,7 @@ class AuthService {
     fun register(bean: RegisterBean): AuthEntity? {
         val entity = authRepository.save(AuthEntity().apply {
             username = bean.username
-            password = bean.password
+            password = passwordEncoder.encode(bean.password)
         })
         entity.roles = listOf(roleRepository.save(RoleEntity().apply {
             authId = entity.id
@@ -60,8 +69,8 @@ class AuthService {
      * 这里只需要从数据库查找授权用户信息, 并返回即可*/
     fun loadAuth(username: String): AuthEntity? {
         val authEntity = authRepository.findByUsername(username)
-        authEntity?.let {
-            //roleRepository
+        authEntity?.apply {
+            roles = roleRepository.findAllByAuthId(id)
         }
         return authEntity
     }

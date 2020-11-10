@@ -23,6 +23,6 @@ class JwtAccessDeniedHandler : AccessDeniedHandler {
         val exception = AccessDeniedException("Sorry you don not enough permissions to access it!")
         response.sendError(HttpServletResponse.SC_FORBIDDEN, exception.message)
 
-        L.e("权限不足: ${request.requestURL}")
+        L.e("[JwtAccessDeniedHandler] 权限不足: ${request.requestURL}")
     }
 }

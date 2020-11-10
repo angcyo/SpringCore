@@ -3,6 +3,9 @@ package com.angcyo.spring.base.data
 import com.angcyo.spring.base.data.Result.Companion.ERROR_CODE
 import com.angcyo.spring.base.str
 import org.springframework.validation.BindingResult
+import javax.validation.ConstraintViolation
+import javax.validation.Validation
+import javax.validation.groups.Default
 
 /**
  * Email:angcyo@126.com
@@ -33,10 +36,6 @@ data class Result<T>(
 
         /**错误码*/
         const val ERROR_CODE = 501
-
-        fun <T> error(msg: String? = "Error", code: Int = ERROR_CODE, data: T? = null): Result<T?> {
-            return data.error(msg, code)
-        }
     }
 }
 
@@ -45,18 +44,39 @@ fun <T> Any?.ok(msg: String? = "Success") = when {
 }
 
 /**error*/
-fun <T> error(msg: String? = "Error", code: Int = ERROR_CODE) = Result.error<T>(msg, code)
+fun resultError(msg: String? = "Error", code: Int = ERROR_CODE) = msg.error<String>(code)
 
 /**error*/
-fun <T> Any?.error(msg: String? = "Error", code: Int = ERROR_CODE) = when {
-    else -> Result(code = code, msg = msg, data = this as T)
+fun <T> Any?.error(code: Int = ERROR_CODE) = when {
+    else -> Result<T>(code = code, msg = this.str(), null)
 }
 
 inline fun <T> BindingResult.result(responseEntity: () -> T): Result<T> {
     return if (hasErrors()) {
-        //null.error(allErrors.toString())
-        null.error(allErrors.joinToString { it.defaultMessage.str() })
+        allErrors.joinToString { it.defaultMessage.str() }.error()
     } else {
         responseEntity().ok()
     }
+}
+
+/**[validator]验证数据是否正确*/
+fun Any.validate(vararg propertyName: String): Set<ConstraintViolation<Any>> {
+    val validator = Validation.buildDefaultValidatorFactory().validator
+    if (propertyName.isNullOrEmpty()) {
+        //如果指定验证的属性为空,则验证所有字段
+        return validator.validate(this, Default::class.java)
+    }
+    for (prop in propertyName) {
+        val result = validator.validateProperty(this, prop, Default::class.java)
+        if (!result.isNullOrEmpty()) {
+            //指定属性验证失败了, 立即返回. 否则验证下一个指定的属性
+            return result
+        }
+    }
+    return emptySet()
+}
+
+/**拿不到数据不正确提示的消息错误返回结构体*/
+fun <T> Set<ConstraintViolation<T>?>.result(): Result<T> {
+    return joinToString { it?.message.str() }.error()
 }

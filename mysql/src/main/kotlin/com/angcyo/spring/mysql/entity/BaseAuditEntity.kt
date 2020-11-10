@@ -1,5 +1,6 @@
 package com.angcyo.spring.mysql.entity
 
+import com.angcyo.spring.base.Base
 import com.fasterxml.jackson.annotation.JsonFormat
 import com.fasterxml.jackson.annotation.JsonIgnore
 import io.swagger.annotations.ApiModel
@@ -29,14 +30,14 @@ abstract class BaseAuditEntity {
     @CreatedDate
     @Column(updatable = false)
     @ApiModelProperty("创建时间")
-    @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
+    @DateTimeFormat(pattern = Base.DEFAULT_DATE_TIME_FORMATTER)
+    @JsonFormat(pattern = Base.DEFAULT_DATE_TIME_FORMATTER, timezone = "GMT+8")
     var createdAt: LocalDateTime = LocalDateTime.now()
 
     @LastModifiedDate
     @ApiModelProperty("更新时间")
-    @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
+    @DateTimeFormat(pattern = Base.DEFAULT_DATE_TIME_FORMATTER)
+    @JsonFormat(pattern = Base.DEFAULT_DATE_TIME_FORMATTER, timezone = "GMT+8")
     var updatedAt: LocalDateTime = LocalDateTime.now()
 
     @CreatedBy

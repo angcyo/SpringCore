@@ -18,10 +18,10 @@ import javax.persistence.Transient
 @Entity
 @Table(name = "auth_entity")
 class AuthEntity : BaseAuditEntity() {
-    @ApiModelProperty("登录用户名")
+    @ApiModelProperty("用户名")
     var username: String? = null
 
-    @ApiModelProperty("登录用户密码(已加密)")
+    @ApiModelProperty("用户密码(已加密)")
     @JsonIgnore
     var password: String? = null
 
@@ -30,6 +30,9 @@ class AuthEntity : BaseAuditEntity() {
 
     @ApiModelProperty("用户对应的角色信息")
     @Transient
-    @JsonIgnore
     var roles: List<RoleEntity>? = null
+
+    @ApiModelProperty("授权成功,返回的token")
+    @Transient
+    var token: String? = null
 }

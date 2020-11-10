@@ -1,5 +1,8 @@
 package com.angcyo.spring.base.servlet
 
+import com.angcyo.spring.base.data.error
+import com.angcyo.spring.base.json.fromJson
+import com.angcyo.spring.base.json.toJson
 import com.angcyo.spring.base.string
 import javax.servlet.ServletRequest
 import javax.servlet.http.HttpServletResponse
@@ -11,9 +14,27 @@ import javax.servlet.http.HttpServletResponse
  */
 
 /**读取请求体字符串数据*/
-fun ServletRequest.body() = if (contentLength >= 0) inputStream.readBytes().string() else null
+fun ServletRequest.body() = if (contentLength > 0)
+    if (this is IStreamWrapper)
+        this.toByteArray(true)?.string()
+    else
+        inputStream.readBytes().string()
+else null
 
-fun ServletRequest.bytes() = if (contentLength >= 0) inputStream.readBytes() else null
+fun ServletRequest.bytes() = if (contentLength > 0)
+    if (this is IStreamWrapper)
+        this.toByteArray(true)
+    else
+        inputStream.readBytes()
+else null
+
+fun <T> ServletRequest.fromJson(classOfT: Class<T>): T? {
+    return if (contentLengthLong > 0) {
+        body()?.fromJson<T>(classOfT)
+    } else {
+        null
+    }
+}
 
 /**写入返回体消息*/
 fun HttpServletResponse.send(message: String?,
@@ -31,6 +52,11 @@ fun HttpServletResponse.send(message: String?,
             it.print(message)
         }
     }
+}
+
+/**发送一个Rest格式的错误数据*/
+fun HttpServletResponse.sendError(message: String?) {
+    send(message.error<String>().toJson())
 }
 
 fun HttpServletResponse.send(bytes: ByteArray?,

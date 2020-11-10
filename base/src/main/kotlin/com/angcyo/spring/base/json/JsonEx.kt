@@ -1,5 +1,6 @@
 package com.angcyo.spring.base.json
 
+import com.angcyo.spring.base.Base
 import com.angcyo.spring.base.util.TextUtils
 import com.google.gson.*
 import com.google.gson.reflect.TypeToken
@@ -258,7 +259,7 @@ fun gson(config: GsonBuilder.() -> Unit = {}): Gson {
             .setPrettyPrinting()
             .serializeNulls()
             .registerTypeAdapterFactory(LocalDateTimeTypeAdapter.FACTORY)
-            .setDateFormat("yyyy-MM-dd HH:mm:ss")
+            .setDateFormat(Base.DEFAULT_DATE_TIME_FORMATTER)
             .setLenient() //支持畸形json解析
             .excludeFieldsWithModifiers(
                     Modifier.STATIC,

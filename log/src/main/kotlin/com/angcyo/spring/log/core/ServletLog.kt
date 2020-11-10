@@ -102,32 +102,36 @@ object ServletLog {
                     appendLine()
                     append(it)
                 }
-                request.parameterMap.onEach {
+                /*request.parameterMap.onEach {
                     appendLine()
                     append(it.key)
                     append(":")
                     append(it.value.toList().toString())
-                }
+                }*/
 
                 val bodySize: Long = request.contentLengthLong
+                appendLine()
                 append("body(${DataSize.ofBytes(bodySize)} ${bodySize.prettyByteSize()})")
                 if (request.isMultipart() || request.isBinaryContent()) {
                     append("↓")
                     appendLine()
                     append("binary body.")
-                } else {
+                } else if (bodySize != -1L) {
                     fun _log(bytes: ByteArray?) {
                         val size = bytes?.size?.toLong() ?: -1
-                        append(" $size")
-                        append("↓")
-                        appendLine()
 
-                        if (bytes?.isNotEmpty() == true) {
-                            try {
-                                val body = bytes.string(request.characterEncoding)
-                                append(body)
-                            } catch (e: Exception) {
-                                append(e.stackTraceToString())
+                        if (size > 0) {
+                            append(" $size")
+                            append("↓")
+                            appendLine()
+
+                            if (bytes?.isNotEmpty() == true) {
+                                try {
+                                    val body = bytes.string(request.characterEncoding)
+                                    append(body)
+                                } catch (e: Exception) {
+                                    append(e.stackTraceToString())
+                                }
                             }
                         }
                     }
@@ -151,6 +155,8 @@ object ServletLog {
                             _log(bytes)
                         }
                     }
+                } else {
+                    //appendLine()
                 }
 
                 //请求头
@@ -179,21 +185,25 @@ object ServletLog {
                 }
 
                 fun _log(bytes: ByteArray?) {
-                    appendLine()
                     val size = bytes?.size?.toLong() ?: -1
-                    append("body(${DataSize.ofBytes(size)} ${size.prettyByteSize()})↓")
-                    if (bytes?.isNotEmpty() == true) {
+                    if (size > 0) {
                         appendLine()
-                        if (!response.isMultipart() && !response.isBinaryContent()) {
-                            try {
-                                val body = bytes.string(response.characterEncoding)
-                                append(body)
-                            } catch (e: Exception) {
-                                append(e.stackTraceToString())
+                        append("body(${DataSize.ofBytes(size)} ${size.prettyByteSize()})↓")
+                        if (bytes?.isNotEmpty() == true) {
+                            appendLine()
+                            if (!response.isMultipart() && !response.isBinaryContent()) {
+                                try {
+                                    val body = bytes.string(response.characterEncoding)
+                                    append(body)
+                                } catch (e: Exception) {
+                                    append(e.stackTraceToString())
+                                }
+                            } else {
+                                append("binary body.")
                             }
-                        } else {
-                            append("binary body.")
                         }
+                    } else {
+                        //append("body empty.")
                     }
                 }
 

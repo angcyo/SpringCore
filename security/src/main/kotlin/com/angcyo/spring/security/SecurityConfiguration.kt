@@ -1,11 +1,10 @@
 package com.angcyo.spring.security
 
-import com.angcyo.spring.security.jwt.JwtAccessDeniedHandler
-import com.angcyo.spring.security.jwt.JwtAuthenticationEntryPoint
-import com.angcyo.spring.security.jwt.JwtAuthorizationFilter
-import com.angcyo.spring.security.jwt.JwtLoginFilter
+import com.angcyo.spring.security.jwt.*
+import com.angcyo.spring.security.service.AuthService
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.Bean
+import org.springframework.security.authentication.AuthenticationProvider
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder
 import org.springframework.security.config.annotation.web.builders.HttpSecurity
 import org.springframework.security.config.annotation.web.builders.WebSecurity
@@ -18,6 +17,7 @@ import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.web.cors.CorsConfiguration
 import org.springframework.web.cors.CorsConfigurationSource
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource
+import java.security.SecureRandom
 
 
 /**
@@ -35,6 +35,10 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource
 class SecurityConfiguration : WebSecurityConfigurerAdapter() {
 
     companion object {
+
+        /**密码加密器*/
+        val encoder = BCryptPasswordEncoder(BCryptPasswordEncoder.BCryptVersion.`$2B`, 10, SecureRandom())
+
         /**认证白名单, 不需要验证*/
         val SECURITY_WHITE_LIST = arrayOf(
                 "/test/**",
@@ -64,19 +68,30 @@ class SecurityConfiguration : WebSecurityConfigurerAdapter() {
                 .authorities("ROLE_USER")*/
 
         // 设置自定义的userDetailsService以及密码编码器, 用于登录接口验证判断
-        auth.userDetailsService(userDetailsServiceImpl).passwordEncoder(passwordEncoder())//.password(passwordEncoder())
+        auth.authenticationProvider(authenticationProvider())
+                .userDetailsService(userDetailsServiceImpl)
+                .passwordEncoder(passwordEncoder())//.password(passwordEncoder())
+
     }
 
     @Bean
     fun passwordEncoder(): PasswordEncoder {
-        return BCryptPasswordEncoder()
+        return encoder
     }
 
     @Bean
-    fun corsConfigurationSource(): CorsConfigurationSource? {
+    fun corsConfigurationSource(): CorsConfigurationSource {
         val source = UrlBasedCorsConfigurationSource()
         source.registerCorsConfiguration("/**", CorsConfiguration().applyPermitDefaultValues())
         return source
+    }
+
+    /**
+     * 认证 AuthenticationProvider
+     */
+    @Bean
+    fun authenticationProvider(): AuthenticationProvider {
+        return JwtAuthenticationProvider()
     }
 
     /**2. */
@@ -87,6 +102,9 @@ class SecurityConfiguration : WebSecurityConfigurerAdapter() {
     override fun userDetailsServiceBean(): UserDetailsService {
         return super.userDetailsServiceBean()
     }
+
+    @Autowired
+    lateinit var authService: AuthService
 
     /**3. 通过重载，配置如何通过拦截器保护请求*/
     override fun configure(http: HttpSecurity) {
@@ -99,7 +117,7 @@ class SecurityConfiguration : WebSecurityConfigurerAdapter() {
                 .anyRequest().authenticated()
                 //.and().formLogin().loginPage().failureUrl()
                 .and()
-                .addFilter(JwtLoginFilter(authenticationManager()))
+                .addFilter(JwtLoginFilter(authenticationManager(), authService))
                 .addFilter(JwtAuthorizationFilter(authenticationManager(), userDetailsServiceImpl))
                 //.addFilter(JwtLogoutFilter(SecurityLogoutSuccessHandler(), SecurityLogoutHandler()))
                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
@@ -119,7 +137,14 @@ class SecurityConfiguration : WebSecurityConfigurerAdapter() {
     }
 
     /**4. 通过重载，配置Spring Security的Filter链*/
-    override fun configure(web: WebSecurity?) {
-        super.configure(web)
+    override fun configure(web: WebSecurity) {
+        web.ignoring()
+                .antMatchers(
+                        "**.js",
+                        "**.css",
+                        "/images/**",
+                        "/webjars/**",
+                        "/**/favicon.ico"
+                )
     }
 }

@@ -1,5 +1,6 @@
 package com.angcyo.spring.mysql.annotation
 
+import com.angcyo.spring.base.Base
 import com.fasterxml.jackson.annotation.JsonFormat
 import org.springframework.format.annotation.DateTimeFormat
 
@@ -9,8 +10,8 @@ import org.springframework.format.annotation.DateTimeFormat
  * @date 2020/11/05
  */
 
-@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
-@DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+@JsonFormat(pattern = Base.DEFAULT_DATE_TIME_FORMATTER, timezone = "GMT+8")
+@DateTimeFormat(pattern = Base.DEFAULT_DATE_TIME_FORMATTER)
 @Retention(AnnotationRetention.RUNTIME)
 @Target(AnnotationTarget.TYPE, AnnotationTarget.FIELD, AnnotationTarget.FUNCTION, AnnotationTarget.PROPERTY)
 annotation class RLocalDateTime

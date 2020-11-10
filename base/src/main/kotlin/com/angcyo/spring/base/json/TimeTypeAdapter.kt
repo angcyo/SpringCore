@@ -1,5 +1,6 @@
 package com.angcyo.spring.base.json
 
+import com.angcyo.spring.base.Base
 import com.google.gson.Gson
 import com.google.gson.JsonSyntaxException
 import com.google.gson.TypeAdapter
@@ -11,6 +12,7 @@ import com.google.gson.stream.JsonWriter
 import java.text.ParseException
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
+import java.util.*
 
 /**
  * Email:angcyo@126.com
@@ -22,7 +24,7 @@ import java.time.format.DateTimeFormatter
  */
 
 class LocalDateTimeTypeAdapter : TypeAdapter<LocalDateTime>() {
-    private val format: DateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
+    private val format: DateTimeFormatter = DateTimeFormatter.ofPattern(Base.DEFAULT_DATE_TIME_FORMATTER, Locale.CHINA)
 
     companion object {
         val FACTORY: TypeAdapterFactory = object : TypeAdapterFactory {

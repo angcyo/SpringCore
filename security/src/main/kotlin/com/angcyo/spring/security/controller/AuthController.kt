@@ -1,6 +1,7 @@
 package com.angcyo.spring.security.controller
 
 import com.angcyo.spring.base.data.Result
+import com.angcyo.spring.base.data.error
 import com.angcyo.spring.base.data.result
 import com.angcyo.spring.base.servlet.send
 import com.angcyo.spring.base.str
@@ -92,25 +93,28 @@ class AuthController {
         L.i("验证码:${pair.first}")
     }
 
+    /**
+     * [org.springframework.web.servlet.mvc.method.annotation.AbstractMessageConverterMethodArgumentResolver.isBindExceptionRequired]
+     * */
     @PostMapping(SecurityConstants.AUTH_REGISTER_URL)
     @ApiOperation("注册用户")
-    fun register(@Validated @RequestBody bean: RegisterBean,
-                 request: HttpServletRequest,
-                 bindingResult: BindingResult): Result<AuthEntity?> {
+    fun register(@RequestBody @Validated bean: RegisterBean,
+                 bindingResult: BindingResult,/*必须放在第2个参数上, 否则无效*/
+                 request: HttpServletRequest): Result<AuthEntity?>? {
         return bindingResult.result {
 
             if (bean.type == WebType.value) {
                 //web 注册类型, 需要验证验证码
 
                 if (bean.code.isNullOrBlank() || bean.code != getImageCode(request)) {
-                    return Result.error("验证码错误")
+                    return "验证码错误".error()
                 }
             }
 
             val pair = authService.canRegister(bean)
             if (!pair.first) {
                 clearImageCode(request)
-                return Result.error(pair.second)
+                return pair.second.error()
             }
 
             val entity = authService.register(bean)

@@ -9,4 +9,6 @@ import org.springframework.data.jpa.repository.JpaRepository
  * @date 2020/11/07
  */
 
-interface RoleRepository : JpaRepository<RoleEntity, Long>
+interface RoleRepository : JpaRepository<RoleEntity, Long> {
+    fun findAllByAuthId(authId: Long): List<RoleEntity>
+}
