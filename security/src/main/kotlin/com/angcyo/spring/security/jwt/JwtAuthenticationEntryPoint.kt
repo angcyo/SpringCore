@@ -26,7 +26,7 @@ class JwtAuthenticationEntryPoint : AuthenticationEntryPoint {
     override fun commence(request: HttpServletRequest,
                           response: HttpServletResponse,
                           authException: AuthenticationException) {
-        L.e("[JwtAuthenticationEntryPoint] 未授权: ${request.requestURL}")
+        L.e("[JwtAuthenticationEntryPoint] 未授权: ${request.requestURL} ${authException.message}")
         val status = response.status
         if (status == 401) {
             //授权失败. response body需要手动设置

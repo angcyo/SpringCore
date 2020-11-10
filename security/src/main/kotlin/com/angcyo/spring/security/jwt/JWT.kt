@@ -10,7 +10,6 @@ import org.springframework.security.core.GrantedAuthority
 import org.springframework.security.core.authority.SimpleGrantedAuthority
 import java.security.SignatureException
 import java.util.*
-import java.util.stream.Collectors
 
 /**
  * Email:angcyo@126.com
@@ -58,11 +57,21 @@ object JWT {
                         .parseClaimsJws(token.replace(SecurityConstants.TOKEN_PREFIX, ""))
 
                 val username = parsedToken.body.subject
-                val authorities = (parsedToken.body[SecurityConstants.TOKEN_ROLES] as List<*>).stream()
-                        .map { authority -> SimpleGrantedAuthority(authority as String?) }
-                        .collect(Collectors.toList())
+                if (username.isNullOrBlank()) {
+                    return null
+                }
 
-                if (!username.isNullOrBlank()) {
+                val roles = parsedToken.body[SecurityConstants.TOKEN_ROLES]
+                if (roles is Iterable<*>) {
+                    val authorities = mutableListOf<SimpleGrantedAuthority>()
+                    roles.forEach { role ->
+                        if (role is Map<*, *>) {
+                            val authority = role["authority"]
+                            if (authority is String && authority.isNotEmpty()) {
+                                authorities.add(SimpleGrantedAuthority(authority))
+                            }
+                        }
+                    }
                     //颁发证书
                     return username to authorities
                 }

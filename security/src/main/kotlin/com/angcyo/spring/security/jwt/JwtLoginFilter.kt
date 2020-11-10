@@ -5,6 +5,7 @@ import com.angcyo.spring.base.data.result
 import com.angcyo.spring.base.data.resultError
 import com.angcyo.spring.base.data.validate
 import com.angcyo.spring.base.json.toJackson
+import com.angcyo.spring.base.json.toJacksonIgnore
 import com.angcyo.spring.base.json.toJson
 import com.angcyo.spring.base.servlet.fromJson
 import com.angcyo.spring.base.servlet.send
@@ -111,8 +112,9 @@ class JwtLoginFilter(authManager: AuthenticationManager, val authService: AuthSe
             //4
             val roles = entity.roles.toAuthorities()
             val token = JWT.generateToken(entity.username.str(), roles)
-            entity.token = SecurityConstants.TOKEN_PREFIX + token
-            response.send(entity.ok<AuthEntity>().toJackson())
+            entity.token = /*SecurityConstants.TOKEN_PREFIX + */token
+            response.send(entity.ok<AuthEntity>().toJacksonIgnore("roles", "enable"))
+            //response.send(entity.ok<AuthEntity>().toJacksonOnly("username", "token"))
         } else {
             super.successfulAuthentication(request, response, filterChain, authentication)
         }

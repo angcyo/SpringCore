@@ -1,6 +1,8 @@
 package com.angcyo.spring.security.entity
 
+import com.angcyo.spring.base.json.JacksonEx
 import com.angcyo.spring.mysql.entity.BaseAuditEntity
+import com.fasterxml.jackson.annotation.JsonFilter
 import com.fasterxml.jackson.annotation.JsonIgnore
 import io.swagger.annotations.ApiModelProperty
 import javax.persistence.Entity
@@ -17,6 +19,7 @@ import javax.persistence.Transient
 
 @Entity
 @Table(name = "auth_entity")
+@JsonFilter(JacksonEx.DEFAULT_FILTER)
 class AuthEntity : BaseAuditEntity() {
     @ApiModelProperty("用户名")
     var username: String? = null

@@ -123,6 +123,9 @@ class SecurityConfiguration : WebSecurityConfigurerAdapter() {
                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 .and()
                 .logout()
+                /*.logout().defaultLogoutSuccessHandlerFor(
+                        SecurityLogoutSuccessHandler(),
+                        AntPathRequestMatcher(SecurityConstants.AUTH_LOGIN_URL, RequestMethod.POST.toString()))*/
                 .logoutUrl(SecurityConstants.AUTH_LOGOUT_URL)
                 .logoutSuccessUrl(SecurityConstants.AUTH_LOGOUT_SUCCESS_URL)
                 .logoutSuccessHandler(SecurityLogoutSuccessHandler())

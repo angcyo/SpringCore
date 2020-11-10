@@ -1,7 +1,11 @@
 package com.angcyo.spring.base.json
 
+import com.angcyo.spring.base.json.JacksonEx.ignorePropertyMapper
 import com.angcyo.spring.base.json.JacksonEx.mapper
+import com.angcyo.spring.base.json.JacksonEx.onlyPropertyMapper
 import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.databind.ser.impl.SimpleBeanPropertyFilter
+import com.fasterxml.jackson.databind.ser.impl.SimpleFilterProvider
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 
 /**
@@ -13,24 +17,53 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
  */
 
 object JacksonEx {
+
+    const val DEFAULT_FILTER = "JacksonFilter"
+
     val mapper = ObjectMapper().apply {
         //registerModule(LocalDateTimeSerializer(DateTimeFormatter.ofPattern(DEFAULT_DATE_TIME_FORMATTER), Locale.CHINA))
         //registerModule(LocalDateTimeDeserializer())
         registerModule(JavaTimeModule())
     }
+
+    /**忽略指定的属性, 不序列化*/
+    fun ignorePropertyMapper(vararg property: String) = ObjectMapper().apply {
+        registerModule(JavaTimeModule())
+        setFilterProvider(SimpleFilterProvider().apply {
+            addFilter(DEFAULT_FILTER, SimpleBeanPropertyFilter.serializeAllExcept(*property))
+        })
+    }
+
+    /**只序列化指定的属性字段*/
+    fun onlyPropertyMapper(vararg property: String) = ObjectMapper().apply {
+        registerModule(JavaTimeModule())
+        setFilterProvider(SimpleFilterProvider().apply {
+            addFilter(DEFAULT_FILTER, SimpleBeanPropertyFilter.filterOutAllExcept(*property))
+        })
+    }
 }
 
 /**任意对象, 转成json字符串*/
-fun Any?.toJackson(): String? {
+fun Any?.toJackson(ignoreProperty: Array<out String>? = null, onlyProperty: Array<out String>? = null): String? {
     return this?.run {
         try {
-            mapper.writeValueAsString(this)
+            (if (!onlyProperty.isNullOrEmpty()) {
+                onlyPropertyMapper(*onlyProperty)
+            } else if (!ignoreProperty.isNullOrEmpty()) {
+                ignorePropertyMapper(*ignoreProperty)
+            } else {
+                mapper
+            }).writeValueAsString(this)
         } catch (e: Exception) {
             e.printStackTrace()
             null
         }
     }
 }
+
+fun Any?.toJacksonIgnore(vararg property: String) = toJackson(ignoreProperty = property)
+
+fun Any?.toJacksonOnly(vararg property: String) = toJackson(onlyProperty = property)
 
 fun <T> String?.fromJackson(clazz: Class<T>): T? {
     return this?.run {
