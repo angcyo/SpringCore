@@ -43,7 +43,8 @@ object JacksonEx {
     }
 }
 
-/**任意对象, 转成json字符串*/
+/**任意对象, 转成json字符串
+ * [@JsonFilter(JacksonEx.DEFAULT_FILTER)]*/
 fun Any?.toJackson(ignoreProperty: Array<out String>? = null, onlyProperty: Array<out String>? = null): String? {
     return this?.run {
         try {
@@ -61,8 +62,10 @@ fun Any?.toJackson(ignoreProperty: Array<out String>? = null, onlyProperty: Arra
     }
 }
 
+/**[@JsonFilter(JacksonEx.DEFAULT_FILTER)]*/
 fun Any?.toJacksonIgnore(vararg property: String) = toJackson(ignoreProperty = property)
 
+/**[@JsonFilter(JacksonEx.DEFAULT_FILTER)]*/
 fun Any?.toJacksonOnly(vararg property: String) = toJackson(onlyProperty = property)
 
 fun <T> String?.fromJackson(clazz: Class<T>): T? {
