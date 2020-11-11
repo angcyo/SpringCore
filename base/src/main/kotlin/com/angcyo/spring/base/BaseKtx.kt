@@ -24,6 +24,9 @@ inline fun <reified T> String.bean() = Base.getBean<T>(this)
  * */
 fun <T> Class<T>.bean() = Base.getBean(this)
 
+/**获取[application.properties]中, 配置的值*/
+fun String.propertyValue() = Base.applicationContext.environment.getProperty(this)
+
 /*----------------------------------------------------------------------------------*/
 
 /**当前的[Date]对象*/

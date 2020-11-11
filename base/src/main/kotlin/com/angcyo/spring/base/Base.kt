@@ -1,5 +1,6 @@
 package com.angcyo.spring.base
 
+import com.angcyo.spring.base.util.L
 import org.springframework.context.ApplicationContext
 import org.springframework.context.ApplicationContextAware
 import org.springframework.stereotype.Component
@@ -34,7 +35,10 @@ class Base : ApplicationContextAware {
         }
     }
 
+    /**[org.springframework.boot.web.servlet.context.AnnotationConfigServletWebServerApplicationContext]*/
     override fun setApplicationContext(applicationContext: ApplicationContext) {
         Base.applicationContext = applicationContext
+        val activeProfiles = applicationContext.environment.activeProfiles
+        L.isDebug = activeProfiles.contains("dev") || activeProfiles.contains("pre")
     }
 }
