@@ -85,7 +85,7 @@ class AuthService {
     /**检查用户的token, 是否和redis里面的一样
      * [token] 支持包含/不包含前缀的token*/
     fun _checkTokenValid(username: String, token: String): Boolean {
-        val redisToken = redis["TOKEN$username"]
+        val redisToken = redis["TOKEN.$username"]
         if (token.startsWith(SecurityConstants.TOKEN_PREFIX)) {
             return SecurityConstants.TOKEN_PREFIX + redisToken == token
         }
@@ -95,12 +95,12 @@ class AuthService {
     /**[token] 不含前缀的token*/
     fun _loginEnd(username: String, token: String) {
         //保存token, 一天超时
-        redis["TOKEN$username", token] = oneDay
+        redis["TOKEN.$username", token] = oneDay
     }
 
     /**退出登录*/
     fun _logoutEnd(username: String) {
         SecurityContextHolder.clearContext()
-        redis.del("TOKEN$username")
+        redis.del("TOKEN.$username")
     }
 }

@@ -1,5 +1,6 @@
 package com.angcyo.spring.security.jwt
 
+import com.angcyo.spring.base.util.L
 import com.angcyo.spring.security.SecurityConstants
 import com.angcyo.spring.security.UserDetailsServiceImpl
 import com.angcyo.spring.security.service.AuthService
@@ -57,9 +58,11 @@ class JwtAuthorizationFilter(authenticationManager: AuthenticationManager?,
         }
 
         if (authentication == null) {
-            if (request.getParameter("dev") == "truthy") {
-                //开发控制
-                authentication = UsernamePasswordAuthenticationToken(JWT.TEMP_GUEST, null, JWT.TEMP_GUEST_ROLES)
+            if (L.isDebug) {
+                if (request.getParameter("dev") == "truthy") {
+                    //开发控制
+                    authentication = UsernamePasswordAuthenticationToken(JWT.TEMP_GUEST, null, JWT.TEMP_GUEST_ROLES)
+                }
             }
         }
 

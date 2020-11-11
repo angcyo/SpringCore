@@ -18,7 +18,7 @@ object L {
     val _logTemp: Logger = LoggerFactory.getLogger("temp")
     val _logDb: Logger = LoggerFactory.getLogger("db")
 
-    val isDebug: Boolean get() = _logAngcyo.isDebugEnabled
+    val isDebug: Boolean get() = _logAngcyo.isDebugEnabled || true
 
     fun debug(action: () -> Unit) {
         if (isDebug) {

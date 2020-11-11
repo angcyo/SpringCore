@@ -46,19 +46,19 @@ class AuthController {
     private fun setImageCode(request: HttpServletRequest, code: String) {
         //根据session id, 将code 存到redis
         request.getSession(true)?.apply {
-            redis["IMAGE${id}CODE", code] = 1 * 60
+            redis["CODE.IMAGE.${id}", code] = 1 * 60
         }
     }
 
     private fun getImageCode(request: HttpServletRequest): String? {
         return request.getSession(false)?.run {
-            redis["IMAGE${id}CODE"].str()
+            redis["CODE.IMAGE.${id}"].str()
         }
     }
 
     private fun clearImageCode(request: HttpServletRequest) {
         request.getSession(false)?.run {
-            redis.del("IMAGE${id}CODE")
+            redis.del("CODE.IMAGE.${id}")
         }
     }
 
