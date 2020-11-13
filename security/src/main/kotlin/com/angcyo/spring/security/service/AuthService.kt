@@ -1,6 +1,6 @@
 package com.angcyo.spring.security.service
 
-import com.angcyo.spring.base.oneDay
+import com.angcyo.spring.base.oneDaySec
 import com.angcyo.spring.redis.Redis
 import com.angcyo.spring.security.SecurityConstants
 import com.angcyo.spring.security.controller.RegisterBean
@@ -95,7 +95,7 @@ class AuthService {
     /**[token] 不含前缀的token*/
     fun _loginEnd(username: String, token: String) {
         //保存token, 一天超时
-        redis["TOKEN.$username", token] = oneDay
+        redis["TOKEN.$username", token] = oneDaySec
     }
 
     /**退出登录*/

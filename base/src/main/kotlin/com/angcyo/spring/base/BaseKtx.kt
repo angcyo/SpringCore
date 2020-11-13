@@ -64,7 +64,10 @@ fun ByteArray.string(charset: Charset = Charset.defaultCharset()) = String(this,
 fun ByteArray.string(charset: String?) = String(this, Charset.forName(charset ?: "UTF-8"))
 
 /**一天对应多少毫秒 [86400_000]*/
-val oneDay: Long get() = 1000L * 60 * 60 * 24
+val oneDay: Long get() = 1000L * oneDaySec
+
+/**一天对应多少秒 [86400_000]*/
+val oneDaySec: Long get() = 60 * 60 * 24L
 
 fun Long.prettyByteSize() = PrettyMemoryUtil.prettyByteSize(this)
 
