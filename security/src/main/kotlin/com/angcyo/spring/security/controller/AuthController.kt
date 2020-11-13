@@ -3,10 +3,12 @@ package com.angcyo.spring.security.controller
 import com.angcyo.spring.base.data.Result
 import com.angcyo.spring.base.data.error
 import com.angcyo.spring.base.data.result
+import com.angcyo.spring.base.elseNull
 import com.angcyo.spring.base.servlet.send
 import com.angcyo.spring.base.str
 import com.angcyo.spring.base.util.ImageCode
 import com.angcyo.spring.base.util.L
+import com.angcyo.spring.base.uuid
 import com.angcyo.spring.redis.Redis
 import com.angcyo.spring.security.SecurityConstants
 import com.angcyo.spring.security.entity.AuthEntity
@@ -44,16 +46,11 @@ class AuthController {
     lateinit var redis: Redis
 
     private fun setImageCode(request: HttpServletRequest, code: String) {
-        //根据session id, 将code 存到redis
-        request.getSession(true)?.apply {
-            redis["CODE.IMAGE.${id}", code] = 1 * 60
-        }
+        redis["CODE.IMAGE.${request.codeKey()}", code] = 1 * 60
     }
 
     private fun getImageCode(request: HttpServletRequest): String? {
-        return request.getSession(false)?.run {
-            redis["CODE.IMAGE.${id}"].str()
-        }
+        return redis["CODE.IMAGE.${request.codeKey()}"].str()
     }
 
     private fun clearImageCode(request: HttpServletRequest) {
@@ -65,6 +62,7 @@ class AuthController {
     @GetMapping(SecurityConstants.AUTH_REGISTER_CODE_URL)
     @ApiOperation("获取注册时的图形验证码")
     @ApiImplicitParams(
+            ApiImplicitParam(name = "uuid", value = "客户端id", required = true),
             ApiImplicitParam(name = "l", value = "验证码的长度"),
             ApiImplicitParam(name = "w", value = "验证码的宽度"),
             ApiImplicitParam(name = "h", value = "验证码的高度")
@@ -98,6 +96,7 @@ class AuthController {
      * */
     @PostMapping(SecurityConstants.AUTH_REGISTER_URL)
     @ApiOperation("注册用户")
+    @ApiImplicitParam(name = "uuid", value = "客户端id", required = true)
     fun register(@RequestBody @Validated bean: RegisterBean,
                  bindingResult: BindingResult,/*必须放在第2个参数上, 否则无效*/
                  request: HttpServletRequest): Result<AuthEntity?>? {
@@ -106,7 +105,7 @@ class AuthController {
             if (bean.type == WebType.value) {
                 //web 注册类型, 需要验证验证码
 
-                if (bean.code.isNullOrBlank() || bean.code != getImageCode(request)) {
+                if (bean.code.isNullOrBlank() || bean.code?.toLowerCase() != getImageCode(request)?.toLowerCase()) {
                     return "验证码错误".error()
                 }
             }
@@ -121,4 +120,20 @@ class AuthController {
             entity
         }
     }
+}
+
+fun HttpServletRequest.codeKey(): String {
+    val uuid = getParameter("uuid")
+    var key = ""
+    if (uuid.isNullOrEmpty()) {
+        //根据session id, 将code 存到redis
+        getSession(true)?.apply {
+            key = id
+        }.elseNull {
+            key = uuid()
+        }
+    } else {
+        key = uuid
+    }
+    return key
 }

@@ -80,3 +80,12 @@ fun Any?.str(): String {
         this.toString()
     }
 }
+
+/**如果为空, 则执行[action].
+ * 原样返回*/
+fun <T> T?.elseNull(action: () -> Unit = {}): T? {
+    if (this == null) {
+        action()
+    }
+    return this
+}
