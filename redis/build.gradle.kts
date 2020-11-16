@@ -3,7 +3,7 @@ dependencies {
         exclude("org.junit.vintage", "junit-vintage-engine")
     }
 
-    api(project(":SpringCore:core"))
+    implementation(project(":SpringCore:base"))
 
     api("org.springframework.boot:spring-boot-starter-data-redis")
 }

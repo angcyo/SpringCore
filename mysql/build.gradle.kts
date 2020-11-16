@@ -5,7 +5,9 @@ dependencies {
         exclude("org.junit.vintage", "junit-vintage-engine")
     }
 
-    api(project(":SpringCore:core"))
+    implementation(project(":SpringCore:base"))
+    implementation(project(":SpringCore:log"))
+    implementation(project(":SpringCore:swagger"))
 
     api("org.springframework.boot:spring-boot-starter-data-jpa")
     runtimeOnly("mysql:mysql-connector-java")

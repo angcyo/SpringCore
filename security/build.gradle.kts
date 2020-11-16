@@ -3,7 +3,7 @@ dependencies {
         exclude("org.junit.vintage", "junit-vintage-engine")
     }
     testImplementation("org.springframework.security:spring-security-test")
-    api(project(":SpringCore:core"))
+    implementation(project(":SpringCore:base"))
 
     api("org.springframework.boot:spring-boot-starter-security")
 
@@ -19,6 +19,7 @@ dependencies {
     //mysql entity
     implementation(project(":SpringCore:mysql"))
     implementation(project(":SpringCore:redis"))
+    implementation(project(":SpringCore:swagger"))
 }
 
 tasks.getByName<org.springframework.boot.gradle.tasks.bundling.BootJar>("bootJar") {

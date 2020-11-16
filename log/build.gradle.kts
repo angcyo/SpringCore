@@ -1,5 +1,5 @@
 dependencies {
-    api(project(":SpringCore:base"))
+    implementation(project(":SpringCore:base"))
 
     //slf4j
     //implementation("org.springframework.boot:spring-boot-starter-logging")
