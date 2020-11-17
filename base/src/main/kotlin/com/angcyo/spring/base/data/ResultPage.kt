@@ -6,7 +6,7 @@ package com.angcyo.spring.base.data
  * @date 2020/11/13
  */
 
-data class Page<T>(
+data class ResultPage<T>(
         /**返回的元素数量*/
         var size: Long = -1,
         /**总共的页数*/
@@ -14,5 +14,5 @@ data class Page<T>(
         /**元素总数量*/
         var totalSize: Long = 0,
         /**当前返回的数据*/
-        var reords: List<T>? = null
+        var records: List<T>? = null
 )

@@ -11,10 +11,10 @@ import org.springframework.data.domain.Page
 
 fun <T> Page<T>.ok(msg: String? = "Success") = when {
     else -> Result(msg = msg,
-            data = com.angcyo.spring.base.data.Page(
+            data = com.angcyo.spring.base.data.ResultPage(
                     size = this.size.toLong(),
                     totalPages = this.totalPages.toLong(),
                     totalSize = this.totalElements,
-                    reords = this.toList()
+                    records = this.toList()
             ))
 }
