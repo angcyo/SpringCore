@@ -59,6 +59,12 @@ fun HttpServletResponse.sendError(message: String?) {
     send(message.error<String>().toJson())
 }
 
+@Throws(IllegalStateException::class)
+fun HttpServletResponse.throwError(message: String?) {
+    send(message.error<String>().toJson())
+    error(message ?: "throwError")
+}
+
 fun HttpServletResponse.send(bytes: ByteArray?,
                              code: Int = HttpServletResponse.SC_OK,
                              type: String = "application/json") {
