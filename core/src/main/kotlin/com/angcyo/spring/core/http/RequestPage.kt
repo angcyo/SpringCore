@@ -3,6 +3,8 @@ package com.angcyo.spring.core.http
 import io.swagger.annotations.ApiModel
 import io.swagger.annotations.ApiModelProperty
 import org.springframework.data.domain.PageRequest
+import org.springframework.data.domain.Pageable
+import org.springframework.data.domain.Sort
 import kotlin.math.max
 
 /**
@@ -21,4 +23,21 @@ open class RequestPage {
 }
 
 /**将请求body中的[RequestPage]转成jpa的[PageRequest]*/
-fun RequestPage?.pageable() = if (this == null || this.requestSize < 0) null else PageRequest.of(max(0, this.requestPage - 1), this.requestSize)
+fun RequestPage?.pageable(vararg sortProperties: String): Pageable? {
+    var result: Pageable? = null
+    var sort: Sort? = null
+
+    if (!sortProperties.isNullOrEmpty()) {
+        sort = Sort.by(*sortProperties).descending()
+    }
+
+    if (this == null || this.requestSize < 0) {
+        if (sort != null) {
+            //查询所有, 并且需要排序
+            result = PageRequest.of(0, Int.MAX_VALUE, sort)
+        }
+    } else {
+        result = PageRequest.of(max(0, this.requestPage - 1), this.requestSize, sort ?: Sort.unsorted())
+    }
+    return result
+}
