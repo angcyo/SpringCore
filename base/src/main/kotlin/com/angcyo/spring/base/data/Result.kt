@@ -55,7 +55,11 @@ inline fun <T> BindingResult.result(responseEntity: () -> T): Result<T> {
     return if (hasErrors()) {
         allErrors.joinToString { it.defaultMessage.str() }.error()
     } else {
-        responseEntity().ok()
+        try {
+            responseEntity().ok()
+        } catch (e: Exception) {
+            e.message.error<T>()
+        }
     }
 }
 
