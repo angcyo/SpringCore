@@ -1,6 +1,7 @@
 package com.angcyo.spring.base
 
 import com.angcyo.spring.base.util.PrettyMemoryUtil
+import org.springframework.beans.BeanUtils
 import java.nio.charset.Charset
 import java.sql.Date
 import java.text.SimpleDateFormat
@@ -88,4 +89,10 @@ fun <T> T?.elseNull(action: () -> Unit = {}): T? {
         action()
     }
     return this
+}
+
+/**复制对象*/
+fun <T : Any> T.copyTo(obj: T): T {
+    BeanUtils.copyProperties(this, obj)
+    return obj
 }
