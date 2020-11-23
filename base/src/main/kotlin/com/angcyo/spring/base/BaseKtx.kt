@@ -96,3 +96,7 @@ fun <T : Any> T.copyTo(obj: T): T {
     BeanUtils.copyProperties(this, obj)
     return obj
 }
+
+/*----------------------------------------------------------------------------------*/
+
+fun Collection<*>.lastIndex() = size - 1

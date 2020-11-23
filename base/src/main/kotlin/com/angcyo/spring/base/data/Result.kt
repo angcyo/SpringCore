@@ -3,6 +3,7 @@ package com.angcyo.spring.base.data
 import com.angcyo.spring.base.data.Result.Companion.ERROR_CODE
 import com.angcyo.spring.base.str
 import org.springframework.validation.BindingResult
+import org.springframework.validation.FieldError
 import javax.validation.ConstraintViolation
 import javax.validation.Validation
 import javax.validation.groups.Default
@@ -53,7 +54,13 @@ fun <T> Any?.error(code: Int = ERROR_CODE) = when {
 
 inline fun <T> BindingResult.result(responseEntity: () -> T): Result<T> {
     return if (hasErrors()) {
-        allErrors.joinToString { it.defaultMessage.str() }.error()
+        allErrors.joinToString {
+            if (it is FieldError) {
+                "${it.field}:${it.defaultMessage}"
+            } else {
+                "${it.defaultMessage}"
+            }
+        }.error()
     } else {
         try {
             responseEntity().ok()

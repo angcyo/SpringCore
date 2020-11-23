@@ -23,12 +23,20 @@ open class RequestPage {
 }
 
 /**将请求body中的[RequestPage]转成jpa的[PageRequest]*/
-fun RequestPage?.pageable(vararg sortProperties: String): Pageable? {
+fun RequestPage?.pageable(vararg sortProperties: String, desc: Boolean = true): Pageable? {
     var result: Pageable? = null
     var sort: Sort? = null
 
     if (!sortProperties.isNullOrEmpty()) {
-        sort = Sort.by(*sortProperties).descending()
+        sort = Sort.by(*sortProperties).run {
+            if (desc) {
+                //降序排序, 从大->小
+                descending()
+            } else {
+                //升序排序, 从小->大
+                ascending()
+            }
+        }
     }
 
     if (this == null || this.requestSize < 0) {
@@ -40,4 +48,24 @@ fun RequestPage?.pageable(vararg sortProperties: String): Pageable? {
         result = PageRequest.of(max(0, this.requestPage - 1), this.requestSize, sort ?: Sort.unsorted())
     }
     return result
+}
+
+/**排序[Pageable]*/
+fun sortBy(vararg sortProperties: String, desc: Boolean = true): Pageable? {
+    var sort: Sort = Sort.unsorted()
+
+    if (!sortProperties.isNullOrEmpty()) {
+        //降序
+        sort = Sort.by(*sortProperties).run {
+            if (desc) {
+                //降序排序, 从大->小
+                descending()
+            } else {
+                //升序排序, 从小->大
+                ascending()
+            }
+        }
+    }
+
+    return PageRequest.of(0, Int.MAX_VALUE, sort)
 }
