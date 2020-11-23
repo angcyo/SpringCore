@@ -130,7 +130,7 @@ class JwtLoginFilter(authManager: AuthenticationManager, val authService: AuthSe
         SecurityContextHolder.clearContext()
         rememberMeServices.loginFail(request, response)
         response.send(
-                resultError(failed.message, HttpServletResponse.SC_UNAUTHORIZED).toJackson(),
+                resultError<String>(failed.message, HttpServletResponse.SC_UNAUTHORIZED).toJackson(),
                 HttpServletResponse.SC_UNAUTHORIZED)
 
         /*  //response.sendError(HttpServletResponse.SC_UNAUTHORIZED, failed.message)

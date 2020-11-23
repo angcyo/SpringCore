@@ -45,12 +45,10 @@ fun <T> Any?.ok(msg: String? = "Success") = when {
 }
 
 /**error*/
-fun resultError(msg: String? = "Error", code: Int = ERROR_CODE) = msg.error<String>(code)
+fun <T> resultError(msg: String? = "Error", code: Int = ERROR_CODE) = msg.error<T>(code)
 
-/**error*/
-fun <T> Any?.error(code: Int = ERROR_CODE) = when {
-    else -> Result<T>(code = code, msg = this.str(), null)
-}
+/**将[this]当做错误信息返回*/
+fun <T> Any?.error(code: Int = ERROR_CODE) = Result<T>(code = code, msg = this.str(), null)
 
 inline fun <T> BindingResult.result(responseEntity: () -> T): Result<T> {
     return if (hasErrors()) {
@@ -64,6 +62,8 @@ inline fun <T> BindingResult.result(responseEntity: () -> T): Result<T> {
     } else {
         try {
             responseEntity().ok()
+        } catch (e: NoSuchElementException) {
+            e.toString().error<T>()
         } catch (e: Exception) {
             e.message.error<T>()
         }

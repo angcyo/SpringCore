@@ -28,6 +28,42 @@ fun <T> Class<T>.bean() = Base.getBean(this)
 /**获取[application.properties]中, 配置的值*/
 fun String.propertyValue() = Base.applicationContext.environment.getProperty(this)
 
+/**从文本的后面, 一个字符一个字符剔除, 并循环调用剩下的字符串¬
+ * [sub]剩下的文本
+ * [drop]被剔除的文本*/
+inline fun CharSequence.eachDropLast(action: (sub: CharSequence, drop: CharSequence) -> Unit) {
+    for (i in 0 until length) {
+        val sub = subSequence(0, length - i)
+        val drop = subSequence(length - i, length)
+        action(sub, drop)
+    }
+}
+
+/**从文本的前面, 一个字符一个字符剔除, 并循环调用剩下的字符串¬
+ * [sub]剩下的文本
+ * [drop]被剔除的文本*/
+inline fun CharSequence.eachDropFirst(action: (sub: CharSequence, drop: CharSequence) -> Unit) {
+    for (i in 0 until length) {
+        val sub = subSequence(i, length)
+        val drop = subSequence(0, i)
+        action(sub, drop)
+    }
+}
+
+/**限制字符允许的最大字符串
+ * [dropEnd]  超出范围后, 丢掉后的字符串, 否则丢掉前面的字符串*/
+fun CharSequence.maxLength(maxLength: Int, dropEnd: Boolean = true): CharSequence {
+    return if (length > maxLength) {
+        if (dropEnd) {
+            subSequence(0, maxLength)
+        } else {
+            subSequence(length - maxLength, length)
+        }
+    } else {
+        this
+    }
+}
+
 /*----------------------------------------------------------------------------------*/
 
 /**当前的[Date]对象*/
@@ -100,3 +136,13 @@ fun <T : Any> T.copyTo(obj: T): T {
 /*----------------------------------------------------------------------------------*/
 
 fun Collection<*>.lastIndex() = size - 1
+
+/*----------------------------------------------------------------------------------*/
+
+fun <T> Optional<T>?.getOrNull(): T? {
+    return if (this?.isPresent == true) {
+        this.get()
+    } else {
+        null
+    }
+}

@@ -31,7 +31,7 @@ class JwtAuthenticationEntryPoint : AuthenticationEntryPoint {
         if (status == 401) {
             //授权失败. response body需要手动设置
             response.send(
-                    resultError("Unauthorized", HttpServletResponse.SC_UNAUTHORIZED).toJson(),
+                    resultError<String>("Unauthorized", HttpServletResponse.SC_UNAUTHORIZED).toJson(),
                     HttpServletResponse.SC_UNAUTHORIZED)
         } else {
             response.sendError(HttpServletResponse.SC_UNAUTHORIZED, authException.message)

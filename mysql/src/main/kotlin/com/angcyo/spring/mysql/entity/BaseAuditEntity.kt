@@ -25,29 +25,29 @@ abstract class BaseAuditEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     @ApiModelProperty("唯一标识")
-    var id: Long = 0
+    open var id: Long = 0
 
     @CreatedDate
     @Column(updatable = false)
     @ApiModelProperty("创建时间")
     @DateTimeFormat(pattern = Base.DEFAULT_DATE_TIME_FORMATTER)
     @JsonFormat(pattern = Base.DEFAULT_DATE_TIME_FORMATTER, timezone = "GMT+8")
-    var createdAt: LocalDateTime = LocalDateTime.now()
+    open var createdAt: LocalDateTime = LocalDateTime.now()
 
     @LastModifiedDate
     @ApiModelProperty("更新时间")
     @DateTimeFormat(pattern = Base.DEFAULT_DATE_TIME_FORMATTER)
     @JsonFormat(pattern = Base.DEFAULT_DATE_TIME_FORMATTER, timezone = "GMT+8")
-    var updatedAt: LocalDateTime = LocalDateTime.now()
+    open var updatedAt: LocalDateTime = LocalDateTime.now()
 
     @CreatedBy
     @Column(updatable = false)
     @JsonIgnore
     @ApiModelProperty("创建者")
-    var createdBy: String? = null
+    open var createdBy: String? = null
 
     @LastModifiedBy
     @JsonIgnore
     @ApiModelProperty("更新者")
-    var updatedBy: String? = null
+    open var updatedBy: String? = null
 }
