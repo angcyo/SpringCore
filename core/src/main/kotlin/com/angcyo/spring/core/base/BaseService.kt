@@ -20,7 +20,8 @@ abstract class BaseService<Entity, Repository : JpaRepository<Entity, Long>> {
     }
 
     /**删除*/
-    fun delete(repository: Repository, id: Long? = null, ids: String? = null): Boolean {
+    @Transactional
+    open fun delete(repository: Repository, id: Long? = null, ids: String? = null): Boolean {
         return when {
             id != null -> {
                 deleteById(repository, id)

@@ -93,6 +93,19 @@ fun LocalDateTime.toTime(pattern: String = "yyyy-MM-dd HH:mm"): String {
     return format(DateTimeFormatter.ofPattern(pattern, Locale.CHINA))
 }
 
+/**将2020-11-24 14:13:50转换成毫秒数*/
+fun String.toTime(pattern: String = "yyyy-MM-dd HH:mm:ss"): Long {
+    val format: SimpleDateFormat = SimpleDateFormat.getDateInstance() as SimpleDateFormat
+    format.applyPattern(pattern)
+    var time = 0L
+    try {
+        time = format.parse(this)?.time ?: 0
+    } catch (e: Exception) {
+        e.printStackTrace()
+    }
+    return time
+}
+
 /*----------------------------------------------------------------------------------*/
 
 fun uuid() = UUID.randomUUID().toString()
