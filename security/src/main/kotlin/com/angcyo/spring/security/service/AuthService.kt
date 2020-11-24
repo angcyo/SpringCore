@@ -1,9 +1,11 @@
 package com.angcyo.spring.security.service
 
 import com.angcyo.spring.base.oneDaySec
+import com.angcyo.spring.base.str
 import com.angcyo.spring.redis.Redis
 import com.angcyo.spring.security.SecurityConstants
 import com.angcyo.spring.security.controller.RegisterBean
+import com.angcyo.spring.security.controller.codeKey
 import com.angcyo.spring.security.entity.AuthEntity
 import com.angcyo.spring.security.entity.RoleEntity
 import com.angcyo.spring.security.entity.Roles
@@ -13,6 +15,7 @@ import org.springframework.security.core.userdetails.UserDetailsService
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import javax.servlet.http.HttpServletRequest
 
 /**
  * Email:angcyo@126.com
@@ -25,6 +28,14 @@ import org.springframework.transaction.annotation.Transactional
 @Service
 class AuthService {
 
+    companion object {
+        /**注册时的验证码类型*/
+        const val CODE_TYPE_REGISTER = 1
+
+        /**登录时的验证码类型*/
+        const val CODE_TYPE_LOGIN = 2
+    }
+
     @Autowired
     lateinit var authRepository: AuthRepository
 
@@ -36,6 +47,20 @@ class AuthService {
 
     @Autowired
     lateinit var redis: Redis
+
+    fun setImageCode(request: HttpServletRequest, type: Int, code: String) {
+        redis["CODE.IMAGE.${type}.${request.codeKey()}", code] = 1 * 60
+    }
+
+    fun getImageCode(request: HttpServletRequest, type: Int): String? {
+        return redis["CODE.IMAGE.${type}.${request.codeKey()}"].str()
+    }
+
+    fun clearImageCode(request: HttpServletRequest, type: Int) {
+        request.getSession(false)?.run {
+            redis.del("CODE.IMAGE.${type}.${id}")
+        }
+    }
 
     /**[rawPassword] 实际的密码,比如angcyo
      * [encodedPassword] 加密后的密码, 数据库中的密码*/

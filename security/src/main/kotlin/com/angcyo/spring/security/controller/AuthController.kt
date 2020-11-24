@@ -5,7 +5,6 @@ import com.angcyo.spring.base.data.error
 import com.angcyo.spring.base.data.result
 import com.angcyo.spring.base.elseNull
 import com.angcyo.spring.base.servlet.send
-import com.angcyo.spring.base.str
 import com.angcyo.spring.base.util.ImageCode
 import com.angcyo.spring.base.util.L
 import com.angcyo.spring.base.uuid
@@ -13,6 +12,7 @@ import com.angcyo.spring.redis.Redis
 import com.angcyo.spring.security.SecurityConstants
 import com.angcyo.spring.security.entity.AuthEntity
 import com.angcyo.spring.security.service.AuthService
+import com.angcyo.spring.security.service.AuthService.Companion.CODE_TYPE_REGISTER
 import io.swagger.annotations.Api
 import io.swagger.annotations.ApiImplicitParam
 import io.swagger.annotations.ApiImplicitParams
@@ -45,30 +45,18 @@ class AuthController {
     @Autowired
     lateinit var redis: Redis
 
-    private fun setImageCode(request: HttpServletRequest, code: String) {
-        redis["CODE.IMAGE.${request.codeKey()}", code] = 1 * 60
-    }
-
-    private fun getImageCode(request: HttpServletRequest): String? {
-        return redis["CODE.IMAGE.${request.codeKey()}"].str()
-    }
-
-    private fun clearImageCode(request: HttpServletRequest) {
-        request.getSession(false)?.run {
-            redis.del("CODE.IMAGE.${id}")
-        }
-    }
-
     @GetMapping(SecurityConstants.AUTH_REGISTER_CODE_URL)
     @ApiOperation("获取注册时的图形验证码")
     @ApiImplicitParams(
             ApiImplicitParam(name = "uuid", value = "客户端id", required = true, dataTypeClass = String::class),
+            ApiImplicitParam(name = "type", value = "验证码类型", required = true, dataTypeClass = Int::class),
             ApiImplicitParam(name = "l", value = "验证码的长度", required = false, dataTypeClass = Int::class),
             ApiImplicitParam(name = "w", value = "验证码的宽度", required = false, dataTypeClass = Int::class),
             ApiImplicitParam(name = "h", value = "验证码的高度", required = false, dataTypeClass = Int::class)
     )
     fun imageCode(request: HttpServletRequest, response: HttpServletResponse) {
 
+        val type: Int = request.getParameter("type")?.toIntOrNull() ?: CODE_TYPE_REGISTER
         val length: Int = request.getParameter("l")?.toIntOrNull() ?: 4
         val width: Int = request.getParameter("w")?.toIntOrNull() ?: 80
         val height: Int = request.getParameter("h")?.toIntOrNull() ?: 28
@@ -76,10 +64,10 @@ class AuthController {
         val pair = ImageCode.generate(length, width, height)
 
         //根据session id, 将code 存到redis
-        setImageCode(request, pair.first)
+        authService.setImageCode(request, type, pair.first)
 
         //将VerifyCode绑定session
-        request.session.setAttribute("code", pair.first)
+        request.session.setAttribute("code.${type}", pair.first)
         //设置响应头
         response.setHeader("Pragma", "no-cache")
         //设置响应头
@@ -88,7 +76,7 @@ class AuthController {
         response.setDateHeader("Expires", 0)
         //设置响应内容类型
         response.send(pair.second, type = "image/jpeg")
-        L.i("验证码:${pair.first}")
+        L.i("验证码${type}:${pair.first}")
     }
 
     /**
@@ -105,14 +93,14 @@ class AuthController {
             if (bean.type == WebType.value) {
                 //web 注册类型, 需要验证验证码
 
-                if (bean.code.isNullOrBlank() || bean.code?.toLowerCase() != getImageCode(request)?.toLowerCase()) {
+                if (bean.code.isNullOrBlank() || bean.code?.toLowerCase() != authService.getImageCode(request, CODE_TYPE_REGISTER)?.toLowerCase()) {
                     return "验证码错误".error()
                 }
             }
 
             val pair = authService.canRegister(bean)
             if (!pair.first) {
-                clearImageCode(request)
+                authService.clearImageCode(request, CODE_TYPE_REGISTER)
                 return pair.second.error()
             }
 

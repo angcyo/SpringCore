@@ -118,6 +118,9 @@ class JwtLoginFilter(authManager: AuthenticationManager, val authService: AuthSe
             //5 将token保存至redis
             authService._loginEnd(username, token)
 
+            //6 清除验证码
+            authService.clearImageCode(request, AuthService.CODE_TYPE_LOGIN)
+
             response.send(entity.ok<AuthEntity>().toJacksonIgnore("roles", "enable"))
             //response.send(entity.ok<AuthEntity>().toJacksonOnly("username", "token"))
         } else {
