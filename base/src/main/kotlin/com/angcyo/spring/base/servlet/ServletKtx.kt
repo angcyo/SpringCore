@@ -5,6 +5,7 @@ import com.angcyo.spring.base.json.fromJson
 import com.angcyo.spring.base.json.toJson
 import com.angcyo.spring.base.string
 import javax.servlet.ServletRequest
+import javax.servlet.http.HttpServletRequest
 import javax.servlet.http.HttpServletResponse
 
 /**
@@ -80,4 +81,9 @@ fun HttpServletResponse.send(bytes: ByteArray?,
             it.write(bytes)
         }
     }
+}
+
+/**获取请求参数, 优先从参数中获取, 其次从请求头中获取*/
+fun HttpServletRequest.param(key: String): String? {
+    return getParameter(key) ?: return getHeader(key)
 }

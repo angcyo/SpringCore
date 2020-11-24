@@ -13,6 +13,7 @@ import com.angcyo.spring.base.servlet.sendError
 import com.angcyo.spring.base.str
 import com.angcyo.spring.security.SecurityConstants
 import com.angcyo.spring.security.controller.RegisterBean
+import com.angcyo.spring.security.controller.WebType
 import com.angcyo.spring.security.entity.AuthEntity
 import com.angcyo.spring.security.entity.toAuthorities
 import com.angcyo.spring.security.service.AuthService
@@ -68,6 +69,23 @@ class JwtLoginFilter(authManager: AuthenticationManager, val authService: AuthSe
         if (!validate.isNullOrEmpty()) {
             response.sendError(validate.result().toJson())
             return null
+        }
+
+        if (bean.type == WebType.value) {
+            //web 登录需要验证 code 码
+            if (bean.code.isNullOrBlank()) {
+                response.sendError("验证码不正确")
+                return null
+            }
+            val imageCode = authService.getImageCode(request, AuthService.CODE_TYPE_LOGIN)
+            if (imageCode == null) {
+                response.sendError("验证码已过期")
+                return null
+            }
+            if (bean.code?.toLowerCase() != imageCode.toLowerCase()) {
+                response.sendError("验证码不正确")
+                return null
+            }
         }
 
         val entity: AuthEntity

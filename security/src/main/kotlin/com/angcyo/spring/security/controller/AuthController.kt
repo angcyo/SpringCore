@@ -4,6 +4,7 @@ import com.angcyo.spring.base.data.Result
 import com.angcyo.spring.base.data.error
 import com.angcyo.spring.base.data.result
 import com.angcyo.spring.base.elseNull
+import com.angcyo.spring.base.servlet.param
 import com.angcyo.spring.base.servlet.send
 import com.angcyo.spring.base.util.ImageCode
 import com.angcyo.spring.base.util.L
@@ -93,7 +94,9 @@ class AuthController {
             if (bean.type == WebType.value) {
                 //web 注册类型, 需要验证验证码
 
-                if (bean.code.isNullOrBlank() || bean.code?.toLowerCase() != authService.getImageCode(request, CODE_TYPE_REGISTER)?.toLowerCase()) {
+                val imageCode = authService.getImageCode(request, CODE_TYPE_REGISTER) ?: return "验证码已过期".error()
+
+                if (bean.code.isNullOrBlank() || bean.code?.toLowerCase() != imageCode.toLowerCase()) {
                     return "验证码错误".error()
                 }
             }
@@ -111,7 +114,7 @@ class AuthController {
 }
 
 fun HttpServletRequest.codeKey(): String {
-    val uuid = getParameter("uuid")
+    val uuid = param("uuid")
     var key = ""
     if (uuid.isNullOrEmpty()) {
         //根据session id, 将code 存到redis

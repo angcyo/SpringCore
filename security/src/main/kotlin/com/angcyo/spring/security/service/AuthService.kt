@@ -1,7 +1,6 @@
 package com.angcyo.spring.security.service
 
 import com.angcyo.spring.base.oneDaySec
-import com.angcyo.spring.base.str
 import com.angcyo.spring.redis.Redis
 import com.angcyo.spring.security.SecurityConstants
 import com.angcyo.spring.security.controller.RegisterBean
@@ -53,7 +52,7 @@ class AuthService {
     }
 
     fun getImageCode(request: HttpServletRequest, type: Int): String? {
-        return redis["CODE.IMAGE.${type}.${request.codeKey()}"].str()
+        return redis["CODE.IMAGE.${type}.${request.codeKey()}"]?.toString()
     }
 
     fun clearImageCode(request: HttpServletRequest, type: Int) {
