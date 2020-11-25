@@ -34,8 +34,8 @@ object ImageCode {
         //背景
         fillBackground(graphics, width, height);
 
-        //字典池
-        val ch = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789".toCharArray()
+        //字典池, 去掉难分辨的字符O0
+        val ch = "abcdefghijklmnpqrstuvwxyzABCDEFGHIJKLMNPQRSTUVWXYZ123456789".toCharArray()
         val len = ch.size
 
         val textWidth = 15
