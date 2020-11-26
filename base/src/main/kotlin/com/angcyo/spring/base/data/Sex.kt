@@ -12,3 +12,9 @@ sealed class Sex(val value: Int, val label: String)
 object Secret : Sex(-1, "保密")
 object Man : Sex(1, "男")
 object Woman : Sex(0, "女")
+
+fun Int.toSex() = when (this) {
+    Man.value -> Man
+    Woman.value -> Woman
+    else -> Secret
+}
