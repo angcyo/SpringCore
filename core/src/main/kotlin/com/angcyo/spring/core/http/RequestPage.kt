@@ -47,6 +47,18 @@ fun RequestPage?.pageable(vararg sortProperties: String, desc: Boolean = true): 
     return result
 }
 
+fun RequestPage?.pageable(): Pageable? {
+    var result: Pageable? = null
+    if (this == null || this.requestSize < 0) {
+        //no op
+    } else {
+        val orderList = mutableListOf<Sort.Order>()
+        orderList.addAll(orderList())
+        result = PageRequest.of(max(0, this.requestPage - 1), this.requestSize, Sort.by(orderList))
+    }
+    return result
+}
+
 /**排序方式集合*/
 fun RequestPage.orderList(): List<Sort.Order> {
     val result = mutableListOf<Sort.Order>()
@@ -93,8 +105,20 @@ fun Iterable<String>.orderList(desc: Boolean = true): List<Sort.Order> {
 }
 
 /**排序[Pageable]*/
-fun sortBy(vararg sortProperties: String, desc: Boolean = true): Pageable? {
+fun sortBy(vararg sortProperties: String, desc: Boolean = true): Pageable {
     val orderList = mutableListOf<Sort.Order>()
     orderList.addAll(sortProperties.toList().orderList(desc))
     return PageRequest.of(0, Int.MAX_VALUE, Sort.by(orderList))
+}
+
+fun requestSortBy(vararg sortProperties: String, desc: Boolean = true): RequestPage {
+    return RequestPage().apply {
+        requestPage = 0
+        requestSize = Int.MAX_VALUE
+        if (desc) {
+            this.desc = sortProperties.joinToString(";")
+        } else {
+            this.asc = sortProperties.joinToString(";")
+        }
+    }
 }

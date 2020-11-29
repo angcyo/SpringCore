@@ -14,5 +14,10 @@ data class ResultPage<T>(
         /**元素总数量*/
         var totalSize: Long = 0,
         /**当前返回的数据*/
-        var records: List<T>? = null
+        var records: Collection<T>? = null
 )
+
+fun <T> Collection<T>.resultPage(): ResultPage<T> {
+    val long = size.toLong()
+    return ResultPage(long, 1, long, this)
+}

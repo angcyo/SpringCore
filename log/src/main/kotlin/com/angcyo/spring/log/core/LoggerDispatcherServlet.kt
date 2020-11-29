@@ -22,8 +22,8 @@ import javax.servlet.http.HttpServletResponse
  * 如果被[Filter]拦截中断了, 那么就收不到回调
  */
 
-@Component
-@Order(Ordered.HIGHEST_PRECEDENCE)
+//@Component
+//@Order(Ordered.HIGHEST_PRECEDENCE)
 class LoggerDispatcherServlet : DispatcherServlet() {
     private val id = AtomicLong(1)
 
