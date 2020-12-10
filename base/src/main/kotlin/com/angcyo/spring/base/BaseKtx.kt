@@ -8,6 +8,7 @@ import java.text.SimpleDateFormat
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import java.util.*
+import kotlin.random.Random.Default.nextInt
 
 /**
  * Email:angcyo@126.com
@@ -149,6 +150,27 @@ fun <T : Any> T.copyTo(obj: T): T {
 /*----------------------------------------------------------------------------------*/
 
 fun Collection<*>.lastIndex() = size - 1
+
+/**从当前列表中, 随机获取指定数量的数据*/
+fun <T> List<T>.randomList(count: Int): List<T> {
+    val indexMap = hashMapOf<Int, String>()
+    val result = mutableListOf<T>()
+    val list = this
+    if (list.size <= count) {
+        //原始数量不够时
+        result.addAll(list)
+    } else {
+        while (indexMap.size < count) {
+            val randomIndex = nextInt(0, list.size)
+            if (!indexMap.containsKey(randomIndex)) {
+                //随机获取
+                indexMap[randomIndex] = ""
+                result.add(list[randomIndex])
+            }
+        }
+    }
+    return result
+}
 
 /*----------------------------------------------------------------------------------*/
 
