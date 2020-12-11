@@ -2,6 +2,7 @@ package com.angcyo.spring.base
 
 import com.angcyo.spring.base.util.PrettyMemoryUtil
 import org.springframework.beans.BeanUtils
+import java.lang.Integer.min
 import java.nio.charset.Charset
 import java.sql.Date
 import java.text.SimpleDateFormat
@@ -170,6 +171,24 @@ fun <T> List<T>.randomList(count: Int): List<T> {
         }
     }
     return result
+}
+
+/**从指定列表中, 随机读取指定数量数据, 直到列表无数据
+ * [index] 当前随机数据集合中的索引*/
+fun <T> List<T>.eachRandomList(count: Int, action: (index: Int, T) -> Unit) {
+    val list = this.toMutableList()
+    while (list.isNotEmpty()) {
+
+        //随机获取数据
+        val selectList = list.randomList(count)
+        list.removeAll(selectList)
+
+        for (i in 0 until min(count, selectList.size)) {
+            selectList.getOrNull(i)?.let { item ->
+                action(i, item)
+            }
+        }
+    }
 }
 
 /*----------------------------------------------------------------------------------*/

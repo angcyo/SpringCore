@@ -7,6 +7,7 @@ import com.angcyo.spring.core.http.extension.ApiException
 import org.springframework.web.bind.MethodArgumentNotValidException
 import org.springframework.web.bind.annotation.ExceptionHandler
 import org.springframework.web.bind.annotation.RestControllerAdvice
+import org.springframework.web.util.NestedServletException
 
 
 /**
@@ -27,6 +28,11 @@ class CoreRestExceptionHandlerAdvice {
 
     @ExceptionHandler(ApiException::class)
     fun apiExtension(exception: ApiException): Result<String>? {
+        return exception.message.error()
+    }
+
+    @ExceptionHandler(NestedServletException::class)
+    fun apiExtension(exception: NestedServletException): Result<String>? {
         return exception.message.error()
     }
 }

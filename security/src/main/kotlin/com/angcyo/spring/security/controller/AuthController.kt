@@ -37,7 +37,7 @@ import javax.servlet.http.HttpServletResponse
  */
 
 @RestController
-@Api(value = "授权控制器value")
+@Api(tags = ["授权控制器"])
 class AuthController {
 
     @Autowired
@@ -49,11 +49,11 @@ class AuthController {
     @GetMapping(SecurityConstants.AUTH_REGISTER_CODE_URL)
     @ApiOperation("获取注册时的图形验证码")
     @ApiImplicitParams(
-            ApiImplicitParam(name = "uuid", value = "客户端id", required = true, dataTypeClass = String::class),
-            ApiImplicitParam(name = "type", value = "验证码类型", required = true, dataTypeClass = Int::class),
-            ApiImplicitParam(name = "l", value = "验证码的长度", required = false, dataTypeClass = Int::class),
-            ApiImplicitParam(name = "w", value = "验证码的宽度", required = false, dataTypeClass = Int::class),
-            ApiImplicitParam(name = "h", value = "验证码的高度", required = false, dataTypeClass = Int::class)
+        ApiImplicitParam(name = "uuid", value = "客户端id", required = true, dataTypeClass = String::class),
+        ApiImplicitParam(name = "type", value = "验证码类型", required = true, dataTypeClass = Int::class),
+        ApiImplicitParam(name = "l", value = "验证码的长度", required = false, dataTypeClass = Int::class),
+        ApiImplicitParam(name = "w", value = "验证码的宽度", required = false, dataTypeClass = Int::class),
+        ApiImplicitParam(name = "h", value = "验证码的高度", required = false, dataTypeClass = Int::class)
     )
     fun imageCode(request: HttpServletRequest, response: HttpServletResponse) {
 
@@ -86,9 +86,11 @@ class AuthController {
     @PostMapping(SecurityConstants.AUTH_REGISTER_URL)
     @ApiOperation("注册用户")
     @ApiImplicitParam(name = "uuid", value = "客户端id", required = true, dataTypeClass = String::class)
-    fun register(@RequestBody @Validated bean: RegisterBean,
-                 bindingResult: BindingResult,/*必须放在第2个参数上, 否则无效*/
-                 request: HttpServletRequest): Result<AuthEntity?>? {
+    fun register(
+        @RequestBody @Validated bean: RegisterBean,
+        bindingResult: BindingResult,/*必须放在第2个参数上, 否则无效*/
+        request: HttpServletRequest
+    ): Result<AuthEntity?>? {
         return bindingResult.result {
 
             if (bean.type == WebType.value) {
