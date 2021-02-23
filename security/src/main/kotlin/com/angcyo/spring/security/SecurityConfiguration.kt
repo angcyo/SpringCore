@@ -39,20 +39,23 @@ class SecurityConfiguration : WebSecurityConfigurerAdapter() {
         /**密码加密器*/
         val encoder = BCryptPasswordEncoder(BCryptPasswordEncoder.BCryptVersion.`$2B`, 10, SecureRandom())
 
-        /**认证白名单, 不需要验证*/
-        val SECURITY_WHITE_LIST = arrayOf(
-                "/test/**",
-                "/auth/**",
-                "/swagger**",
-                "/swagger-ui/**",
-                "/swagger-resources/**",
-                "/static/**",
-                "/js/*",
-                "/css/**",
-                "/webjars/**",
-                "/v2/api-docs/**",
-                "/v3/api-docs/**",
-                "/doc.html",
+        /**认证白名单, 不需要验证
+         * 取消安全验证, 必须使用2个*
+         * SecurityConfiguration.SECURITY_WHITE_LIST.add("\**")
+         */
+        val SECURITY_WHITE_LIST = mutableListOf(
+            "/test/**",
+            "/auth/**",
+            "/swagger**",
+            "/swagger-ui/**",
+            "/swagger-resources/**",
+            "/static/**",
+            "/js/*",
+            "/css/**",
+            "/webjars/**",
+            "/v2/api-docs/**",
+            "/v3/api-docs/**",
+            "/doc.html",
         )
     }
 
@@ -69,8 +72,8 @@ class SecurityConfiguration : WebSecurityConfigurerAdapter() {
 
         // 设置自定义的userDetailsService以及密码编码器, 用于登录接口验证判断
         auth.authenticationProvider(authenticationProvider())
-                .userDetailsService(userDetailsServiceImpl)
-                .passwordEncoder(passwordEncoder())//.password(passwordEncoder())
+            .userDetailsService(userDetailsServiceImpl)
+            .passwordEncoder(passwordEncoder())//.password(passwordEncoder())
 
     }
 
@@ -110,30 +113,30 @@ class SecurityConfiguration : WebSecurityConfigurerAdapter() {
     override fun configure(http: HttpSecurity) {
         //super.configure(http)
         http.cors()
-                .and()
-                .csrf().disable()
-                .authorizeRequests()
-                .antMatchers(*SECURITY_WHITE_LIST).permitAll()
-                .anyRequest().authenticated()
-                //.and().formLogin().loginPage().failureUrl()
-                .and()
-                .addFilter(JwtLoginFilter(authenticationManager(), authService))
-                .addFilter(JwtAuthorizationFilter(authenticationManager(), userDetailsServiceImpl, authService))
-                //.addFilter(JwtLogoutFilter(SecurityLogoutSuccessHandler(), SecurityLogoutHandler()))
-                .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-                .and()
-                .logout()
-                /*.logout().defaultLogoutSuccessHandlerFor(
-                        SecurityLogoutSuccessHandler(),
-                        AntPathRequestMatcher(SecurityConstants.AUTH_LOGIN_URL, RequestMethod.POST.toString()))*/
-                .logoutUrl(SecurityConstants.AUTH_LOGOUT_URL)
-                .logoutSuccessUrl(SecurityConstants.AUTH_LOGOUT_SUCCESS_URL)
-                .logoutSuccessHandler(JwtLogoutSuccessHandler())
-                .addLogoutHandler(JwtLogoutHandler())
-                .and()
-                // 授权异常处理
-                .exceptionHandling().authenticationEntryPoint(JwtAuthenticationEntryPoint())
-                .accessDeniedHandler(JwtAccessDeniedHandler())
+            .and()
+            .csrf().disable()
+            .authorizeRequests()
+            .antMatchers(*SECURITY_WHITE_LIST.toTypedArray()).permitAll()
+            .anyRequest().authenticated()
+            //.and().formLogin().loginPage().failureUrl()
+            .and()
+            .addFilter(JwtLoginFilter(authenticationManager(), authService))
+            .addFilter(JwtAuthorizationFilter(authenticationManager(), userDetailsServiceImpl, authService))
+            //.addFilter(JwtLogoutFilter(SecurityLogoutSuccessHandler(), SecurityLogoutHandler()))
+            .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+            .and()
+            .logout()
+            /*.logout().defaultLogoutSuccessHandlerFor(
+                    SecurityLogoutSuccessHandler(),
+                    AntPathRequestMatcher(SecurityConstants.AUTH_LOGIN_URL, RequestMethod.POST.toString()))*/
+            .logoutUrl(SecurityConstants.AUTH_LOGOUT_URL)
+            .logoutSuccessUrl(SecurityConstants.AUTH_LOGOUT_SUCCESS_URL)
+            .logoutSuccessHandler(JwtLogoutSuccessHandler())
+            .addLogoutHandler(JwtLogoutHandler())
+            .and()
+            // 授权异常处理
+            .exceptionHandling().authenticationEntryPoint(JwtAuthenticationEntryPoint())
+            .accessDeniedHandler(JwtAccessDeniedHandler())
 
         // 防止H2 web 页面的Frame 被拦截
         http.headers().frameOptions().disable()
@@ -142,12 +145,12 @@ class SecurityConfiguration : WebSecurityConfigurerAdapter() {
     /**4. 通过重载，配置Spring Security的Filter链*/
     override fun configure(web: WebSecurity) {
         web.ignoring()
-                .antMatchers(
-                        "**.js",
-                        "**.css",
-                        "/images/**",
-                        "/webjars/**",
-                        "/**/favicon.ico"
-                )
+            .antMatchers(
+                "**.js",
+                "**.css",
+                "/images/**",
+                "/webjars/**",
+                "/**/favicon.ico"
+            )
     }
 }
