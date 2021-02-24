@@ -14,6 +14,8 @@ import javax.servlet.http.HttpServletResponse
  * @date 2020/11/07
  */
 
+//<editor-fold desc="ServletRequest扩展">
+
 /**读取请求体字符串数据*/
 fun ServletRequest.body() = if (contentLength > 0)
     if (this is IStreamWrapper)
@@ -37,10 +39,34 @@ fun <T> ServletRequest.fromJson(classOfT: Class<T>): T? {
     }
 }
 
+/**获取请求参数, 优先从参数中获取, 其次从请求头中获取*/
+fun ServletRequest.param(key: String): String? {
+    val parameter = getParameter(key)
+    if (parameter == null) {
+        if (this is HttpServletRequest) {
+            return getHeader(key)
+        }
+    }
+    return parameter
+}
+
+/**当前请求, 是否来自管理员. 特殊处理*/
+fun ServletRequest.isAdmin(): Boolean {
+    return param("debug").isTruthy()
+}
+
+fun String?.isTruthy() = this == "truthy"
+
+//</editor-fold desc="ServletRequest扩展">
+
+//<editor-fold desc="ServletResponse扩展">
+
 /**写入返回体消息*/
-fun HttpServletResponse.send(message: String?,
-                             code: Int = HttpServletResponse.SC_OK,
-                             type: String = "application/json") {
+fun HttpServletResponse.send(
+    message: String?,
+    code: Int = HttpServletResponse.SC_OK,
+    type: String = "application/json"
+) {
     status = code
     contentType = type
     characterEncoding = "UTF-8"
@@ -66,9 +92,11 @@ fun HttpServletResponse.throwError(message: String?) {
     error(message ?: "throwError")
 }
 
-fun HttpServletResponse.send(bytes: ByteArray?,
-                             code: Int = HttpServletResponse.SC_OK,
-                             type: String = "application/json") {
+fun HttpServletResponse.send(
+    bytes: ByteArray?,
+    code: Int = HttpServletResponse.SC_OK,
+    type: String = "application/json"
+) {
     status = code
     contentType = type
     characterEncoding = "UTF-8"
@@ -83,7 +111,4 @@ fun HttpServletResponse.send(bytes: ByteArray?,
     }
 }
 
-/**获取请求参数, 优先从参数中获取, 其次从请求头中获取*/
-fun HttpServletRequest.param(key: String): String? {
-    return getParameter(key) ?: return getHeader(key)
-}
+//</editor-fold desc="ServletResponse扩展">
