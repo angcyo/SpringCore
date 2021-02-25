@@ -14,13 +14,13 @@ import javax.persistence.Id
  * @date 2020/11/04
  */
 
-@Entity
+@Entity(name = "test_jpa_entity")
 data class TestEntity(
-        @Id @GeneratedValue(strategy = GenerationType.AUTO)
-        var id: Long = 0,
-        var data: String? = null,
-        @JsonFormat(pattern = Base.DEFAULT_DATE_TIME_FORMATTER, timezone = "GMT+8")
-        var createTime: LocalDateTime = LocalDateTime.now(),
-        @JsonFormat(pattern = Base.DEFAULT_DATE_TIME_FORMATTER, timezone = "GMT+8")
-        var updateTime: LocalDateTime = LocalDateTime.now()
+    @Id @GeneratedValue(strategy = GenerationType.AUTO)
+    var id: Long = 0,
+    var data: String? = null,
+    @JsonFormat(pattern = Base.DEFAULT_DATE_TIME_FORMATTER, timezone = "GMT+8")
+    var createdAt: LocalDateTime = LocalDateTime.now(),
+    @JsonFormat(pattern = Base.DEFAULT_DATE_TIME_FORMATTER, timezone = "GMT+8")
+    var updatedAt: LocalDateTime = LocalDateTime.now()
 )
