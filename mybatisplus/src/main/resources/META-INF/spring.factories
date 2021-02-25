@@ -1,0 +1,4 @@
+# https://github.com/spring-projects/spring-boot/blob/v2.3.5.RELEASE/spring-boot-project/spring-boot-autoconfigure/src/main/resources/META-INF/spring.factories
+# Auto Configure
+org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
+    com.angcyo.spring.mybatis.plus.MyBatisPlusAutoConfiguration
