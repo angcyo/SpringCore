@@ -16,5 +16,4 @@ import org.springframework.data.jpa.repository.config.EnableJpaAuditing
 @Configuration
 @ComponentScan(basePackages = ["com.angcyo.spring.app"])
 @EnableJpaAuditing
-class AppAutoConfiguration {
-}
+class AppAutoConfiguration

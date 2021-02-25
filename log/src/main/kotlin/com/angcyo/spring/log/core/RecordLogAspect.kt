@@ -56,25 +56,27 @@ class RecordLogAspect {
 
         val result = joinPoint.proceed()
 
-        ServletLog.wrap(id.incrementAndGet(),
-                request, response,
-                StringBuilder().apply {
-                    if (methodDesc.isNotEmpty()) {
-                        appendLine()
-                        append(methodDesc)
-                    }
-                    if (joinPoint.args.isNotEmpty()) {
-                        appendLine()
-                        append(joinPoint.args.toJson())
-                    }
-                },
-                StringBuilder().apply {
-                    if (result != null) {
-                        appendLine()
-                        append(result)
-                    }
-                },
-                wrap = false) { _, _, _, _ ->
+        ServletLog.wrap(
+            id.incrementAndGet(),
+            request, response,
+            StringBuilder().apply {
+                if (methodDesc.isNotEmpty()) {
+                    appendLine()
+                    append(methodDesc)
+                }
+                if (joinPoint.args.isNotEmpty()) {
+                    appendLine()
+                    append(joinPoint.args.toJson())
+                }
+            },
+            StringBuilder().apply {
+                if (result != null) {
+                    appendLine()
+                    append(result)
+                }
+            },
+            wrap = false
+        ) { _, _, _, _ ->
         }
 
         return result

@@ -39,7 +39,11 @@ class LoggerRequestFilter : OncePerRequestFilter() {
     private val id = AtomicLong(1)
 
     /**https://github.com/isrsal/spring-mvc-logger*/
-    override fun doFilterInternal(request: HttpServletRequest, response: HttpServletResponse, filterChain: FilterChain) {
+    override fun doFilterInternal(
+        request: HttpServletRequest,
+        response: HttpServletResponse,
+        filterChain: FilterChain
+    ) {
         val requestId = id.incrementAndGet()
 
         ServletLog.wrap(requestId, request, response) { requestWrap, responseWrap, requestBuilder, responseBuilder ->

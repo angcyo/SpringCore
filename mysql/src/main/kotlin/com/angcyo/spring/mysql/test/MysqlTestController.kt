@@ -25,7 +25,7 @@ class MysqlTestController {
     @RequestMapping("/save")
     @Transactional
     fun saveOne(): Result<TestEntity> {
-        val entity = TestEntity(data = nowTimeString())
+        val entity = TestEntity().apply { data = nowTimeString() }
         val result = mysqlTestRepository.save(entity)
         return result.ok()
     }

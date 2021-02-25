@@ -14,5 +14,4 @@ import org.springframework.context.annotation.Configuration
 
 @Configuration
 @ComponentScan(basePackages = ["com.angcyo.spring.base"])
-class BaseAutoConfiguration {
-}
+class BaseAutoConfiguration

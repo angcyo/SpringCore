@@ -15,6 +15,4 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories
 @ComponentScan(basePackages = ["com.angcyo.spring.mysql"])
 @EnableJpaRepositories(basePackages = ["com.angcyo.spring"])
 @EntityScan(basePackages = ["com.angcyo.spring"])
-class MysqlAutoConfiguration {
-
-}
+class MysqlAutoConfiguration

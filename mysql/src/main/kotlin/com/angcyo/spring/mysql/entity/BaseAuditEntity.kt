@@ -24,7 +24,7 @@ abstract class BaseAuditEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
-    @ApiModelProperty("唯一标识")
+    @ApiModelProperty("数据Id")
     open var id: Long = 0
 
     @CreatedDate

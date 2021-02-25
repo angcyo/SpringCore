@@ -18,5 +18,4 @@ import springfox.documentation.oas.annotations.EnableOpenApi
 @Configuration
 @EnableOpenApi
 @ComponentScan(basePackages = ["com.angcyo.spring.swagger"])
-class SwaggerAutoConfiguration {
-}
+class SwaggerAutoConfiguration

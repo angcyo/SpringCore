@@ -12,5 +12,5 @@ package com.angcyo.spring.log.core
 @Retention(AnnotationRetention.RUNTIME)
 @MustBeDocumented
 annotation class RecordLog(
-        val des: String = ""
+    val des: String = ""
 )
