@@ -1,10 +1,7 @@
 package com.angcyo.http
 
 import com.angcyo.http.interceptor.LogInterceptor
-import com.angcyo.spring.base.json.gson
 import okhttp3.OkHttpClient
-import retrofit2.Retrofit
-import retrofit2.converter.gson.GsonConverterFactory
 import java.net.Proxy
 import java.util.concurrent.TimeUnit
 
@@ -53,19 +50,4 @@ class DslHttpConfig {
     var onGetBaseUrl: () -> String = { "http://api.angcyo.com" }
 
     /*----------Retrofit-----------*/
-
-    var retrofit: Retrofit? = null
-
-    val defaultRetrofitBuilder = Retrofit.Builder().apply {
-
-    }
-
-    var onBuildRetrofit: (Retrofit.Builder, OkHttpClient) -> Retrofit = { builder, client ->
-        retrofit ?: builder.apply {
-            baseUrl(onGetBaseUrl())
-            //addCallAdapterFactory(RxJava2CallAdapterFactory.createAsync())
-            addConverterFactory(GsonConverterFactory.create(gson()))
-            client(client)
-        }.build()
-    }
 }
