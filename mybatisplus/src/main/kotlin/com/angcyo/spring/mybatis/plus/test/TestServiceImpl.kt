@@ -1,6 +1,6 @@
 package com.angcyo.spring.mybatis.plus.test
 
-import com.angcyo.spring.mybatis.plus.test.table.TestBean
+import com.angcyo.spring.mybatis.plus.test.table.TestTable
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl
 import org.springframework.stereotype.Service
 
@@ -11,7 +11,7 @@ import org.springframework.stereotype.Service
  */
 
 @Service
-class TestServiceImpl : ServiceImpl<TestMapper, TestBean>(), TestService {
+class TestServiceImpl : ServiceImpl<TestMapper, TestTable>(), TestService {
     fun test() {
         /*update().setSql()
         //query().sql

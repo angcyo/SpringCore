@@ -6,7 +6,7 @@ import com.angcyo.spring.base.nowTimeString
 import com.angcyo.spring.base.util.L
 import com.angcyo.spring.log.core.RecordLog
 import com.angcyo.spring.mybatis.plus.queryWrapper
-import com.angcyo.spring.mybatis.plus.test.table.TestBean
+import com.angcyo.spring.mybatis.plus.test.table.TestTable
 import com.baomidou.mybatisplus.annotation.TableName
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.transaction.annotation.Transactional
@@ -28,15 +28,15 @@ class MybatisTestController {
 
     @RequestMapping("/save")
     @Transactional
-    fun save(): Result<TestBean> {
-        val entity = TestBean().apply { data = nowTimeString() }
+    fun save(): Result<TestTable> {
+        val entity = TestTable().apply { data = nowTimeString() }
         val result = testServiceImpl.save(entity)
         return entity.ok()
     }
 
     @RequestMapping("/delete")
     fun delete(): Result<Int> {
-        val cls = TestBean::class.java
+        val cls = TestTable::class.java
         val ano = cls.getAnnotation(TableName::class.java)
         L.i(ano.value)
         return testServiceImpl.remove(queryWrapper {
@@ -49,7 +49,7 @@ class MybatisTestController {
     }
 
     @RequestMapping("/update")
-    fun update(): Result<TestBean> {
+    fun update(): Result<TestTable> {
         //1
         //FieldFill.INSERT_UPDATE 不会触发
         /*val result = testServiceImpl.update(updateWrapper {
@@ -87,7 +87,7 @@ class MybatisTestController {
     }
 
     @RequestMapping("/find")
-    fun find(): Result<TestBean> {
+    fun find(): Result<TestTable> {
         return testServiceImpl.getOne(queryWrapper {
             apply("id = (select * from (select max(id) from test_mybatis_bean) a)")
         }).ok()
@@ -95,13 +95,13 @@ class MybatisTestController {
 
     @RequestMapping("/all")
     @RecordLog("RecordLog测试")
-    fun findAll(): Result<List<TestBean>> {
+    fun findAll(): Result<List<TestTable>> {
         return try {
             //testServiceImpl.getOne(null)
             testServiceImpl.list()
         } catch (e: Exception) {
             e.printStackTrace()
-            emptyList<TestBean>()
+            emptyList<TestTable>()
         }.ok()
     }
 }

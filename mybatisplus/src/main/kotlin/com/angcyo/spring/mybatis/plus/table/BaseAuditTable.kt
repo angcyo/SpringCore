@@ -29,7 +29,7 @@ import javax.persistence.MappedSuperclass
 @MappedSuperclass
 @EntityListeners(value = [AuditingEntityListener::class])
 @ApiModel("基础表结构信息")
-abstract class BaseAuditBean {
+abstract class BaseAuditTable {
 
     @IsKey
     @IsAutoIncrement

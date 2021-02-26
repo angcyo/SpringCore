@@ -1,6 +1,6 @@
 package com.angcyo.spring.mybatis.plus.test.table
 
-import com.angcyo.spring.mybatis.plus.table.BaseAuditBean
+import com.angcyo.spring.mybatis.plus.table.BaseAuditTable
 import com.baomidou.mybatisplus.annotation.TableName
 import com.gitee.sunchenbin.mybatis.actable.annotation.Column
 
@@ -10,7 +10,7 @@ import com.gitee.sunchenbin.mybatis.actable.annotation.Column
  * @date 2021/02/25
  */
 @TableName("test_mybatis_bean")
-class TestBean : BaseAuditBean() {
+class TestTable : BaseAuditTable() {
     @Column
     var data: String? = null
 
