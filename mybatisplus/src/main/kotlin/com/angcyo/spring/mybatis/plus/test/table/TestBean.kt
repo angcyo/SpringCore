@@ -18,5 +18,5 @@ class TestBean : BaseAuditBean() {
     var message: String? = null
 
     @Column
-    var count: Int = 0
+    var num: Int = 0
 }

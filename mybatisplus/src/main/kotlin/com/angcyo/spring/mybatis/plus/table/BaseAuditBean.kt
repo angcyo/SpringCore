@@ -1,7 +1,10 @@
 package com.angcyo.spring.mybatis.plus.table
 
 import com.angcyo.spring.base.Base
-import com.baomidou.mybatisplus.annotation.*
+import com.baomidou.mybatisplus.annotation.FieldFill
+import com.baomidou.mybatisplus.annotation.IdType
+import com.baomidou.mybatisplus.annotation.TableField
+import com.baomidou.mybatisplus.annotation.TableId
 import com.fasterxml.jackson.annotation.JsonFormat
 import com.fasterxml.jackson.annotation.JsonIgnore
 import com.gitee.sunchenbin.mybatis.actable.annotation.IsAutoIncrement
@@ -61,7 +64,7 @@ abstract class BaseAuditBean {
     @ApiModelProperty("更新者")
     open var updatedBy: String? = null
 
-    @TableLogic(value = "0", delval = "1")
+    //@TableLogic(value = "0", delval = "1")
     @TableField(fill = FieldFill.INSERT)
     @ApiModelProperty("逻辑删除（0 未删除、1 删除）,使用delete语句时自动生效")
     open var deleteFlag: Int = 0

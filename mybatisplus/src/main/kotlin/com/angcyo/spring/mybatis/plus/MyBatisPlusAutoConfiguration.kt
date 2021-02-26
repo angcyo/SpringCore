@@ -3,7 +3,6 @@ package com.angcyo.spring.mybatis.plus
 import org.mybatis.spring.annotation.MapperScan
 import org.springframework.context.annotation.ComponentScan
 import org.springframework.context.annotation.Configuration
-import org.springframework.context.annotation.PropertySource
 
 /**
  * Email:angcyo@126.com

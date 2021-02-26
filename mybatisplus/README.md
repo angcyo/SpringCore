@@ -31,6 +31,12 @@ Kaptcha (opens new window)- 基于 SpringBoot 和 Google Kaptcha 的简单验证
 
 https://www.cnblogs.com/l-y-h/p/12859477.html
 
+## 逻辑删除
+
+- 给数据表增加一个字段：delete_flag，用于表示该数据是否被逻辑删除。
+- @TableLogic(value = "0", delval = "1")
+- this.strictInsertFill(metaObject, "deleteFlag", Integer.class, 0);
+
 # A.CTable框架
 
 https://gitee.com/sunchenbin/mybatis-enhance

@@ -13,5 +13,5 @@ import javax.persistence.Entity
 class TestEntity : BaseAuditEntity() {
     var data: String? = null
     var message: String? = null
-    var count: Int = 0
+    var num: Int = 0
 }
