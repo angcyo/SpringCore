@@ -58,10 +58,11 @@ class MybatisTestController {
         }).ok()
     }
 
-    @RequestMapping("/one")
-    fun findOne(): TestBean? {
-        //mysqlTestRepository.findById()
-        return TestBean()
+    @RequestMapping("/find")
+    fun find(): Result<TestBean> {
+        return testServiceImpl.getOne(queryWrapper {
+            apply("id = (select * from (select max(id) from test_mybatis_bean) a)")
+        }).ok()
     }
 
     @RequestMapping("/all")
