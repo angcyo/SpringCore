@@ -15,12 +15,12 @@ import java.time.LocalDateTime
 class TableMetaObjectHandler : MetaObjectHandler {
 
     override fun insertFill(metaObject: MetaObject?) {
-        this.strictInsertFill(metaObject, "createdAt", LocalDateTime::class.java, LocalDateTime.now())
-        this.strictInsertFill(metaObject, "updatedAt", LocalDateTime::class.java, LocalDateTime.now())
-        this.strictInsertFill(metaObject, "deleteFlag", Int::class.java, 0)
+        strictInsertFill(metaObject, "createdAt", LocalDateTime::class.java, LocalDateTime.now())
+        strictInsertFill(metaObject, "updatedAt", LocalDateTime::class.java, LocalDateTime.now())
+        //strictInsertFill(metaObject, "deleteFlag", Int::class.java, 0)
     }
 
     override fun updateFill(metaObject: MetaObject?) {
-        this.strictUpdateFill(metaObject, "updatedAt", LocalDateTime::class.java, LocalDateTime.now())
+        strictUpdateFill(metaObject, "updatedAt", LocalDateTime::class.java, LocalDateTime.now())
     }
 }

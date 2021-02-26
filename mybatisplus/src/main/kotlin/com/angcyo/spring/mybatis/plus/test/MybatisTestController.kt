@@ -7,7 +7,6 @@ import com.angcyo.spring.base.util.L
 import com.angcyo.spring.log.core.RecordLog
 import com.angcyo.spring.mybatis.plus.queryWrapper
 import com.angcyo.spring.mybatis.plus.test.table.TestBean
-import com.angcyo.spring.mybatis.plus.updateWrapper
 import com.baomidou.mybatisplus.annotation.TableName
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.transaction.annotation.Transactional
@@ -50,12 +49,41 @@ class MybatisTestController {
     }
 
     @RequestMapping("/update")
-    fun update(): Result<Boolean> {
-        return testServiceImpl.update(updateWrapper {
+    fun update(): Result<TestBean> {
+        //1
+        //FieldFill.INSERT_UPDATE 不会触发
+        /*val result = testServiceImpl.update(updateWrapper {
             set("message", "update:${nowTimeString()}")
 
             apply("id = (select * from (select max(id) from test_mybatis_bean) a)")
-        }).ok()
+        })*/
+
+        //2
+        //会触发
+        /*val result = testServiceImpl.update(TestBean(), updateWrapper {
+            eq("id", 1)
+        })*/
+
+        //3
+        /*val result = testServiceImpl.updateById(TestBean().apply { id = 1 })
+        return if (result) {
+            find()
+        } else {
+            null.ok()
+        }*/
+
+        //4
+        val last = find().data
+
+        return if (last == null) {
+            null.ok()
+        } else {
+            testServiceImpl.updateById(last.apply {
+                updatedAt = null //置空后, 才会自动插入
+                message = "update:${nowTimeString()}"
+            })
+            last.ok()
+        }
     }
 
     @RequestMapping("/find")
