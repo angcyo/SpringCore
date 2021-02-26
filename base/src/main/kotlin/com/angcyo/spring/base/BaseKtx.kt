@@ -193,10 +193,10 @@ fun <T> List<T>.eachRandomList(count: Int, action: (index: Int, T) -> Unit) {
 
 /*----------------------------------------------------------------------------------*/
 
-fun <T> Optional<T>?.getOrNull(): T? {
+fun <T> Optional<T>?.getOrNull(def: T? = null): T? {
     return if (this?.isPresent == true) {
         this.get()
     } else {
-        null
+        def
     }
 }

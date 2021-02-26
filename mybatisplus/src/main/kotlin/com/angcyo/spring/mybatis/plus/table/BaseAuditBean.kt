@@ -52,12 +52,14 @@ abstract class BaseAuditBean {
     @Column(updatable = false)
     @JsonIgnore
     @ApiModelProperty("创建者")
+    @TableField(fill = FieldFill.INSERT)
     open var createdBy: String? = null
 
     @LastModifiedBy
     @JsonIgnore
     @com.gitee.sunchenbin.mybatis.actable.annotation.Column
     @ApiModelProperty("更新者")
+    @TableField(fill = FieldFill.INSERT_UPDATE)
     open var updatedBy: String? = null
 
     //@TableLogic(value = "0", delval = "1")

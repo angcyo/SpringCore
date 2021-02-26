@@ -12,6 +12,11 @@ import java.util.*
  */
 @Component
 class UserAuditor : AuditorAware<String> {
+
+    companion object {
+        const val DEFAULT_USER = "unknown"
+    }
+
     /**
      * 获取当前创建或修改的用户
      */
@@ -25,7 +30,7 @@ class UserAuditor : AuditorAware<String> {
             if (authentication.principal is String) {
                 Optional.ofNullable("${authentication.principal}")
             } else {
-                Optional.ofNullable("default")
+                Optional.ofNullable(DEFAULT_USER)
             }
         }
     }

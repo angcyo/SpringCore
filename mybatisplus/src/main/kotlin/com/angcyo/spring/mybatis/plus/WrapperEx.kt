@@ -1,5 +1,6 @@
 package com.angcyo.spring.mybatis.plus
 
+import com.baomidou.mybatisplus.core.conditions.AbstractWrapper
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper
 
@@ -25,5 +26,17 @@ fun <T> updateWrapper(action: UpdateWrapper<T>.() -> Unit): UpdateWrapper<T> {
         //setSql()
         //lambda()
         apply(action)
+    }
+}
+
+/**https://www.cnblogs.com/l-y-h/p/12859477.html*/
+fun AbstractWrapper<*, String, *>.deleteFlag(delete: Boolean? = false) {
+    when {
+        //查询所有
+        delete == null -> Unit
+        //查询被删除的
+        delete -> eq("deleteFlag", 1)
+        //查询没被删除的
+        else -> ne("deleteFlag", 1)
     }
 }

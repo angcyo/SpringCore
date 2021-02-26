@@ -12,15 +12,20 @@ import java.time.LocalDateTime
  */
 
 @Component
-class TableMetaObjectHandler : MetaObjectHandler {
+class MybatisTableMetaObjectHandler : MetaObjectHandler {
 
     override fun insertFill(metaObject: MetaObject?) {
         strictInsertFill(metaObject, "createdAt", LocalDateTime::class.java, LocalDateTime.now())
         strictInsertFill(metaObject, "updatedAt", LocalDateTime::class.java, LocalDateTime.now())
         //strictInsertFill(metaObject, "deleteFlag", Int::class.java, 0)
+
+        //审计
+//        strictInsertFill(metaObject, "createdBy", String::class.java, "xxx")
+//        strictInsertFill(metaObject, "updatedBy", String::class.java, "xxx")
     }
 
     override fun updateFill(metaObject: MetaObject?) {
         strictUpdateFill(metaObject, "updatedAt", LocalDateTime::class.java, LocalDateTime.now())
+//        strictInsertFill(metaObject, "updatedBy", String::class.java, "xxx")
     }
 }
