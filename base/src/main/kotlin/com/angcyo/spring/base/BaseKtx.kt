@@ -27,6 +27,14 @@ inline fun <reified T> String.bean() = Base.getBean<T>(this)
  * */
 fun <T> Class<T>.bean() = Base.getBean(this)
 
+/**复制属性*/
+fun Any?.copyTo(new: Any, vararg ignoreProperties: String): Any {
+    if (this != null) {
+        BeanUtils.copyProperties(this, new, *ignoreProperties)
+    }
+    return new
+}
+
 /**获取[application.properties]中, 配置的值*/
 fun String.propertyValue() = Base.applicationContext.environment.getProperty(this)
 
@@ -64,6 +72,13 @@ fun CharSequence.maxLength(maxLength: Int, dropEnd: Boolean = true): CharSequenc
     } else {
         this
     }
+}
+
+/**host/url*/
+fun String?.connectUrl(url: String?): String {
+    val h = this?.trimEnd('/') ?: ""
+    val u = url?.trimStart('/') ?: ""
+    return "$h/$u"
 }
 
 /*----------------------------------------------------------------------------------*/
