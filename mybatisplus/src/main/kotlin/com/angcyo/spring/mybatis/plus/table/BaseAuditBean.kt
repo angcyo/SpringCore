@@ -21,7 +21,10 @@ import javax.persistence.EntityListeners
 import javax.persistence.MappedSuperclass
 
 /**2020-11-07
- * https://www.cnblogs.com/niceyoo/p/10908647.html*/
+ * https://www.cnblogs.com/niceyoo/p/10908647.html
+ * 自动填充字段, 必须指定为null,否则不会自动填充
+ * 使用Bean更新数据时, 字段为null, 则不会更新此字段
+ * */
 
 @MappedSuperclass
 @EntityListeners(value = [AuditingEntityListener::class])
