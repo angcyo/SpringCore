@@ -12,11 +12,17 @@ import kotlin.math.ceil
  * Version: 1.0.0
  */
 
+/**一天的毫秒数 72,000 72,000,000*/
+const val DAY_MILLIS = 24 * 60 * 60 * 1000L
+
+/**多少天对应的毫秒数*/
+fun day(count: Int = 1): Long = count * DAY_MILLIS
+
 fun nowTime() = System.currentTimeMillis()
 
 /**返回毫秒对应的天数*/
 fun Long.toDay(): Int {
-    return ceil((this * 1.0 / (24 * 60 * 60 * 1000L))).toInt()
+    return ceil((this * 1.0 / DAY_MILLIS)).toInt()
 }
 
 /**返回毫秒对应的年数*/
@@ -98,14 +104,14 @@ fun Long.spiltTime(): IntArray {
     //TUESDAY = 3
     //SATURDAY = 7 星期六
     return intArrayOf(
-            year /*0*/,
-            month /*1*/,
-            day /*2*/,
-            h /*3*/,
-            m /*4*/,
-            s /*5*/,
-            sss /*6*/,
-            week /*7*/
+        year /*0*/,
+        month /*1*/,
+        day /*2*/,
+        h /*3*/,
+        m /*4*/,
+        s /*5*/,
+        sss /*6*/,
+        week /*7*/
     )
 }
 
@@ -156,9 +162,9 @@ fun Long.toTimes(): LongArray {
  * @param h24 24小时制
  * */
 fun Long.toElapsedTime(
-        pattern: IntArray = intArrayOf(),
-        h24: BooleanArray = booleanArrayOf(true, true, true, true, true),
-        units: Array<String> = arrayOf("毫秒", "秒", "分", "时", "天")
+    pattern: IntArray = intArrayOf(-1, 1, 1),
+    h24: BooleanArray = booleanArrayOf(true, true, true, true, true),
+    units: Array<String> = arrayOf("毫秒", "秒", "分", "时", "天")
 ): String {
     val times = toTimes()
     val builder = StringBuilder()

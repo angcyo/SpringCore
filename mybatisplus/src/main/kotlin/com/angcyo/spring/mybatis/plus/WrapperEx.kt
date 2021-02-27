@@ -1,7 +1,9 @@
 package com.angcyo.spring.mybatis.plus
 
 import com.baomidou.mybatisplus.core.conditions.AbstractWrapper
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper
+import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper
 
 /**
@@ -19,12 +21,24 @@ fun <T> queryWrapper(action: QueryWrapper<T>.() -> Unit): QueryWrapper<T> {
     }
 }
 
+fun <T> queryLambdaWrapper(action: LambdaQueryWrapper<T>.() -> Unit): LambdaQueryWrapper<T> {
+    return QueryWrapper<T>().lambda().apply {
+        apply(action)
+    }
+}
+
 /**https://mp.baomidou.com/guide/wrapper.html#updatewrapper*/
 fun <T> updateWrapper(action: UpdateWrapper<T>.() -> Unit): UpdateWrapper<T> {
     return UpdateWrapper<T>().apply {
         //set()
         //setSql()
         //lambda()
+        apply(action)
+    }
+}
+
+fun <T> updateLambdaWrapper(action: LambdaUpdateWrapper<T>.() -> Unit): LambdaUpdateWrapper<T> {
+    return UpdateWrapper<T>().lambda().apply {
         apply(action)
     }
 }

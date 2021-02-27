@@ -9,6 +9,6 @@ import javax.servlet.http.HttpServletRequest
  * @date 2021/02/27
  */
 
-fun HttpServletRequest.androidId() = getHeader("androidId").decode()
+fun HttpServletRequest.androidId() = getHeader("androidId")?.decode()
 
-fun HttpServletRequest.deviceInfo() = getHeader("deviceInfo").decode()
+fun HttpServletRequest.deviceInfo() = getHeader("deviceInfo")?.decode()

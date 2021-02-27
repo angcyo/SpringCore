@@ -25,7 +25,6 @@ class MybatisTableMetaObjectHandler : MetaObjectHandler {
     }
 
     override fun updateFill(metaObject: MetaObject?) {
-        strictUpdateFill(metaObject, "updatedAt", LocalDateTime::class.java, LocalDateTime.now())
-//        strictInsertFill(metaObject, "updatedBy", String::class.java, "xxx")
+        setFieldValByName("updatedAt", LocalDateTime.now(), metaObject)
     }
 }

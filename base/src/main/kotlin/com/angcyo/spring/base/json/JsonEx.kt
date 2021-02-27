@@ -319,3 +319,7 @@ inline fun <reified T> String?.fromJson2(): T? =
         gson().fromJson<T>(this, object : TypeToken<T>() {}.type)
 
 //</editor-fold desc="Json 解析">
+
+fun String.toJsonObject() = fromJson(JsonObject::class.java)
+
+fun String.toJsonArray() = fromJson(JsonArray::class.java)
