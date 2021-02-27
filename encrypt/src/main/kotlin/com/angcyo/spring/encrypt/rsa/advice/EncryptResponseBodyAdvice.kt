@@ -65,7 +65,7 @@ class EncryptResponseBodyAdvice : ResponseBodyAdvice<Any?> {
                 val encodedData: ByteArray = RSAUtil.encrypt(data, publicKey)
                 val result: String = Base64Util.encode(encodedData)
                 if (secretKeyConfig.isShowLog) {
-                    log.info("Pre-encrypted data：{}，After encryption：{}", content, result)
+                    log.info("原文：{}，密文：{}", content, result)
                 }
                 return result
             } catch (e: Exception) {

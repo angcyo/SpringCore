@@ -40,7 +40,7 @@ class DecryptHttpInputMessage(
             .collect(Collectors.joining(System.lineSeparator()))
         val decryptBody: String
         if (content.startsWith("{")) {
-            log.info("Unencrypted without decryption:{}", content)
+            log.info("未加密:{}", content)
             decryptBody = content
         } else {
             val json = StringBuilder()
@@ -55,7 +55,7 @@ class DecryptHttpInputMessage(
             }
             decryptBody = json.toString()
             if (showLog) {
-                log.info("Encrypted data received：{},After decryption：{}", content, decryptBody)
+                log.info("密文：{},原文：{}", content, decryptBody)
             }
         }
         body = ByteArrayInputStream(decryptBody.toByteArray())

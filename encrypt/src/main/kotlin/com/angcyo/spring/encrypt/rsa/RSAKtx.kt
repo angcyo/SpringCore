@@ -8,4 +8,6 @@ import org.springframework.http.HttpMessage
  * @author angcyo
  * @date 2021/02/24
  */
+
+/**忽略rsa验证*/
 fun HttpMessage.isIgnoreRsa() = headers.getFirst("ignore-rsa").isTruthy()
