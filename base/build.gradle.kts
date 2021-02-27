@@ -1,3 +1,9 @@
+/*import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+
+plugins {
+    kotlin("jvm") version "1.4.31"
+}*/
+
 dependencies {
     //spring web
     api("org.springframework.boot:spring-boot-starter-web")
@@ -22,6 +28,8 @@ dependencies {
     api("org.springframework.boot:spring-boot-starter-validation")
     //https://mvnrepository.com/artifact/com.h2database
     //runtimeOnly("com.h2database:h2:1.4.200")
+
+    //implementation(kotlin("stdlib-jdk8"))
 }
 
 tasks.getByName<org.springframework.boot.gradle.tasks.bundling.BootJar>("bootJar") {
@@ -31,3 +39,16 @@ tasks.getByName<org.springframework.boot.gradle.tasks.bundling.BootJar>("bootJar
 tasks.getByName<Jar>("jar") {
     enabled = true
 }
+
+/*
+repositories {
+    mavenCentral()
+}
+val compileKotlin: KotlinCompile by tasks
+compileKotlin.kotlinOptions {
+    jvmTarget = "1.8"
+}
+val compileTestKotlin: KotlinCompile by tasks
+compileTestKotlin.kotlinOptions {
+    jvmTarget = "1.8"
+}*/

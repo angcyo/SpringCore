@@ -4,6 +4,8 @@ import com.angcyo.spring.base.data.error
 import com.angcyo.spring.base.json.fromJson
 import com.angcyo.spring.base.json.toJson
 import com.angcyo.spring.base.string
+import org.springframework.web.context.request.RequestContextHolder
+import org.springframework.web.context.request.ServletRequestAttributes
 import javax.servlet.ServletRequest
 import javax.servlet.http.HttpServletRequest
 import javax.servlet.http.HttpServletResponse
@@ -15,6 +17,23 @@ import javax.servlet.http.HttpServletResponse
  */
 
 //<editor-fold desc="ServletRequest扩展">
+
+/**https://blog.csdn.net/justlpf/article/details/88523638
+ * https://www.cnblogs.com/wade-luffy/p/8867144.html
+ * */
+fun requestAttributes() = RequestContextHolder.currentRequestAttributes()
+
+fun servletRequestAttributes(): ServletRequestAttributes? {
+    val attributes = requestAttributes()
+    if (attributes is ServletRequestAttributes) {
+        return attributes
+    }
+    return null
+}
+
+fun request() = servletRequestAttributes()?.request
+
+fun response() = servletRequestAttributes()?.response
 
 /**读取请求体字符串数据*/
 fun ServletRequest.body() = if (contentLength > 0)
