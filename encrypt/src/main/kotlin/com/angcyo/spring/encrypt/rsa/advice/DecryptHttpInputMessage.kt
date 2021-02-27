@@ -39,25 +39,25 @@ class DecryptHttpInputMessage(
         var content = BufferedReader(InputStreamReader(inputMessage.body)).lines()
             .collect(Collectors.joining(System.lineSeparator()))
         val decryptBody: String
-        if (content.startsWith("{")) {
+        /*if (content.startsWith("{")) {
             log.info("未加密:{}", content)
             decryptBody = content
-        } else {
-            val json = StringBuilder()
-            content = content.replace(" ".toRegex(), "+")
-            if (!content.isNullOrEmpty()) {
-                val contents = content.split("\\|").toTypedArray()
-                for (value in contents) {
-                    val decrypt =
-                        String(RSAUtil.decrypt(Base64Util.decode(value), privateKey), Charset.forName(charset))
-                    json.append(decrypt)
-                }
-            }
-            decryptBody = json.toString()
-            if (showLog) {
-                log.info("密文：{},原文：{}", content, decryptBody)
+        } else {*/
+        val json = StringBuilder()
+        content = content.replace(" ".toRegex(), "+")
+        if (!content.isNullOrEmpty()) {
+            val contents = content.split("\\|").toTypedArray()
+            for (value in contents) {
+                val decrypt =
+                    String(RSAUtil.decrypt(Base64Util.decode(value), privateKey), Charset.forName(charset))
+                json.append(decrypt)
             }
         }
+        decryptBody = json.toString()
+        if (showLog) {
+            log.info("密文：{},原文：{}", content, decryptBody)
+        }
+        //}
         body = ByteArrayInputStream(decryptBody.toByteArray())
     }
 }

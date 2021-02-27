@@ -19,7 +19,7 @@ dependencies {
     //mysql entity
     implementation(project(":SpringCore:mysql"))
     implementation(project(":SpringCore:redis"))
-    implementation(project(":SpringCore:swagger"))
+    //implementation(project(":SpringCore:swagger"))
 }
 
 tasks.getByName<org.springframework.boot.gradle.tasks.bundling.BootJar>("bootJar") {

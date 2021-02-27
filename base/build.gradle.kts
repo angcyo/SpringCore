@@ -30,6 +30,8 @@ dependencies {
     //runtimeOnly("com.h2database:h2:1.4.200")
 
     //implementation(kotlin("stdlib-jdk8"))
+
+    api(project(":SpringCore:swagger"))
 }
 
 tasks.getByName<org.springframework.boot.gradle.tasks.bundling.BootJar>("bootJar") {

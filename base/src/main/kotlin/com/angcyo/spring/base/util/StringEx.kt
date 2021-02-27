@@ -2,6 +2,7 @@ package com.angcyo.spring.base.util
 
 import java.net.URLDecoder
 import java.net.URLEncoder
+import kotlin.reflect.KCallable
 
 /**
  * Email:angcyo@126.com
@@ -18,3 +19,11 @@ fun String.humpToLine() = HumpUtils.humpToLine(this)
 
 /**下划线转驼峰*/
 fun String.lineToHump() = HumpUtils.lineToHump(this)
+
+fun KCallable<*>.queryColumn() = name.queryColumn()
+
+fun String.queryColumn() = humpToLine()
+
+fun String?.md5(): String? {
+    return this?.toByteArray(Charsets.UTF_8)?.encrypt()?.toHexString()
+}

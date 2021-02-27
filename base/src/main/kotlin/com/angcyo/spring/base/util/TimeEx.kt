@@ -2,6 +2,7 @@ package com.angcyo.spring.base.util
 
 import java.text.ParseException
 import java.text.SimpleDateFormat
+import java.time.LocalDateTime
 import java.util.*
 import kotlin.math.ceil
 
@@ -52,6 +53,8 @@ fun Long.fullTime(pattern: String = "yyyy-MM-dd HH:mm:ss.SSS"): String {
 fun nowTimeString(pattern: String = "yyyy-MM-dd HH:mm:ss.SSS"): String {
     return nowTime().fullTime(pattern)
 }
+
+fun nowLocalDateTime() = LocalDateTime.now()
 
 /**格式化时间输出*/
 fun Long.toTime(pattern: String = "yyyy-MM-dd HH:mm"): String {

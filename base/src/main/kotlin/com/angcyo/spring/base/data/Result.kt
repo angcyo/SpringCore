@@ -50,7 +50,7 @@ fun <T> resultError(msg: String? = "Error", code: Int = ERROR_CODE) = msg.error<
 /**将[this]当做错误信息返回*/
 fun <T> Any?.error(code: Int = ERROR_CODE) = Result<T>(code = code, msg = this.str(), null)
 
-inline fun <T> BindingResult.result(responseEntity: () -> T): Result<T> {
+inline fun <T> BindingResult.result(responseEntity: () -> T?): Result<T> {
     return if (hasErrors()) {
         allErrors.joinToString {
             if (it is FieldError) {

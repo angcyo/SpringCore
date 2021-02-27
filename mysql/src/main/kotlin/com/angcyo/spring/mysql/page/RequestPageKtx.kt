@@ -1,7 +1,6 @@
-package com.angcyo.spring.core.http
+package com.angcyo.spring.mysql.page
 
-import io.swagger.annotations.ApiModel
-import io.swagger.annotations.ApiModelProperty
+import com.angcyo.spring.base.page.RequestPage
 import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Pageable
 import org.springframework.data.domain.Sort
@@ -10,23 +9,9 @@ import kotlin.math.max
 /**
  * Email:angcyo@126.com
  * @author angcyo
- * @date 2020/11/13
+ * @date 2021/02/27
  */
 
-@ApiModel("分页请求")
-open class RequestPage {
-    @ApiModelProperty("请求第几页,从1开始")
-    var requestPage: Int = 1
-
-    @ApiModelProperty("每页请求数据量")
-    var requestSize: Int = 20
-
-    @ApiModelProperty("需要降序排序字段(从大->小), 多个用;分割")
-    var desc: String? = null
-
-    @ApiModelProperty("需要升序排序字段(从小->大), 多个用;分割")
-    var asc: String? = null
-}
 
 /**将请求body中的[RequestPage]转成jpa的[PageRequest]*/
 fun RequestPage?.pageable(vararg sortProperties: String, desc: Boolean = true): Pageable? {
@@ -42,7 +27,7 @@ fun RequestPage?.pageable(vararg sortProperties: String, desc: Boolean = true): 
         }
     } else {
         orderList.addAll(orderList())
-        result = PageRequest.of(max(0, this.requestPage - 1), this.requestSize, Sort.by(orderList))
+        result = PageRequest.of(max(0, this.requestPage - 1).toInt(), this.requestSize.toInt(), Sort.by(orderList))
     }
     return result
 }
@@ -54,7 +39,7 @@ fun RequestPage?.pageable(): Pageable? {
     } else {
         val orderList = mutableListOf<Sort.Order>()
         orderList.addAll(orderList())
-        result = PageRequest.of(max(0, this.requestPage - 1), this.requestSize, Sort.by(orderList))
+        result = PageRequest.of(max(0, this.requestPage - 1).toInt(), this.requestSize.toInt(), Sort.by(orderList))
     }
     return result
 }
@@ -64,7 +49,7 @@ fun RequestPage.orderList(): List<Sort.Order> {
     val result = mutableListOf<Sort.Order>()
 
     if (!desc.isNullOrEmpty()) {
-        desc?.split(";")?.forEach {
+        desc?.split(RequestPage.SPLIT)?.forEach {
             if (it.isNotBlank()) {
                 result.add(Sort.Order.desc(it))
             }
@@ -72,7 +57,7 @@ fun RequestPage.orderList(): List<Sort.Order> {
     }
 
     if (!asc.isNullOrEmpty()) {
-        asc?.split(";")?.forEach {
+        asc?.split(RequestPage.SPLIT)?.forEach {
             if (it.isNotBlank()) {
                 result.add(Sort.Order.asc(it))
             }
@@ -114,7 +99,7 @@ fun sortBy(vararg sortProperties: String, desc: Boolean = true): Pageable {
 fun requestSortBy(vararg sortProperties: String, desc: Boolean = true): RequestPage {
     return RequestPage().apply {
         requestPage = 0
-        requestSize = Int.MAX_VALUE
+        requestSize = Long.MAX_VALUE
         if (desc) {
             this.desc = sortProperties.joinToString(";")
         } else {

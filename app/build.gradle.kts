@@ -12,7 +12,7 @@ dependencies {
     api(project(":SpringCore:mysql"))
     api(project(":SpringCore:redis"))
     api(project(":SpringCore:security"))
-    api(project(":SpringCore:swagger"))
+    //api(project(":SpringCore:swagger"))
 
     /*//https://github.com/belerweb/pinyin4j
     //https://mvnrepository.com/artifact/com.belerweb/pinyin4j

@@ -87,8 +87,8 @@ class AuthController {
     @ApiOperation("注册用户")
     @ApiImplicitParam(name = "uuid", value = "客户端id", required = true, dataTypeClass = String::class)
     fun register(
-        @RequestBody @Validated bean: RegisterBean,
-        bindingResult: BindingResult,/*必须放在第2个参数上, 否则无效*/
+        @RequestBody @Validated bean: RegisterBean, /*不支持kotlin的data class*/
+        bindingResult: BindingResult,/*必须放在模型属性之后, 否则无效*/
         request: HttpServletRequest
     ): Result<AuthEntity?>? {
         return bindingResult.result {

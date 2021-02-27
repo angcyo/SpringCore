@@ -1,7 +1,7 @@
 dependencies {
     implementation(project(":SpringCore:base"))
     implementation(project(":SpringCore:log"))
-    implementation(project(":SpringCore:swagger"))
+    //implementation(project(":SpringCore:swagger"))
     implementation(project(":SpringCore:mysql"))
 
     //https://jcenter.bintray.com/com/baomidou/mybatis-plus-boot-starter
