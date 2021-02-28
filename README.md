@@ -3,7 +3,7 @@
 ## 启动程序
 
 ```shell
-nohup java -Xms512m -Xmx512m -Xmn256m -Dspring.profiles.active=pro -jar xxx.jar > ./nohup-out.log &
+nohup java -Xms512m -Xmx512m -Xmn256m -Dspring.profiles.active=pro -jar xxx.jar > ./nohup-out.log 2>&1 &
 ```
 
 ## 实时查看日志
