@@ -19,6 +19,15 @@ fun <Table> RequestPage.page(): Page<Table> {
     return page
 }
 
+/**Mybatis分页查询*/
+fun <Table> page(action: Page<Table>.() -> Unit = {}): Page<Table> {
+    return RequestPage().page<Table>().apply {
+        //setSize()
+        //setCurrent()
+        action()
+    }
+}
+
 /**排序*/
 fun Func<*, String>.order(page: RequestPage) {
     val desc = page.desc
