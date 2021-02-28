@@ -1,8 +1,10 @@
 package com.angcyo.spring.base.util
 
+import com.angcyo.spring.base.Base
 import java.text.ParseException
 import java.text.SimpleDateFormat
 import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
 import java.util.*
 import kotlin.math.ceil
 
@@ -55,6 +57,14 @@ fun nowTimeString(pattern: String = "yyyy-MM-dd HH:mm:ss.SSS"): String {
 }
 
 fun nowLocalDateTime() = LocalDateTime.now()
+
+fun String?.toLocalDateTime(pattern: String = Base.DEFAULT_DATE_TIME_FORMATTER): LocalDateTime? {
+    if (this.isNullOrEmpty()) {
+        return null
+    }
+    val format: DateTimeFormatter = DateTimeFormatter.ofPattern(pattern, Locale.CHINA)
+    return LocalDateTime.parse(this, format)
+}
 
 /**格式化时间输出*/
 fun Long.toTime(pattern: String = "yyyy-MM-dd HH:mm"): String {
