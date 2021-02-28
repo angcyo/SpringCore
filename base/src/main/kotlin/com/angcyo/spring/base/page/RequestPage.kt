@@ -17,10 +17,10 @@ open class RequestPage {
     }
 
     @ApiModelProperty("请求第几页,从1开始")
-    var requestPage: Long = 1
+    var requestPageIndex: Long = 1
 
     @ApiModelProperty("每页请求数据量")
-    var requestSize: Long = 20
+    var requestPageSize: Long = 20
 
     @ApiModelProperty("需要降序排序字段(从大->小), 多个用;分割")
     var desc: String? = null

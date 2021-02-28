@@ -13,8 +13,9 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page
 
 /**将[RequestPage]参数, 转换成mybatisplus分页参数*/
 fun <Table> RequestPage.page(): Page<Table> {
-    val page = Page<Table>(requestPage, requestSize)
+    val page = Page<Table>(requestPageIndex, requestPageSize)
     //page.countId = ""
+    page.maxLimit = requestPageSize
     return page
 }
 

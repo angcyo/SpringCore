@@ -20,26 +20,26 @@ fun RequestPage?.pageable(vararg sortProperties: String, desc: Boolean = true): 
     val orderList = mutableListOf<Sort.Order>()
     orderList.addAll(sortProperties.toList().orderList(desc))
 
-    if (this == null || this.requestSize < 0) {
+    if (this == null || this.requestPageSize < 0) {
         if (orderList.isNotEmpty()) {
             //查询所有, 并且需要排序
             result = PageRequest.of(0, Int.MAX_VALUE, Sort.by(orderList))
         }
     } else {
         orderList.addAll(orderList())
-        result = PageRequest.of(max(0, this.requestPage - 1).toInt(), this.requestSize.toInt(), Sort.by(orderList))
+        result = PageRequest.of(max(0, this.requestPageIndex - 1).toInt(), this.requestPageSize.toInt(), Sort.by(orderList))
     }
     return result
 }
 
 fun RequestPage?.pageable(): Pageable? {
     var result: Pageable? = null
-    if (this == null || this.requestSize < 0) {
+    if (this == null || this.requestPageSize < 0) {
         //no op
     } else {
         val orderList = mutableListOf<Sort.Order>()
         orderList.addAll(orderList())
-        result = PageRequest.of(max(0, this.requestPage - 1).toInt(), this.requestSize.toInt(), Sort.by(orderList))
+        result = PageRequest.of(max(0, this.requestPageIndex - 1).toInt(), this.requestPageSize.toInt(), Sort.by(orderList))
     }
     return result
 }
@@ -98,8 +98,8 @@ fun sortBy(vararg sortProperties: String, desc: Boolean = true): Pageable {
 
 fun requestSortBy(vararg sortProperties: String, desc: Boolean = true): RequestPage {
     return RequestPage().apply {
-        requestPage = 0
-        requestSize = Long.MAX_VALUE
+        requestPageIndex = 0
+        requestPageSize = Long.MAX_VALUE
         if (desc) {
             this.desc = sortProperties.joinToString(";")
         } else {
