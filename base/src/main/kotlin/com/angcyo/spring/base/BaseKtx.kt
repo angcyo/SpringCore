@@ -206,6 +206,8 @@ fun <T> List<T>.eachRandomList(count: Int, action: (index: Int, T) -> Unit) {
     }
 }
 
+fun List<*>?.size() = this?.size ?: 0
+
 /*----------------------------------------------------------------------------------*/
 
 fun <T> Optional<T>?.getOrNull(def: T? = null): T? {
