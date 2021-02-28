@@ -1,6 +1,7 @@
 package com.angcyo.spring.base.data
 
 import com.angcyo.spring.base.data.Result.Companion.ERROR_CODE
+import com.angcyo.spring.base.data.Result.Companion.SUCCESS_CODE
 import com.angcyo.spring.base.str
 import org.springframework.validation.BindingResult
 import org.springframework.validation.FieldError
@@ -29,28 +30,42 @@ import javax.validation.groups.Default
  */
 
 data class Result<T>(
-        var code: Int = 200,
-        var msg: String? = "Success",
-        var data: T? = null
+    var code: Int = SUCCESS_CODE,
+    var msg: String? = "Success",
+    var data: T? = null
 ) {
     companion object {
 
         /**错误码*/
         const val ERROR_CODE = 501
+        const val SUCCESS_CODE = 200
     }
 }
 
-fun <T> Any?.ok(msg: String? = "Success") = when {
-    else -> Result(msg = msg, data = this as T)
+/**无论如何都返回成功*/
+fun <T> Any?.ok(msg: String? = null, checkNull: Boolean = false) = if (checkNull && this == null) {
+    resultError(msg ?: "Error")
+} else {
+    Result(msg = msg ?: "Success", data = this as T)
+}
+
+/**不为空时, 才返回成功; 否则返回失败*/
+fun <T> Any?.okIfNull(msg: String? = if (this == null) "Error" else "Success") = if (this == null) {
+    resultError(msg ?: "Error")
+} else {
+    Result(msg = msg, data = this as T)
 }
 
 /**error*/
 fun <T> resultError(msg: String? = "Error", code: Int = ERROR_CODE) = msg.error<T>(code)
 
+/**Success*/
+fun <T> resultOk(msg: String? = "Success", code: Int = SUCCESS_CODE) = msg.error<T>(code)
+
 /**将[this]当做错误信息返回*/
 fun <T> Any?.error(code: Int = ERROR_CODE) = Result<T>(code = code, msg = this.str(), null)
 
-inline fun <T> BindingResult.result(responseEntity: () -> T?): Result<T> {
+inline fun <T> BindingResult.result(checkNull: Boolean = true, responseEntity: () -> T?): Result<T> {
     return if (hasErrors()) {
         allErrors.joinToString {
             if (it is FieldError) {
@@ -61,11 +76,11 @@ inline fun <T> BindingResult.result(responseEntity: () -> T?): Result<T> {
         }.error()
     } else {
         try {
-            responseEntity().ok()
+            responseEntity().ok(checkNull = checkNull)
         } catch (e: NoSuchElementException) {
-            e.toString().error<T>()
+            e.toString().error()
         } catch (e: Exception) {
-            e.message.error<T>()
+            e.message.error()
         }
     }
 }

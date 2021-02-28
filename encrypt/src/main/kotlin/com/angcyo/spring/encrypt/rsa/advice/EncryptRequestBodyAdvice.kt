@@ -1,6 +1,7 @@
 package com.angcyo.spring.encrypt.rsa.advice
 
 import com.angcyo.spring.encrypt.rsa.annotation.Decrypt
+import com.angcyo.spring.encrypt.rsa.annotation.IgnoreDecryptException
 import com.angcyo.spring.encrypt.rsa.config.SecretKeyConfig
 import com.angcyo.spring.encrypt.rsa.isIgnoreRsa
 import org.slf4j.LoggerFactory
@@ -21,6 +22,7 @@ class EncryptRequestBodyAdvice : RequestBodyAdvice {
 
     private val log = LoggerFactory.getLogger(this.javaClass)
     private var encrypt = false
+    private var ignoreDecryptException = false
 
     @Autowired
     lateinit var secretKeyConfig: SecretKeyConfig
@@ -30,8 +32,15 @@ class EncryptRequestBodyAdvice : RequestBodyAdvice {
         targetType: Type,
         converterType: Class<out HttpMessageConverter<*>>
     ): Boolean {
-        if (methodParameter.method!!.isAnnotationPresent(Decrypt::class.java) && secretKeyConfig.isOpen) {
-            encrypt = true
+        encrypt = false
+        ignoreDecryptException = false
+        if (secretKeyConfig.isOpen) {
+            if (methodParameter.method!!.isAnnotationPresent(Decrypt::class.java)) {
+                encrypt = true
+            }
+            if (methodParameter.method!!.isAnnotationPresent(IgnoreDecryptException::class.java)) {
+                ignoreDecryptException = true
+            }
         }
         return encrypt
     }
@@ -65,6 +74,9 @@ class EncryptRequestBodyAdvice : RequestBodyAdvice {
                 )
             } catch (e: Exception) {
                 log.error("Decryption failed", e)
+                if (!ignoreDecryptException) {
+                    throw e
+                }
             }
         }
         return inputMessage

@@ -2,6 +2,7 @@ package com.angcyo.spring.encrypt.rsa.advice
 
 import com.alibaba.fastjson.JSON
 import com.angcyo.spring.encrypt.rsa.annotation.Encrypt
+import com.angcyo.spring.encrypt.rsa.annotation.IgnoreEncryptException
 import com.angcyo.spring.encrypt.rsa.config.SecretKeyConfig
 import com.angcyo.spring.encrypt.rsa.isIgnoreRsa
 import com.angcyo.spring.encrypt.rsa.util.Base64Util
@@ -24,14 +25,21 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseBodyAdvice
 class EncryptResponseBodyAdvice : ResponseBodyAdvice<Any?> {
     private val log = LoggerFactory.getLogger(this.javaClass)
     private var encrypt = false
+    private var ignoreEncryptException = false
 
     @Autowired
     lateinit var secretKeyConfig: SecretKeyConfig
 
     override fun supports(returnType: MethodParameter, converterType: Class<out HttpMessageConverter<*>>): Boolean {
         encrypt = false
-        if (returnType.method!!.isAnnotationPresent(Encrypt::class.java) && secretKeyConfig.isOpen) {
-            encrypt = true
+        ignoreEncryptException = false
+        if (secretKeyConfig.isOpen) {
+            if (returnType.method!!.isAnnotationPresent(Encrypt::class.java) && secretKeyConfig.isOpen) {
+                encrypt = true
+            }
+            if (returnType.method!!.isAnnotationPresent(IgnoreEncryptException::class.java)) {
+                ignoreEncryptException = true
+            }
         }
         return encrypt
     }
@@ -70,6 +78,9 @@ class EncryptResponseBodyAdvice : ResponseBodyAdvice<Any?> {
                 return result
             } catch (e: Exception) {
                 log.error("Encrypted data exception", e)
+                if (!ignoreEncryptException) {
+                    throw e
+                }
             }
         }
         return body

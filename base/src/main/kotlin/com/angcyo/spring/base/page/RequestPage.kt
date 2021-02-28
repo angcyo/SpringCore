@@ -27,4 +27,8 @@ open class RequestPage {
 
     @ApiModelProperty("需要升序排序字段(从小->大), 多个用;分割")
     var asc: String? = null
+
+    init {
+        //asc = "id" //按照id升序排列
+    }
 }
