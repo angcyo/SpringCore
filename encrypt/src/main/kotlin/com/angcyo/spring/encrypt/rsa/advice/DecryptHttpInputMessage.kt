@@ -27,7 +27,9 @@ import kotlin.math.absoluteValue
 class DecryptHttpInputMessage(
     inputMessage: HttpInputMessage,
     redis: Redis,
-    secretKeyConfig: SecretKeyConfig
+    secretKeyConfig: SecretKeyConfig,
+    /**是否要检查频繁请求*/
+    checkFrequent: Boolean = false
 ) : HttpInputMessage {
 
     private val log = LoggerFactory.getLogger(this.javaClass)
@@ -86,14 +88,16 @@ class DecryptHttpInputMessage(
         }
         decryptBody = json.toString()
 
-        //解密后的内容md5
-        val decryptBodyMd5 = decryptBody.md5()!!
-        if (redis.hasKey(decryptBodyMd5)) {
-            throw IllegalArgumentException("请勿频繁请求")
-        }
+        if (checkFrequent) {
+            //解密后的内容md5
+            val decryptBodyMd5 = decryptBody.md5()!!
+            if (redis.hasKey(decryptBodyMd5)) {
+                throw IllegalArgumentException("请勿频繁请求")
+            }
 
-        //30分钟后才可以再次请求
-        redis[decryptBodyMd5, nowTime] = 30 * 60
+            //30分钟后才可以再次请求
+            redis[decryptBodyMd5, nowTime] = 30 * 60
+        }
 
         if (secretKeyConfig.isShowLog) {
             log.info("密文：{},原文：{}", content, decryptBody)

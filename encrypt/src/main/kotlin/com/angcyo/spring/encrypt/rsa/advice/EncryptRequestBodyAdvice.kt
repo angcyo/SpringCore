@@ -1,5 +1,6 @@
 package com.angcyo.spring.encrypt.rsa.advice
 
+import com.angcyo.spring.encrypt.rsa.annotation.CheckFrequentRequest
 import com.angcyo.spring.encrypt.rsa.annotation.Decrypt
 import com.angcyo.spring.encrypt.rsa.annotation.IgnoreDecryptException
 import com.angcyo.spring.encrypt.rsa.config.SecretKeyConfig
@@ -73,7 +74,8 @@ class EncryptRequestBodyAdvice : RequestBodyAdvice {
                 return DecryptHttpInputMessage(
                     inputMessage,
                     redis,
-                    secretKeyConfig
+                    secretKeyConfig,
+                    parameter.method!!.isAnnotationPresent(CheckFrequentRequest::class.java)
                 )
             } catch (e: Exception) {
                 log.error("Decryption failed", e)
