@@ -10,4 +10,7 @@ import org.springframework.http.HttpMessage
  */
 
 /**忽略rsa验证*/
-fun HttpMessage.isIgnoreRsa() = headers.getFirst("ignore-rsa").isTruthy()
+fun HttpMessage.isIgnoreRsa() = header("ignore-rsa").isTruthy()
+
+/**请求头*/
+fun HttpMessage.header(key: String) = headers.getFirst(key)

@@ -1,5 +1,6 @@
 dependencies {
     implementation(project(":SpringCore:base"))
+    implementation(project(":SpringCore:redis"))
 
     //https://gitee.com/ishuibo/rsa-encrypt-body-spring-boot
     //https://jcenter.bintray.com/cn/shuibo/rsa-encrypt-body-spring-boot/

@@ -4,6 +4,7 @@ import com.angcyo.spring.encrypt.rsa.annotation.Decrypt
 import com.angcyo.spring.encrypt.rsa.annotation.IgnoreDecryptException
 import com.angcyo.spring.encrypt.rsa.config.SecretKeyConfig
 import com.angcyo.spring.encrypt.rsa.isIgnoreRsa
+import com.angcyo.spring.redis.Redis
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.core.MethodParameter
@@ -26,6 +27,9 @@ class EncryptRequestBodyAdvice : RequestBodyAdvice {
 
     @Autowired
     lateinit var secretKeyConfig: SecretKeyConfig
+
+    @Autowired
+    lateinit var redis: Redis
 
     override fun supports(
         methodParameter: MethodParameter,
@@ -68,9 +72,8 @@ class EncryptRequestBodyAdvice : RequestBodyAdvice {
                 }
                 return DecryptHttpInputMessage(
                     inputMessage,
-                    secretKeyConfig.privateKey,
-                    secretKeyConfig.charset,
-                    secretKeyConfig.isShowLog
+                    redis,
+                    secretKeyConfig
                 )
             } catch (e: Exception) {
                 log.error("Decryption failed", e)

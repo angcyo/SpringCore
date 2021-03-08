@@ -24,6 +24,22 @@ fun KCallable<*>.queryColumn() = name.queryColumn()
 
 fun String.queryColumn() = humpToLine()
 
+/**05840C88275286B3A75A833A09306425 32位*/
 fun String?.md5(): String? {
     return this?.toByteArray(Charsets.UTF_8)?.encrypt()?.toHexString()
+}
+
+/**如果是负数, 则反向取值
+ * 如果大于size, 则取模*/
+fun String.getSafe(index: Int): Char? {
+    val newIndex = if (index < 0) {
+        length + index
+    } else {
+        index
+    }
+    val size = length
+    if (newIndex >= size) {
+        return getOrNull(newIndex % size)
+    }
+    return getOrNull(newIndex)
 }

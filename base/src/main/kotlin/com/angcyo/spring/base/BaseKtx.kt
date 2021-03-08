@@ -208,6 +208,21 @@ fun <T> List<T>.eachRandomList(count: Int, action: (index: Int, T) -> Unit) {
 
 fun List<*>?.size() = this?.size ?: 0
 
+/**如果是负数, 则反向取值
+ * 如果大于size, 则取模*/
+fun <T> List<T>.getSafe(index: Int): T? {
+    val newIndex = if (index < 0) {
+        size + index
+    } else {
+        index
+    }
+    val size = size()
+    if (newIndex >= size) {
+        return getOrNull(newIndex % size)
+    }
+    return getOrNull(newIndex)
+}
+
 /*----------------------------------------------------------------------------------*/
 
 fun <T> Optional<T>?.getOrNull(def: T? = null): T? {
