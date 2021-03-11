@@ -45,6 +45,7 @@ class SecurityConfiguration : WebSecurityConfigurerAdapter() {
          */
         val SECURITY_WHITE_LIST = mutableListOf(
             "/test/**",
+            "/http/**",
             "/auth/**",
             "/swagger**",
             "/swagger-ui/**",
