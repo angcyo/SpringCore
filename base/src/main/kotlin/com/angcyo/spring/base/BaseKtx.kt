@@ -81,6 +81,22 @@ fun String?.connectUrl(url: String?): String {
     return "$h/$u"
 }
 
+fun CharSequence?.des(): String {
+    return if (this.isNullOrEmpty()) {
+        ""
+    } else {
+        "($this)"
+    }
+}
+
+fun CharSequence?.des2(): String {
+    return if (this.isNullOrEmpty()) {
+        ""
+    } else {
+        "[$this]"
+    }
+}
+
 /*----------------------------------------------------------------------------------*/
 
 /**当前的[Date]对象*/
