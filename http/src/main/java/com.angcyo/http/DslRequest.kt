@@ -4,9 +4,11 @@ import com.angcyo.http.base.toHttpUrl
 import com.angcyo.http.base.toMediaTypeOrNull
 import com.angcyo.http.base.toRequestBody
 import com.angcyo.http.exception.HttpDataException
+import com.angcyo.spring.base.json.fromJson
 import okhttp3.*
 import okhttp3.internal.http.HttpMethod
 import java.io.IOException
+import java.lang.reflect.Type
 import java.nio.charset.Charset
 
 /**
@@ -61,7 +63,7 @@ class DslRequest {
     /**请求头*/
     var header: HashMap<String, String>? = null
 
-    /**返回回调*/
+    /**返回回调, 有可能在子线程回调*/
     var onEndAction: ((response: Response?, exception: Exception?) -> Unit)? = null
 
     /**异步请求*/
@@ -104,7 +106,7 @@ class DslRequest {
 
                 requestUrl?.let {
                     val httpUrl = it.toHttpUrl()
-                    httpUrl?.host()?.let { header("Host", it) }
+                    httpUrl?.host?.let { header("Host", it) }
                     //header("Origin", "${httpUrl.scheme}://${httpUrl.host}")
                 }
 
@@ -161,7 +163,7 @@ class DslRequest {
                     } else {
                         onEndAction?.invoke(
                             null,
-                            HttpDataException(response.message(), response.code())
+                            HttpDataException(response.message, response.code)
                         )
                     }
                 }
@@ -173,6 +175,20 @@ class DslRequest {
     }
 }
 
+/**toBean*/
+fun <T> Response.toBean(typeOfT: Type): T? = fromJson(typeOfT)
+
+fun <T> Response.fromJson(typeOfT: Type): T? {
+    if (isSuccessful) {
+        val bodyString = body?.string()
+        return bodyString?.fromJson<T>(typeOfT)
+    }
+    return null
+}
+
+fun Response.bodyString(): String? = body?.string()
+
+/**[DSL]*/
 fun request(action: DslRequest.() -> Unit): Call? {
     return DslRequest().run {
         action()

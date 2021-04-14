@@ -1,6 +1,7 @@
 package com.angcyo.http
 
 import com.angcyo.http.interceptor.LogInterceptor
+import okhttp3.Interceptor
 import okhttp3.OkHttpClient
 import java.net.Proxy
 import java.util.concurrent.TimeUnit
@@ -26,17 +27,18 @@ class DslHttpConfig {
     var okHttpClient: OkHttpClient? = null
 
     //构造器
-    val defaultOkHttpClientBuilder = OkHttpClient.Builder().apply {
-        connectTimeout(TIME_OUT, TimeUnit.SECONDS)
-        readTimeout(TIME_OUT, TimeUnit.SECONDS)
-        writeTimeout(TIME_OUT, TimeUnit.SECONDS)
-        proxy(Proxy.NO_PROXY)
-        followRedirects(true)
-        followSslRedirects(true)
+    val defaultOkHttpClientBuilder: OkHttpClient.Builder
+        get() = OkHttpClient.Builder().apply {
+            connectTimeout(TIME_OUT, TimeUnit.SECONDS)
+            readTimeout(TIME_OUT, TimeUnit.SECONDS)
+            writeTimeout(TIME_OUT, TimeUnit.SECONDS)
+            proxy(Proxy.NO_PROXY)
+            followRedirects(true)
+            followSslRedirects(true)
 
-        //日志拦截器
-        addInterceptor(LogInterceptor())
-    }
+            //日志拦截器, 放在最后拦截
+            addInterceptor(LogInterceptor())
+        }
 
     //构造器配置
     val onConfigOkHttpClient = mutableListOf<(OkHttpClient.Builder) -> Unit>()
@@ -46,8 +48,28 @@ class DslHttpConfig {
         okHttpClient ?: it.build()
     }
 
-    /**base url*/
-    var onGetBaseUrl: () -> String = { "http://api.angcyo.com" }
+    /** baseUrl must end in '/' */
+    var onGetBaseUrl: () -> String = { "http://api.angcyo.com/" }
 
-    /*----------Retrofit-----------*/
+    /**调用此方法, 添加自定义的配置*/
+    fun configHttpBuilder(config: (OkHttpClient.Builder) -> Unit) {
+        onConfigOkHttpClient.add(config)
+    }
+
+    fun reset() {
+        okHttpClient = null
+    }
+}
+
+/**添加拦截器*/
+fun OkHttpClient.Builder.addInterceptorEx(interceptor: Interceptor, index: Int = -1) {
+    with(interceptors()) {
+        if (!this.contains(interceptor)) {
+            if (index in this.indices) {
+                add(index, interceptor)
+            } else {
+                add(interceptor)
+            }
+        }
+    }
 }

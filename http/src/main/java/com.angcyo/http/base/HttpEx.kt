@@ -59,7 +59,7 @@ fun Buffer.isPlaintext(): Boolean {
     return try {
         val prefix = Buffer()
         val buffer = buffer()
-        val byteCount = if (buffer.size() < 64) buffer.size() else 64
+        val byteCount = if (buffer.size < 64) buffer.size else 64
         buffer.copyTo(prefix, 0, byteCount)
         for (i in 0..15) {
             if (prefix.exhausted()) {

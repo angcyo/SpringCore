@@ -3,7 +3,7 @@ dependencies {
 
     //https://github.com/square/okhttp
     //https://jcenter.bintray.com/com/squareup/okhttp3/
-    api("com.squareup.okhttp3:okhttp:3.9.1")
+    api("com.squareup.okhttp3:okhttp:4.9.1")
 
     //https://jcenter.bintray.com/com/squareup/okio/
     //api("com.squareup.okio:okio:2.9.0")

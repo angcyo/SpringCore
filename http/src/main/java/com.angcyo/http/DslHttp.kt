@@ -6,6 +6,11 @@ import com.angcyo.spring.base.connectUrl
 import com.google.gson.JsonElement
 import com.google.gson.JsonObject
 import okhttp3.OkHttpClient
+import java.security.cert.X509Certificate
+import javax.net.ssl.HttpsURLConnection
+import javax.net.ssl.SSLContext
+import javax.net.ssl.TrustManager
+import javax.net.ssl.X509TrustManager
 
 /**
  * 网络请求库
@@ -26,6 +31,7 @@ object DslHttp {
 
     /**自定义配置, 否则使用库中默认配置*/
     fun config(action: DslHttpConfig.() -> Unit) {
+        dslHttpConfig.reset()
         dslHttpConfig.action()
     }
 
@@ -36,7 +42,8 @@ object DslHttp {
             throw NullPointerException("请先初始化[DslHttp.config{ ... }]")
         }
 
-        val client = dslHttpConfig.onBuildHttpClient(
+        //缓存客户端
+        val client = dslHttpConfig.okHttpClient ?: dslHttpConfig.onBuildHttpClient(
             dslHttpConfig.defaultOkHttpClientBuilder.apply {
                 dslHttpConfig.onConfigOkHttpClient.forEach {
                     it(this)
@@ -64,6 +71,20 @@ object DslHttp {
         }.build()
         return client
     }
+
+
+    /**去掉ssl验证*/
+    fun noSSL() {
+        System.setProperty("sun.net.http.allowRestrictedHeaders", "true")
+        val trm: TrustManager = object : X509TrustManager {
+            override fun checkClientTrusted(certs: Array<X509Certificate?>?, authType: String?) {}
+            override fun checkServerTrusted(certs: Array<X509Certificate?>?, authType: String?) {}
+            override fun getAcceptedIssuers(): Array<X509Certificate>? = null
+        }
+        val sc: SSLContext = SSLContext.getInstance("SSL")
+        sc.init(null, arrayOf(trm), null)
+        HttpsURLConnection.setDefaultSSLSocketFactory(sc.socketFactory)
+    }
 }
 
 /**拼接 host 和 api接口*/
@@ -73,6 +94,8 @@ fun connectUrl(host: String?, url: String?): String {
 //    return "$h/$u"
     return host.connectUrl(url)
 }
+
+//</editor-fold desc="基础">
 
 //<editor-fold desc="网络请求配置项">
 
@@ -94,13 +117,13 @@ open class BaseRequestConfig {
     var autoConnectUrl: Boolean = true
 
     //body数据, 仅用于post请求. @Body
-    var body: JsonElement = JsonObject()
+    var body: JsonElement? = JsonObject()
 
     //url后面拼接的参数列表
-    var query: HashMap<String, Any> = hashMapOf()
+    var query: HashMap<String, Any?> = hashMapOf()
 
     //表单格式请求数据 method使用[POST_FORM]
-    var formMap: HashMap<String, Any> = hashMapOf()
+    var formMap: HashMap<String, Any?> = hashMapOf()
 
     //请求头
     var header: HashMap<String, String> = hashMapOf()
@@ -116,6 +139,9 @@ open class BaseRequestConfig {
 
     //异常处理
     var onError: (Throwable) -> Unit = {}
+
+    //在主线程观察
+    var observableOnMain: Boolean = true
 }
 
 //</editor-fold desc="网络请求配置项">

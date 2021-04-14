@@ -1,12 +1,13 @@
 package com.angcyo.http.base
 
 import okhttp3.HttpUrl
+import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
 import okhttp3.MediaType
+import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.RequestBody
-import okhttp3.internal.Util.checkOffsetAndCount
+import okhttp3.internal.checkOffsetAndCount
 import okio.BufferedSink
 import java.nio.charset.Charset
-import java.util.*
 import kotlin.text.Charsets.UTF_8
 
 /**
@@ -15,7 +16,7 @@ import kotlin.text.Charsets.UTF_8
  * @date 2021/02/26
  */
 
-fun String.toHttpUrl(): HttpUrl? = HttpUrl.parse(this)
+fun String.toHttpUrl(): HttpUrl? = this.toHttpUrlOrNull()
 
 fun ByteArray.toRequestBody(
     contentType: MediaType? = null,
@@ -42,7 +43,7 @@ fun String.toMediaTypeOrNull(): MediaType? {
     }
 }
 
-fun String.toMediaType(): MediaType? = MediaType.parse(this)
+fun String.toMediaType(): MediaType? = this.toMediaTypeOrNull()
 
 fun String.toRequestBody(contentType: MediaType? = null): RequestBody {
     var charset: Charset = UTF_8
