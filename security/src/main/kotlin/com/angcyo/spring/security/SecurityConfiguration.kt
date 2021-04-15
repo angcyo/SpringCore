@@ -40,7 +40,7 @@ class SecurityConfiguration : WebSecurityConfigurerAdapter() {
         val encoder = BCryptPasswordEncoder(BCryptPasswordEncoder.BCryptVersion.`$2B`, 10, SecureRandom())
 
         /**认证白名单, 不需要验证
-         * 取消安全验证, 必须使用2个*
+         * 取消安全验证, 可以使用通配符`*` `**`
          * SecurityConfiguration.SECURITY_WHITE_LIST.add("\**")
          */
         val SECURITY_WHITE_LIST = mutableListOf(
@@ -58,6 +58,10 @@ class SecurityConfiguration : WebSecurityConfigurerAdapter() {
             "/v3/api-docs/**",
             "/doc.html",
         )
+
+        fun configSecurityWhiteList(config: MutableList<String>.() -> Unit) {
+            SECURITY_WHITE_LIST.apply(config)
+        }
     }
 
     @Autowired
