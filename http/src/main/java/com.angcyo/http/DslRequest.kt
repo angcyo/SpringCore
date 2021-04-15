@@ -18,39 +18,6 @@ import java.nio.charset.Charset
  */
 class DslRequest {
 
-    companion object {
-        fun body(mediaType: String, byteArray: ByteArray): RequestBody {
-            return byteArray.toRequestBody(mediaType.toMediaTypeOrNull())
-        }
-
-        fun jsonBody(json: String): RequestBody {
-            return json.toRequestBody("application/json; charset=utf-8".toMediaTypeOrNull())
-        }
-
-        fun textBody(text: String): RequestBody {
-            return text.toRequestBody("text/plain".toMediaTypeOrNull())
-        }
-
-        fun formBody(form: Map<String, String?>?, charset: Charset = Charsets.UTF_8): FormBody {
-            return FormBody.Builder(charset).apply {
-                form?.forEach { entry ->
-                    entry.value?.let {
-                        add(entry.key, it)
-                    }
-                }
-            }.build()
-        }
-
-        fun multipartBody(config: MultipartBody.Builder.() -> Unit): MultipartBody {
-            return MultipartBody.Builder().apply {
-                //setType()
-                //addPart()
-                //addFormDataPart()
-                config()
-            }.build()
-        }
-    }
-
     /**请求地址*/
     var url: String? = null
 
@@ -90,7 +57,14 @@ class DslRequest {
                     url(requestUrl)
                 }
 
-                val requestMethod = method.toUpperCase()
+                var requestMethod = method.toUpperCase()
+
+                if (body != null) {
+                    if (requestMethod == "GET") {
+                        requestMethod = "POST"
+                    }
+                }
+
                 val requestBody = if (HttpMethod.requiresRequestBody(requestMethod)) {
                     body ?: jsonBody("")
                 } else {
@@ -106,7 +80,7 @@ class DslRequest {
 
                 requestUrl?.let {
                     val httpUrl = it.toHttpUrl()
-                    httpUrl?.host?.let { header("Host", it) }
+                    httpUrl.host()?.let { header("Host", it) }
                     //header("Origin", "${httpUrl.scheme}://${httpUrl.host}")
                 }
 
@@ -163,7 +137,7 @@ class DslRequest {
                     } else {
                         onEndAction?.invoke(
                             null,
-                            HttpDataException(response.message, response.code)
+                            HttpDataException(response.message(), response.code())
                         )
                     }
                 }
@@ -175,18 +149,49 @@ class DslRequest {
     }
 }
 
+fun body(mediaType: String, byteArray: ByteArray): RequestBody {
+    return byteArray.toRequestBody(mediaType.toMediaTypeOrNull())
+}
+
+fun jsonBody(json: String): RequestBody {
+    return json.toRequestBody("application/json; charset=utf-8".toMediaTypeOrNull())
+}
+
+fun textBody(text: String): RequestBody {
+    return text.toRequestBody("text/plain".toMediaTypeOrNull())
+}
+
+fun formBody(form: Map<String, String?>?, charset: Charset = Charsets.UTF_8): FormBody {
+    return FormBody.Builder(charset).apply {
+        form?.forEach { entry ->
+            entry.value?.let {
+                add(entry.key, it)
+            }
+        }
+    }.build()
+}
+
+fun multipartBody(config: MultipartBody.Builder.() -> Unit): MultipartBody {
+    return MultipartBody.Builder().apply {
+        //setType()
+        //addPart()
+        //addFormDataPart()
+        config()
+    }.build()
+}
+
 /**toBean*/
 fun <T> Response.toBean(typeOfT: Type): T? = fromJson(typeOfT)
 
 fun <T> Response.fromJson(typeOfT: Type): T? {
     if (isSuccessful) {
-        val bodyString = body?.string()
+        val bodyString = body()?.string()
         return bodyString?.fromJson<T>(typeOfT)
     }
     return null
 }
 
-fun Response.bodyString(): String? = body?.string()
+fun Response.bodyString(): String? = body()?.string()
 
 /**[DSL]*/
 fun request(action: DslRequest.() -> Unit): Call? {

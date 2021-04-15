@@ -74,7 +74,7 @@ open class LogInterceptor : Interceptor {
                             .toLongOrNull()
                     if (mill != null) {
                         //规定了间隔多长时间, 才输出日志
-                        val url = originRequest.url.toString()//默认的url可能会带?号
+                        val url = originRequest.url().toString()//默认的url可能会带?号
                         val index = url.indexOf("?")
 
                         //key
@@ -163,19 +163,19 @@ open class LogInterceptor : Interceptor {
 
     open fun logRequest(chain: Interceptor.Chain, request: Request, builder: StringBuilder) {
         builder.apply {
-            appendln().appends(request.method).appends(request.url)
+            appendln().appends(request.method()).appends(request.url())
             val connection: Connection? = chain.connection()
             val protocol = connection?.protocol() ?: Protocol.HTTP_1_1
             append(protocol)
 
             //打印请求头
-            for (pair in request.headers.toMultimap()) {
+            for (pair in request.headers().toMultimap()) {
                 appendln().append(pair.key).append(":").append(pair.value)
             }
 
             if (logRequestBody && request.logRequestBody(logRequestBody)) {
                 //打印请求体
-                request.body?.run {
+                request.body()?.run {
                     val simpleName = javaClass.simpleName
                     if (simpleName.isNotEmpty()) {
                         appendln().append(simpleName)
@@ -184,7 +184,7 @@ open class LogInterceptor : Interceptor {
                     appendln().appends("Content-Length:").append(contentLength())
                     appendln().appendln("Body:")
 
-                    if (request.headers.hasEncoded()) {
+                    if (request.headers().hasEncoded()) {
                         //加密了数据
                         appendln("(encoded body omitted)")
                     } else {
@@ -205,24 +205,24 @@ open class LogInterceptor : Interceptor {
 
     open fun logResponse(request: Request, response: Response, builder: StringBuilder) {
         builder.apply {
-            appendln().append(response.request.url)
-            append(" ${response.message}").append("(${response.code})")
+            appendln().append(response.request().url())
+            append(" ${response.message()}").append("(${response.code()})")
 
             //返回头
-            for (pair in response.headers.toMultimap()) {
+            for (pair in response.headers().toMultimap()) {
                 appendln().append(pair.key).append(":").append(pair.value)
             }
 
             if (logResponseBody && request.logResponseBody(logResponseBody)) {
                 //返回体
-                response.body?.run {
+                response.body()?.run {
                     val contentLength: Long = contentLength()
                     val bodySize: String =
                         if (contentLength != -1L) "$contentLength-byte" else "unknown-length"
                     appendln().append("Body")
                     append("(").append(bodySize).appendln("):")
 
-                    if (response.headers.hasEncoded()) {
+                    if (response.headers().hasEncoded()) {
                         //加密了数据
                         appendln("(encoded body omitted)")
                     } else {

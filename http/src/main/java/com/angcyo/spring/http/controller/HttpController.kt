@@ -27,7 +27,7 @@ class HttpController {
                 this.url = url
                 async = false
                 onEndAction = { response, exception ->
-                    response?.body?.readString()?.let {
+                    response?.body()?.readString()?.let {
                         result = it
                     }
                     exception?.let {

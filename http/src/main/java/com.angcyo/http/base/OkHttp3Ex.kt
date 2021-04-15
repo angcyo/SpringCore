@@ -1,12 +1,10 @@
 package com.angcyo.http.base
 
 import okhttp3.HttpUrl
-import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
 import okhttp3.MediaType
-import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.RequestBody
-import okhttp3.internal.checkOffsetAndCount
 import okio.BufferedSink
+import okio.ByteString
 import java.nio.charset.Charset
 import kotlin.text.Charsets.UTF_8
 
@@ -16,8 +14,17 @@ import kotlin.text.Charsets.UTF_8
  * @date 2021/02/26
  */
 
-fun String.toHttpUrl(): HttpUrl? = this.toHttpUrlOrNull()
+fun String.toHttpUrl(): HttpUrl = HttpUrl.get(this)
 
+fun String.toHttpUrlOrNull(): HttpUrl? {
+    return try {
+        toHttpUrl()
+    } catch (_: IllegalArgumentException) {
+        null
+    }
+}
+
+/** Returns a new request body that transmits this. */
 fun ByteArray.toRequestBody(
     contentType: MediaType? = null,
     offset: Int = 0,
@@ -59,4 +66,22 @@ fun String.toRequestBody(contentType: MediaType? = null): RequestBody {
     }
     val bytes = toByteArray(charset)
     return bytes.toRequestBody(finalContentType, 0, bytes.size)
+}
+
+fun ByteString.toRequestBody(contentType: MediaType? = null): RequestBody {
+    return object : RequestBody() {
+        override fun contentType() = contentType
+
+        override fun contentLength() = size().toLong()
+
+        override fun writeTo(sink: BufferedSink) {
+            sink.write(this@toRequestBody)
+        }
+    }
+}
+
+fun checkOffsetAndCount(arrayLength: Long, offset: Long, count: Long) {
+    if (offset or count < 0L || offset > arrayLength || arrayLength - offset < count) {
+        throw ArrayIndexOutOfBoundsException()
+    }
 }
