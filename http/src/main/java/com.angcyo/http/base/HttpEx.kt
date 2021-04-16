@@ -16,8 +16,12 @@ import java.nio.charset.Charset
  * Copyright (c) 2019 ShenZhen O&M Cloud Co., Ltd. All rights reserved.
  */
 
-/**读取ResponseBody中的字符串*/
-fun ResponseBody?.readString(urlDecode: Boolean = true, charsetName: String = "UTF-8"): String {
+/**读取ResponseBody中的字符串
+ * [urlDecode] 如果读取的不是json数据, 请设置此变量为false*/
+fun ResponseBody?.readString(
+    urlDecode: Boolean = this?.contentType()?.toString()?.startsWith("application/json") == true,
+    charsetName: String = "UTF-8"
+): String {
     if (this == null) {
         return ""
     }

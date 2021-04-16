@@ -5,6 +5,7 @@ import com.angcyo.http.base.toMediaTypeOrNull
 import com.angcyo.http.base.toRequestBody
 import com.angcyo.http.exception.HttpDataException
 import com.angcyo.spring.base.json.fromJson
+import com.angcyo.spring.base.util.L
 import okhttp3.*
 import okhttp3.internal.http.HttpMethod
 import java.io.IOException
@@ -39,14 +40,8 @@ class DslRequest {
     var _call: Call? = null
 
     /**执行*/
-    fun doIt(): Call? {
-        return try {
-            request()
-        } catch (e: Exception) {
-            e.printStackTrace()
-            _callback(_call, null, e)
-            null
-        }
+    fun doIt(): Call {
+        return request()
     }
 
     fun request(): Call {
@@ -80,7 +75,7 @@ class DslRequest {
 
                 requestUrl?.let {
                     val httpUrl = it.toHttpUrl()
-                    httpUrl.host()?.let { header("Host", it) }
+                    header("Host", httpUrl.host())
                     //header("Origin", "${httpUrl.scheme}://${httpUrl.host}")
                 }
 
@@ -100,6 +95,7 @@ class DslRequest {
 
         val call = client.newCall(request)
 
+        L.i("请求:$url")
         if (async) {
             call.enqueue(object : Callback {
 
@@ -113,13 +109,8 @@ class DslRequest {
                 }
             })
         } else {
-            try {
-                val response = call.execute()
-                _callback(call, response, null)
-            } catch (e: Exception) {
-                e.printStackTrace()
-                _callback(call, null, e)
-            }
+            val response = call.execute()
+            _callback(call, response, null)
         }
         _call = call
         return call
@@ -127,23 +118,18 @@ class DslRequest {
 
     //回调
     fun _callback(call: Call?, response: Response?, e: Exception?) {
-        if (call == null || !call.isCanceled()) {
-            try {
-                if (response?.isSuccessful == true) {
-                    onEndAction?.invoke(response, null)
+        if (call == null || !call.isCanceled) {
+            if (response?.isSuccessful == true) {
+                onEndAction?.invoke(response, null)
+            } else {
+                if (response == null) {
+                    onEndAction?.invoke(null, e)
                 } else {
-                    if (response == null) {
-                        onEndAction?.invoke(null, e)
-                    } else {
-                        onEndAction?.invoke(
-                            null,
-                            HttpDataException(response.message(), response.code())
-                        )
-                    }
+                    onEndAction?.invoke(
+                        null,
+                        HttpDataException(response.message(), response.code())
+                    )
                 }
-            } catch (e: Exception) {
-                e.printStackTrace()
-                onEndAction?.invoke(null, e)
             }
         }
     }
