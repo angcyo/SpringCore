@@ -2,7 +2,10 @@ package com.angcyo.spring.base
 
 import com.angcyo.spring.base.util.PrettyMemoryUtil
 import org.springframework.beans.BeanUtils
+import org.springframework.context.ConfigurableApplicationContext
 import java.lang.Integer.min
+import java.net.InetAddress
+import java.net.UnknownHostException
 import java.nio.charset.Charset
 import java.sql.Date
 import java.text.SimpleDateFormat
@@ -10,6 +13,7 @@ import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import java.util.*
 import kotlin.random.Random.Default.nextInt
+
 
 /**
  * Email:angcyo@126.com
@@ -247,4 +251,20 @@ fun <T> Optional<T>?.getOrNull(def: T? = null): T? {
     } else {
         def
     }
+}
+
+/**获取本机ip*/
+fun getLocalHost(): String? {
+    try {
+        val address = InetAddress.getLocalHost()
+        return address.hostAddress
+    } catch (e: UnknownHostException) {
+        e.printStackTrace()
+    }
+    return null
+}
+
+/**获取Spring服务端口*/
+fun ConfigurableApplicationContext.getServerPort(): String? {
+    return environment.getProperty("server.port")
 }

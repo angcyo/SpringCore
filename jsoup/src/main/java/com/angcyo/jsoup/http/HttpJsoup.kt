@@ -20,14 +20,17 @@ class HttpJsoup {
     /**解析文档*/
     var parseDocument: (document: Document?, exception: Exception?) -> Unit = { _, _ -> }
 
+    /**获取到的网页字符串*/
+    var _html: String? = null
+
     fun doIt() {
         request {
             async = false
             configRequest(this)
             onEndAction = { response, exception ->
                 if (exception == null) {
-                    val html = response?.body()?.readString()
-                    val document = Jsoup.parse(html)
+                    _html = response?.body()?.readString()
+                    val document = Jsoup.parse(_html)
                     parseDocument(document, null)
                 } else {
                     parseDocument(null, exception)
