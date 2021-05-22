@@ -8,7 +8,10 @@ dependencies {
     /* https://jcenter.bintray.com/io/springfox/springfox-swagger-ui */
     //api("io.springfox:springfox-swagger-ui:$version")
 
+    //https://springfox.github.io/springfox/
+    //https://mvnrepository.com/artifact/io.springfox/springfox-boot-starter
     api("io.springfox:springfox-boot-starter:$version")
+    implementation("org.springframework.boot:spring-boot")
 
     //https://doc.xiaominfo.com/
     //https://mvnrepository.com/artifact/com.github.xiaoymin
