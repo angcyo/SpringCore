@@ -32,7 +32,7 @@ class Swagger3Configuration {
         val SWAGGER_SCAN_BASE_PACKAGE = "com.angcyo"
         val VERSION = "1.0.0"
 
-        var SWAGGER_TITLE = "Swagger2"
+        var SWAGGER_TITLE = "欢迎访问接口文档"
         var SWAGGER_DES = "Swagger2 接口文档"
         var SWAGGER_LICENSES = "http://www.baidu.com"
     }
@@ -56,7 +56,7 @@ class Swagger3Configuration {
     private fun apiInfo(): ApiInfo {
         return ApiInfoBuilder()
             .title(swaggerProperties.applicationName ?: SWAGGER_TITLE) //设置文档的标题
-            .description(swaggerProperties.applicationDescription ?: SWAGGER_DES) // 设置文档的描述
+            .description(swaggerProperties.applicationDescription ?: "" + SWAGGER_DES) // 设置文档的描述
             .version(swaggerProperties.applicationVersion ?: VERSION) // 设置文档的版本信息-> 1.0.0 Version information
             .contact(Contact("angcyo", "https://www.angcyo.com", "angcyo@126.com"))
             .termsOfServiceUrl(SWAGGER_LICENSES) // 设置文档的License信息->1.3 License information

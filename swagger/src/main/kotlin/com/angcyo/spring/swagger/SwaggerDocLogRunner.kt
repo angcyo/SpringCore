@@ -30,8 +30,8 @@ class SwaggerDocLogRunner : ApplicationRunner, ApplicationContextAware {
             val host = "http://${getLocalHost()}:${port}"
             L.w(buildString {
                 append("Swagger 文档地址:")
-                append(" ${host}/swagger-ui/index.html")
-                append(" ${host}/doc.html")
+                append("\n${host}/swagger-ui/index.html")
+                append("\n${host}/doc.html")
             })
         }
     }
