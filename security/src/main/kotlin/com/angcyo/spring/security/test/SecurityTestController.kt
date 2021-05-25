@@ -1,6 +1,6 @@
 package com.angcyo.spring.security.test
 
-import com.angcyo.spring.base.nowTimeString
+import com.angcyo.spring.util.nowTimeString
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 

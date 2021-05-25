@@ -1,6 +1,6 @@
 package com.angcyo.spring.base.validator
 
-import com.angcyo.spring.base.util.L
+import com.angcyo.spring.util.L
 import org.springframework.validation.Errors
 import org.springframework.validation.Validator
 

@@ -1,6 +1,5 @@
 package com.angcyo.spring.security.service
 
-import com.angcyo.spring.base.oneDaySec
 import com.angcyo.spring.redis.Redis
 import com.angcyo.spring.security.SecurityConstants
 import com.angcyo.spring.security.controller.RegisterBean
@@ -8,6 +7,7 @@ import com.angcyo.spring.security.controller.codeKey
 import com.angcyo.spring.security.entity.AuthEntity
 import com.angcyo.spring.security.entity.RoleEntity
 import com.angcyo.spring.security.entity.Roles
+import com.angcyo.spring.util.oneDaySec
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.security.core.userdetails.UserDetailsService

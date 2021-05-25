@@ -1,9 +1,6 @@
 package com.angcyo.spring.log.core
 
-import com.angcyo.spring.base.util.L
-import org.springframework.core.Ordered
-import org.springframework.core.annotation.Order
-import org.springframework.stereotype.Component
+import com.angcyo.spring.util.L
 import org.springframework.web.servlet.DispatcherServlet
 import java.util.concurrent.atomic.AtomicLong
 import javax.servlet.http.HttpServletRequest

@@ -3,7 +3,7 @@ package com.angcyo.http.interceptor
 import com.angcyo.http.base.isPlaintext
 import com.angcyo.http.base.readString
 import com.angcyo.spring.base.nowTime
-import com.angcyo.spring.base.util.L
+import com.angcyo.spring.util.L
 import okhttp3.*
 import okio.Buffer
 import java.util.*

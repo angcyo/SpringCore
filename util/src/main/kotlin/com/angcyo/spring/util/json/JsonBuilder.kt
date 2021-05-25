@@ -1,6 +1,6 @@
-package com.angcyo.spring.base.json
+package com.angcyo.spring.util.json
 
-import com.angcyo.spring.base.util.L
+import com.angcyo.spring.util.L
 import com.google.gson.*
 import java.math.BigDecimal
 import java.math.BigInteger

@@ -12,6 +12,7 @@ dependencies {
     //https://mvnrepository.com/artifact/io.springfox/springfox-boot-starter
     api("io.springfox:springfox-boot-starter:$version")
     implementation("org.springframework.boot:spring-boot")
+    implementation(project(":SpringCore:util"))
 
     //https://doc.xiaominfo.com/
     //https://mvnrepository.com/artifact/com.github.xiaoymin

@@ -4,8 +4,8 @@ import com.angcyo.http.base.toHttpUrl
 import com.angcyo.http.base.toMediaTypeOrNull
 import com.angcyo.http.base.toRequestBody
 import com.angcyo.http.exception.HttpDataException
-import com.angcyo.spring.base.json.fromJson
-import com.angcyo.spring.base.util.L
+import com.angcyo.spring.util.json.fromJson
+import com.angcyo.spring.util.L
 import okhttp3.*
 import okhttp3.internal.http.HttpMethod
 import java.io.IOException

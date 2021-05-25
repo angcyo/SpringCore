@@ -1,7 +1,6 @@
 package com.angcyo.spring.log.core
 
-import com.angcyo.spring.base.util.L
-import org.springframework.stereotype.Component
+import com.angcyo.spring.util.L
 import org.springframework.web.filter.CommonsRequestLoggingFilter
 import javax.servlet.http.HttpServletRequest
 

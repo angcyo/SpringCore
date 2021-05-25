@@ -1,6 +1,6 @@
 package com.angcyo.spring.http.test
 
-import com.angcyo.spring.base.util.L
+import com.angcyo.spring.util.L
 import org.springframework.boot.ApplicationArguments
 import org.springframework.boot.ApplicationRunner
 import org.springframework.boot.CommandLineRunner

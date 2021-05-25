@@ -1,9 +1,9 @@
 package com.angcyo.spring.security.jwt
 
-import com.angcyo.spring.base.oneDay
-import com.angcyo.spring.base.util.L
+import com.angcyo.spring.util.L
 import com.angcyo.spring.security.SecurityConstants
 import com.angcyo.spring.security.entity.Roles
+import com.angcyo.spring.util.oneDay
 import io.jsonwebtoken.*
 import io.jsonwebtoken.security.Keys
 import org.springframework.security.core.GrantedAuthority

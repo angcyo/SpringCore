@@ -1,6 +1,6 @@
 package com.angcyo.spring.log.core.wrapper
 
-import com.angcyo.spring.base.util.L
+import com.angcyo.spring.util.L
 import java.io.*
 import java.nio.charset.Charset
 import javax.servlet.ReadListener

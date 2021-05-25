@@ -1,6 +1,6 @@
 package com.angcyo.spring.base
 
-import com.angcyo.spring.base.util.L
+import com.angcyo.spring.util.L
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.ApplicationArguments
 import org.springframework.context.ApplicationContext

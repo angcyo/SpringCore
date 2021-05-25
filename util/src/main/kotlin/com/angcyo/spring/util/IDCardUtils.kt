@@ -15,7 +15,7 @@
  *
  * @(#) IdcardUtils.java Date: 2010-06-17
  */
-package com.angcyo.spring.base.util
+package com.angcyo.spring.util
 
 import java.text.ParseException
 import java.text.SimpleDateFormat
@@ -267,7 +267,8 @@ object IDCardUtils {
             val cal = Calendar.getInstance()
             if (birthDate != null) cal.time = birthDate
             if (!validDate(cal[Calendar.YEAR], Integer.valueOf(birthCode.substring(2, 4)),
-                            Integer.valueOf(birthCode.substring(4, 6)))) {
+                            Integer.valueOf(birthCode.substring(4, 6)))
+            ) {
                 return false
             }
         } else {

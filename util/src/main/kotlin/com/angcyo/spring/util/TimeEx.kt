@@ -1,6 +1,5 @@
-package com.angcyo.spring.base.util
+package com.angcyo.spring.util
 
-import com.angcyo.spring.base.Base
 import java.text.ParseException
 import java.text.SimpleDateFormat
 import java.time.LocalDateTime
@@ -21,6 +20,10 @@ const val DAY_MILLIS = 24 * 60 * 60 * 1000L
 /**多少天对应的毫秒数*/
 fun day(count: Int = 1): Long = count * DAY_MILLIS
 
+/**当前的[Date]对象*/
+fun nowDate() = java.sql.Date(nowTime())
+
+/**当前的时间13位毫秒数*/
 fun nowTime() = System.currentTimeMillis()
 
 /**返回毫秒对应的天数*/
@@ -58,7 +61,7 @@ fun nowTimeString(pattern: String = "yyyy-MM-dd HH:mm:ss.SSS"): String {
 
 fun nowLocalDateTime() = LocalDateTime.now()
 
-fun String?.toLocalDateTime(pattern: String = Base.DEFAULT_DATE_TIME_FORMATTER): LocalDateTime? {
+fun String?.toLocalDateTime(pattern: String = Constant.DEFAULT_DATE_TIME_FORMATTER): LocalDateTime? {
     if (this.isNullOrEmpty()) {
         return null
     }
@@ -226,4 +229,24 @@ fun timeDifference(start: String, end: String, pattern: String = "yyyy-MM-dd HH:
 /**两个时间相差多少毫秒*/
 fun String.diffTime(end: String, pattern: String = "yyyy-MM-dd HH:mm:ss"): Long {
     return timeDifference(this, end, pattern)
+}
+
+/*----------------------------------------------------------------------------------*/
+
+/**2020-11-05 15:07:16.265363*/
+fun LocalDateTime.toTime(pattern: String = "yyyy-MM-dd HH:mm"): String {
+    return format(DateTimeFormatter.ofPattern(pattern, Locale.CHINA))
+}
+
+/**将2020-11-24 14:13:50转换成毫秒数*/
+fun String.toTime(pattern: String = "yyyy-MM-dd HH:mm:ss"): Long {
+    val format: SimpleDateFormat = SimpleDateFormat.getDateInstance() as SimpleDateFormat
+    format.applyPattern(pattern)
+    var time = 0L
+    try {
+        time = format.parse(this)?.time ?: 0
+    } catch (e: Exception) {
+        e.printStackTrace()
+    }
+    return time
 }

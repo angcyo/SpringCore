@@ -6,17 +6,17 @@ import com.angcyo.spring.base.data.resultError
 import com.angcyo.spring.base.data.validate
 import com.angcyo.spring.base.json.toJackson
 import com.angcyo.spring.base.json.toJacksonIgnore
-import com.angcyo.spring.base.json.toJson
 import com.angcyo.spring.base.servlet.fromJson
 import com.angcyo.spring.base.servlet.send
 import com.angcyo.spring.base.servlet.sendError
-import com.angcyo.spring.base.str
 import com.angcyo.spring.security.SecurityConstants
 import com.angcyo.spring.security.controller.RegisterBean
 import com.angcyo.spring.security.controller.WebType
 import com.angcyo.spring.security.entity.AuthEntity
 import com.angcyo.spring.security.entity.toAuthorities
 import com.angcyo.spring.security.service.AuthService
+import com.angcyo.spring.util.json.toJson
+import com.angcyo.spring.util.str
 import org.bouncycastle.openssl.PasswordException
 import org.springframework.security.authentication.AuthenticationManager
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
@@ -42,13 +42,15 @@ import javax.servlet.http.HttpServletResponse
  * https://dev.to/kubadlo/spring-security-with-jwt-3j76
  * 认证成功后, 返回token `Bearer <token string>`
  */
-class JwtLoginFilter(authManager: AuthenticationManager, val authService: AuthService) : UsernamePasswordAuthenticationFilter() {
+class JwtLoginFilter(authManager: AuthenticationManager, val authService: AuthService) :
+    UsernamePasswordAuthenticationFilter() {
 
     init {
         //设置授权接口地址
         //setFilterProcessesUrl(SecurityConstants.AUTH_LOGIN_URL)
         setRequiresAuthenticationRequestMatcher(
-                AntPathRequestMatcher(SecurityConstants.AUTH_LOGIN_URL, RequestMethod.POST.toString()))
+            AntPathRequestMatcher(SecurityConstants.AUTH_LOGIN_URL, RequestMethod.POST.toString())
+        )
         authenticationManager = authManager
     }
 
@@ -109,10 +111,12 @@ class JwtLoginFilter(authManager: AuthenticationManager, val authService: AuthSe
 
     /**认证成功后的回调
      * 创建token返回给客户端*/
-    override fun successfulAuthentication(request: HttpServletRequest,
-                                          response: HttpServletResponse,
-                                          filterChain: FilterChain,
-                                          authentication: Authentication) {
+    override fun successfulAuthentication(
+        request: HttpServletRequest,
+        response: HttpServletResponse,
+        filterChain: FilterChain,
+        authentication: Authentication
+    ) {
         //super会执行授权成功的重定向
 
         val entity = authentication.principal
@@ -124,8 +128,11 @@ class JwtLoginFilter(authManager: AuthenticationManager, val authService: AuthSe
             rememberMeServices.loginSuccess(request, response, authentication)
 
             //3 Fire event
-            eventPublisher?.publishEvent(InteractiveAuthenticationSuccessEvent(
-                    authentication, this.javaClass))
+            eventPublisher?.publishEvent(
+                InteractiveAuthenticationSuccessEvent(
+                    authentication, this.javaClass
+                )
+            )
 
             //4
             val roles = entity.roles.toAuthorities()
@@ -146,13 +153,18 @@ class JwtLoginFilter(authManager: AuthenticationManager, val authService: AuthSe
         }
     }
 
-    override fun unsuccessfulAuthentication(request: HttpServletRequest, response: HttpServletResponse, failed: AuthenticationException) {
+    override fun unsuccessfulAuthentication(
+        request: HttpServletRequest,
+        response: HttpServletResponse,
+        failed: AuthenticationException
+    ) {
         //super.unsuccessfulAuthentication(request, response, failed)
         SecurityContextHolder.clearContext()
         rememberMeServices.loginFail(request, response)
         response.send(
-                resultError<String>(failed.message, HttpServletResponse.SC_UNAUTHORIZED).toJackson(),
-                HttpServletResponse.SC_UNAUTHORIZED)
+            resultError<String>(failed.message, HttpServletResponse.SC_UNAUTHORIZED).toJackson(),
+            HttpServletResponse.SC_UNAUTHORIZED
+        )
 
         /*  //response.sendError(HttpServletResponse.SC_UNAUTHORIZED, failed.message)
           val username = request.getParameter(SecurityConstants.KEY_USERNAME)

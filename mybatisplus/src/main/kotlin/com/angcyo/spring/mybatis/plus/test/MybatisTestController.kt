@@ -2,11 +2,11 @@ package com.angcyo.spring.mybatis.plus.test
 
 import com.angcyo.spring.base.data.Result
 import com.angcyo.spring.base.data.ok
-import com.angcyo.spring.base.nowTimeString
-import com.angcyo.spring.base.util.L
 import com.angcyo.spring.log.core.RecordLog
 import com.angcyo.spring.mybatis.plus.queryWrapper
 import com.angcyo.spring.mybatis.plus.test.table.TestTable
+import com.angcyo.spring.util.L
+import com.angcyo.spring.util.nowTimeString
 import com.baomidou.mybatisplus.annotation.TableName
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.transaction.annotation.Transactional

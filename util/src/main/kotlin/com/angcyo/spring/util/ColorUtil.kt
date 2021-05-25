@@ -1,6 +1,6 @@
-package com.angcyo.spring.base.util
+package com.angcyo.spring.util
 
-import com.angcyo.spring.base.util.ColorUtil.parseColor
+import com.angcyo.spring.util.ColorUtil.parseColor
 import java.awt.Color
 import java.util.*
 import kotlin.random.Random.Default.nextInt

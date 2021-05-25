@@ -1,5 +1,6 @@
 package com.angcyo.spring.base
 
+import com.angcyo.spring.util.nowTimeString
 import org.springframework.boot.context.properties.ConfigurationProperties
 import org.springframework.stereotype.Component
 

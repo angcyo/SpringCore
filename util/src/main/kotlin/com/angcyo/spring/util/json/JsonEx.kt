@@ -1,7 +1,7 @@
-package com.angcyo.spring.base.json
+package com.angcyo.spring.util.json
 
-import com.angcyo.spring.base.Base
-import com.angcyo.spring.base.util.TextUtils
+import com.angcyo.spring.util.Constant
+import com.angcyo.spring.util.TextUtils
 import com.google.gson.*
 import com.google.gson.reflect.TypeToken
 import java.lang.reflect.Modifier
@@ -256,19 +256,19 @@ fun String?.jsonArray(): JsonArray? {
 
 fun gson(config: GsonBuilder.() -> Unit = {}): Gson {
     val gson = GsonBuilder()
-            .setPrettyPrinting()
-            .serializeNulls()
-            .registerTypeAdapterFactory(LocalDateTimeTypeAdapter.FACTORY)
-            .setDateFormat(Base.DEFAULT_DATE_TIME_FORMATTER)
-            .setLenient() //支持畸形json解析
-            .excludeFieldsWithModifiers(
-                    Modifier.STATIC,
-                    Modifier.TRANSIENT,
-                    Modifier.VOLATILE
-            )
-            //.disableHtmlEscaping() //关闭html转义
-            .apply(config)
-            .create()
+        .setPrettyPrinting()
+        .serializeNulls()
+        .registerTypeAdapterFactory(LocalDateTimeTypeAdapter.FACTORY)
+        .setDateFormat(Constant.DEFAULT_DATE_TIME_FORMATTER)
+        .setLenient() //支持畸形json解析
+        .excludeFieldsWithModifiers(
+            Modifier.STATIC,
+            Modifier.TRANSIENT,
+            Modifier.VOLATILE
+        )
+        //.disableHtmlEscaping() //关闭html转义
+        .apply(config)
+        .create()
     return gson
 }
 
@@ -316,7 +316,7 @@ fun <T> String?.fromJson(classOfT: Class<T>): T? {
 inline fun <reified T> String?.fromJson(): T? = this?.fromJson(T::class.java)
 
 inline fun <reified T> String?.fromJson2(): T? =
-        gson().fromJson<T>(this, object : TypeToken<T>() {}.type)
+    gson().fromJson<T>(this, object : TypeToken<T>() {}.type)
 
 //</editor-fold desc="Json 解析">
 

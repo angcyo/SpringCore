@@ -1,13 +1,8 @@
 package com.angcyo.spring.log.core
 
-import com.angcyo.spring.base.fullTime
-import com.angcyo.spring.base.prettyByteSize
 import com.angcyo.spring.base.servlet.bytes
-import com.angcyo.spring.base.string
-import com.angcyo.spring.base.util.IPUtil
-import com.angcyo.spring.base.util.L
-import com.angcyo.spring.base.uuid
 import com.angcyo.spring.log.core.wrapper.*
+import com.angcyo.spring.util.*
 import org.springframework.util.unit.DataSize
 import javax.servlet.ServletRequest
 import javax.servlet.ServletResponse
@@ -23,14 +18,18 @@ import javax.servlet.http.HttpServletResponse
 object ServletLog {
 
     /**包装一下, 请求 返回日志输出*/
-    fun wrap(requestId: Long,
-             request: HttpServletRequest,
-             response: HttpServletResponse?,
-             requestBuilder: StringBuilder = StringBuilder(),
-             responseBuilder: StringBuilder = StringBuilder(),
-             wrap: Boolean = true,
-             action: (request: HttpServletRequest, response: HttpServletResponse?,
-                      requestBuilder: StringBuilder?, responseBuilder: StringBuilder?) -> Unit) {
+    fun wrap(
+        requestId: Long,
+        request: HttpServletRequest,
+        response: HttpServletResponse?,
+        requestBuilder: StringBuilder = StringBuilder(),
+        responseBuilder: StringBuilder = StringBuilder(),
+        wrap: Boolean = true,
+        action: (
+            request: HttpServletRequest, response: HttpServletResponse?,
+            requestBuilder: StringBuilder?, responseBuilder: StringBuilder?
+        ) -> Unit
+    ) {
         // 开始时间
         val startTime = System.currentTimeMillis()
         val uuid = uuid()
@@ -72,7 +71,11 @@ object ServletLog {
     }
 
     /**打印请求体*/
-    fun logRequest(request: ServletRequest, builder: StringBuilder = StringBuilder(), readStream: Boolean = false): String {
+    fun logRequest(
+        request: ServletRequest,
+        builder: StringBuilder = StringBuilder(),
+        readStream: Boolean = false
+    ): String {
         builder.apply {
             if (request is HttpServletRequest) {
                 //入站
@@ -255,6 +258,7 @@ fun HttpServletResponse.isMultipart(): Boolean {
     return contentType != null && contentType.startsWith("multipart/form-data")
 }
 
-fun ServletRequest.log(builder: StringBuilder = StringBuilder(), readStream: Boolean = false): String = ServletLog.logRequest(this, builder, readStream)
+fun ServletRequest.log(builder: StringBuilder = StringBuilder(), readStream: Boolean = false): String =
+    ServletLog.logRequest(this, builder, readStream)
 
 fun ServletResponse.log(builder: StringBuilder = StringBuilder()): String = ServletLog.logResponse(this, builder)

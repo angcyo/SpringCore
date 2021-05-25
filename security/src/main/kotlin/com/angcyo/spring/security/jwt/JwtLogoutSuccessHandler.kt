@@ -1,6 +1,6 @@
 package com.angcyo.spring.security.jwt
 
-import com.angcyo.spring.base.util.L
+import com.angcyo.spring.util.L
 import org.springframework.security.core.Authentication
 import org.springframework.security.web.authentication.logout.LogoutSuccessHandler
 import org.springframework.stereotype.Component

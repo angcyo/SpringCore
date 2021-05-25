@@ -1,6 +1,6 @@
 package com.angcyo.spring.security.jwt
 
-import com.angcyo.spring.base.util.L
+import com.angcyo.spring.util.L
 import org.springframework.security.access.AccessDeniedException
 import org.springframework.security.web.access.AccessDeniedHandler
 import java.io.IOException

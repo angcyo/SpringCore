@@ -1,6 +1,6 @@
 package com.angcyo.spring.base.servlet
 
-import com.angcyo.spring.base.util.decode
+import com.angcyo.spring.util.decode
 import javax.servlet.http.HttpServletRequest
 
 /**

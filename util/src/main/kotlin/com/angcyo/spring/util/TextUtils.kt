@@ -1,4 +1,4 @@
-package com.angcyo.spring.base.util
+package com.angcyo.spring.util
 
 /**
  * Email:angcyo@126.com

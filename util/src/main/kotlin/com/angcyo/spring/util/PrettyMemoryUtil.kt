@@ -1,4 +1,4 @@
-package com.angcyo.spring.base.util
+package com.angcyo.spring.util
 
 import kotlin.math.floor
 

@@ -1,6 +1,6 @@
 package com.angcyo.spring.encrypt.rsa.util
 
-import com.angcyo.spring.base.util.getSafe
+import com.angcyo.spring.util.getSafe
 
 /**
  * Email:angcyo@126.com

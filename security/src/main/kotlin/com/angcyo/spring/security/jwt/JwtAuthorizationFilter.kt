@@ -1,6 +1,6 @@
 package com.angcyo.spring.security.jwt
 
-import com.angcyo.spring.base.util.L
+import com.angcyo.spring.util.L
 import com.angcyo.spring.security.SecurityConstants
 import com.angcyo.spring.security.UserDetailsServiceImpl
 import com.angcyo.spring.security.service.AuthService

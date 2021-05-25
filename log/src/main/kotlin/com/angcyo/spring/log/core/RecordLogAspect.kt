@@ -1,6 +1,6 @@
 package com.angcyo.spring.log.core
 
-import com.angcyo.spring.base.json.toJson
+import com.angcyo.spring.util.json.toJson
 import org.aspectj.lang.ProceedingJoinPoint
 import org.aspectj.lang.annotation.Around
 import org.aspectj.lang.annotation.Aspect

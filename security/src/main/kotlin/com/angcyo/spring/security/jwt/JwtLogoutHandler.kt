@@ -21,9 +21,11 @@ import javax.servlet.http.HttpServletResponse
  */
 
 class JwtLogoutHandler : LogoutHandler {
-    override fun logout(request: HttpServletRequest,
-                        response: HttpServletResponse,
-                        authentication: Authentication?) {
+    override fun logout(
+        request: HttpServletRequest,
+        response: HttpServletResponse,
+        authentication: Authentication?
+    ) {
         //清除上下文
         SecurityContextHolder.clearContext()
 

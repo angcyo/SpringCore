@@ -1,7 +1,7 @@
 package com.angcyo.spring.mybatis.plus.page
 
 import com.angcyo.spring.base.page.RequestPage
-import com.angcyo.spring.base.util.queryColumn
+import com.angcyo.spring.util.queryColumn
 import com.baomidou.mybatisplus.core.conditions.interfaces.Func
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page
 

@@ -3,7 +3,7 @@ package com.angcyo.jsoup
 import com.angcyo.coroutine.CoroutineErrorHandler
 import com.angcyo.coroutine.launchSafe
 import com.angcyo.coroutine.onBack
-import com.angcyo.spring.base.util.L
+import com.angcyo.spring.util.L
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope

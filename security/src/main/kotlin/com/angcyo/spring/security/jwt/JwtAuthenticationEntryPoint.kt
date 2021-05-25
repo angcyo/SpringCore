@@ -1,9 +1,9 @@
 package com.angcyo.spring.security.jwt
 
 import com.angcyo.spring.base.data.resultError
-import com.angcyo.spring.base.json.toJson
+import com.angcyo.spring.util.json.toJson
 import com.angcyo.spring.base.servlet.send
-import com.angcyo.spring.base.util.L
+import com.angcyo.spring.util.L
 import org.springframework.security.core.AuthenticationException
 import org.springframework.security.web.AuthenticationEntryPoint
 import java.io.IOException

@@ -1,6 +1,6 @@
 package com.angcyo.spring.security.controller
 
-import com.angcyo.spring.base.util.L
+import com.angcyo.spring.util.L
 import io.swagger.annotations.ApiModelProperty
 import org.springframework.validation.Errors
 import org.springframework.validation.Validator
