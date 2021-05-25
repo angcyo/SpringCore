@@ -8,9 +8,11 @@ dependencies {
     developmentOnly("org.springframework.boot:spring-boot-devtools")
     annotationProcessor("org.projectlombok:lombok")*/
 
+    //核心
     api(project(":SpringCore:core"))
-    api(project(":SpringCore:mysql"))
+    //内存缓存
     api(project(":SpringCore:redis"))
+    //auth授权认证
     api(project(":SpringCore:security"))
     //api(project(":SpringCore:swagger"))
 

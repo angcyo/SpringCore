@@ -7,8 +7,9 @@ import org.springframework.context.annotation.Configuration
  * Author:Bobby
  * DateTime:2019/4/9
  */
-@ConfigurationProperties(prefix = "rsa.encrypt")
+
 @Configuration
+@ConfigurationProperties(prefix = "rsa.encrypt")
 class SecretKeyConfig {
 
     /**私钥, 用于解密*/
