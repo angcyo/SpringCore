@@ -8,7 +8,7 @@ dependencies {
     //https://mybatis.plus/guide/
     api("com.baomidou:mybatis-plus-boot-starter:3.4.2")
 
-//    runtimeOnly("mysql:mysql-connector-java")
+    //runtimeOnly("mysql:mysql-connector-java")
     //https://mvnrepository.com/artifact/com.gitee.sunchenbin.mybatis.actable/mybatis-enhance-actable
     //https://www.yuque.com/sunchenbin/actable/lcbps5
     api("com.gitee.sunchenbin.mybatis.actable:mybatis-enhance-actable:1.4.9.RELEASE") {
