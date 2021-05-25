@@ -30,3 +30,10 @@ netstat -nat | grep 9201
 # swagger 文档
 
 http://localhost:9201/swagger-ui/index.html
+
+# 使用
+
+```
+git fetch git@gitee.com:angcyo/SpringCore.git
+git clone git@gitee.com:angcyo/SpringCore.git
+```
