@@ -4,6 +4,8 @@
 
 https://docs.spring.io/spring-boot/docs/current/reference/html/build-tool-plugins.html#build-tool-plugins.gradle
 
+https://docs.spring.io/spring-boot/docs/2.5.0/gradle-plugin/reference/htmlsingle/
+
 ## 启动程序
 
 ```shell
