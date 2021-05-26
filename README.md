@@ -1,5 +1,9 @@
 # SpringBoot
 
+>  It requires Gradle 6.8, 6.9, or 7.x.
+
+https://docs.spring.io/spring-boot/docs/current/reference/html/build-tool-plugins.html#build-tool-plugins.gradle
+
 ## 启动程序
 
 ```shell
