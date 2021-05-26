@@ -2,7 +2,7 @@ package com.angcyo.http
 
 import com.angcyo.http.DslHttp.DEFAULT_CODE_KEY
 import com.angcyo.http.DslHttp.DEFAULT_MSG_KEY
-import com.angcyo.spring.base.connectUrl
+import com.angcyo.spring.util.connectUrl
 import com.google.gson.JsonElement
 import com.google.gson.JsonObject
 import okhttp3.OkHttpClient

@@ -14,7 +14,7 @@ import com.angcyo.jsoup.html.dom.HtmlDom
 import com.angcyo.jsoup.html.dom.HtmlElement
 import com.angcyo.jsoup.toAbsUrl
 import com.angcyo.spring.util.L
-import com.angcyo.spring.base.util.patternList
+import com.angcyo.spring.util.patternList
 import org.jsoup.nodes.Document
 import org.jsoup.nodes.Element
 
