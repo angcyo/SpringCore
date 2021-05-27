@@ -1,5 +1,6 @@
 package com.angcyo.spring.security.service
 
+import com.angcyo.spring.base.ApplicationProperties
 import com.angcyo.spring.redis.Redis
 import com.angcyo.spring.security.SecurityConstants
 import com.angcyo.spring.security.controller.RegisterBean
@@ -47,17 +48,26 @@ class AuthService {
     @Autowired
     lateinit var redis: Redis
 
+    @Autowired
+    lateinit var applicationProperties: ApplicationProperties
+
+    val imageCodePrefix: String
+        get() = "${applicationProperties.name}.CODE.IMAGE."
+
+    val tokenPrefix: String
+        get() = "${applicationProperties.name}.TOKEN."
+
     fun setImageCode(request: HttpServletRequest, type: Int, code: String) {
-        redis["CODE.IMAGE.${type}.${request.codeKey()}", code] = 1 * 60
+        redis["${imageCodePrefix}.${type}.${request.codeKey()}", code] = 1 * 60
     }
 
     fun getImageCode(request: HttpServletRequest, type: Int): String? {
-        return redis["CODE.IMAGE.${type}.${request.codeKey()}"]?.toString()
+        return redis["${imageCodePrefix}.${type}.${request.codeKey()}"]?.toString()
     }
 
     fun clearImageCode(request: HttpServletRequest, type: Int) {
         request.getSession(false)?.run {
-            redis.del("CODE.IMAGE.${type}.${id}")
+            redis.del("${imageCodePrefix}.${type}.${id}")
         }
     }
 
@@ -109,7 +119,7 @@ class AuthService {
     /**检查用户的token, 是否和redis里面的一样
      * [token] 支持包含/不包含前缀的token*/
     fun _checkTokenValid(username: String, token: String): Boolean {
-        val redisToken = redis["TOKEN.$username"]
+        val redisToken = redis["${tokenPrefix}.$username"]
         if (token.startsWith(SecurityConstants.TOKEN_PREFIX)) {
             return SecurityConstants.TOKEN_PREFIX + redisToken == token
         }
@@ -119,12 +129,12 @@ class AuthService {
     /**[token] 不含前缀的token*/
     fun _loginEnd(username: String, token: String) {
         //保存token, 一天超时
-        redis["TOKEN.$username", token] = oneDaySec
+        redis["${tokenPrefix}.$username", token] = oneDaySec
     }
 
     /**退出登录*/
     fun _logoutEnd(username: String) {
         SecurityContextHolder.clearContext()
-        redis.del("TOKEN.$username")
+        redis.del("${tokenPrefix}.$username")
     }
 }

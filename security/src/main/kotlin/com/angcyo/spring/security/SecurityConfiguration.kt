@@ -57,6 +57,7 @@ class SecurityConfiguration : WebSecurityConfigurerAdapter() {
             "/v2/api-docs/**",
             "/v3/api-docs/**",
             "/doc.html",
+            "/error",
         )
 
         fun configSecurityWhiteList(config: MutableList<String>.() -> Unit) {
