@@ -10,7 +10,7 @@ import com.gitee.sunchenbin.mybatis.actable.annotation.Column
  * @date 2021/02/25
  */
 @TableName("test_mybatis_bean")
-class TestTable : BaseAuditTable() {
+class TestMybatisTable : BaseAuditTable() {
     @Column
     var data: String? = null
 

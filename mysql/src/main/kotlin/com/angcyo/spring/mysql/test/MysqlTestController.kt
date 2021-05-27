@@ -26,26 +26,26 @@ class MysqlTestController {
 
     @RequestMapping("/save")
     @Transactional
-    fun saveOne(): Result<TestEntity> {
-        val entity = TestEntity().apply { data = nowTimeString() }
+    fun saveOne(): Result<TestJpaEntity> {
+        val entity = TestJpaEntity().apply { data = nowTimeString() }
         val result = mysqlTestRepository.save(entity)
         return result.ok()
     }
 
     @RequestMapping("/one")
-    fun findOne(): TestEntity? {
+    fun findOne(): TestJpaEntity? {
         //mysqlTestRepository.findById()
-        return TestEntity()
+        return TestJpaEntity()
     }
 
     @RequestMapping("/all")
     @RecordLog("RecordLog测试")
-    fun findAll(): Result<List<TestEntity>> {
+    fun findAll(): Result<List<TestJpaEntity>> {
         return try {
             mysqlTestRepository.findAll()
         } catch (e: Exception) {
             e.printStackTrace()
-            emptyList<TestEntity>()
+            emptyList<TestJpaEntity>()
         }.ok()
     }
 }

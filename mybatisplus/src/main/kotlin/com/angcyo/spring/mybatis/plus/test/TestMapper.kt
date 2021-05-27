@@ -1,6 +1,6 @@
 package com.angcyo.spring.mybatis.plus.test
 
-import com.angcyo.spring.mybatis.plus.test.table.TestTable
+import com.angcyo.spring.mybatis.plus.test.table.TestMybatisTable
 import com.baomidou.mybatisplus.core.mapper.BaseMapper
 
 /**
@@ -10,5 +10,5 @@ import com.baomidou.mybatisplus.core.mapper.BaseMapper
  * @author angcyo
  * @date 2021/02/25
  */
-interface TestMapper : BaseMapper<TestTable> {
+interface TestMapper : BaseMapper<TestMybatisTable> {
 }

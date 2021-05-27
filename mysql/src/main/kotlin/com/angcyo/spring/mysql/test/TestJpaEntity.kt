@@ -10,7 +10,7 @@ import javax.persistence.Entity
  */
 
 @Entity(name = "test_jpa_entity")
-class TestEntity : BaseAuditEntity() {
+class TestJpaEntity : BaseAuditEntity() {
     var data: String? = null
     var message: String? = null
     var num: Int = 0

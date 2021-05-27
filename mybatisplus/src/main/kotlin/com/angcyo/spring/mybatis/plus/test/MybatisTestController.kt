@@ -4,7 +4,7 @@ import com.angcyo.spring.base.data.Result
 import com.angcyo.spring.base.data.ok
 import com.angcyo.spring.log.core.RecordLog
 import com.angcyo.spring.mybatis.plus.queryWrapper
-import com.angcyo.spring.mybatis.plus.test.table.TestTable
+import com.angcyo.spring.mybatis.plus.test.table.TestMybatisTable
 import com.angcyo.spring.util.L
 import com.angcyo.spring.util.nowTimeString
 import com.baomidou.mybatisplus.annotation.TableName
@@ -30,15 +30,15 @@ class MybatisTestController {
 
     @RequestMapping("/save")
     @Transactional
-    fun save(): Result<TestTable> {
-        val entity = TestTable().apply { data = nowTimeString() }
+    fun save(): Result<TestMybatisTable> {
+        val entity = TestMybatisTable().apply { data = nowTimeString() }
         val result = testServiceImpl.save(entity)
         return entity.ok()
     }
 
     @RequestMapping("/delete")
     fun delete(): Result<Int> {
-        val cls = TestTable::class.java
+        val cls = TestMybatisTable::class.java
         val ano = cls.getAnnotation(TableName::class.java)
         L.i(ano.value)
         return testServiceImpl.remove(queryWrapper {
@@ -51,7 +51,7 @@ class MybatisTestController {
     }
 
     @RequestMapping("/update")
-    fun update(): Result<TestTable> {
+    fun update(): Result<TestMybatisTable> {
         //1
         //FieldFill.INSERT_UPDATE 不会触发
         /*val result = testServiceImpl.update(updateWrapper {
@@ -89,7 +89,7 @@ class MybatisTestController {
     }
 
     @RequestMapping("/find")
-    fun find(): Result<TestTable> {
+    fun find(): Result<TestMybatisTable> {
         return testServiceImpl.getOne(queryWrapper {
             apply("id = (select * from (select max(id) from test_mybatis_bean) a)")
         }).ok()
@@ -97,13 +97,13 @@ class MybatisTestController {
 
     @RequestMapping("/all")
     @RecordLog("RecordLog测试")
-    fun findAll(): Result<List<TestTable>> {
+    fun findAll(): Result<List<TestMybatisTable>> {
         return try {
             //testServiceImpl.getOne(null)
             testServiceImpl.list()
         } catch (e: Exception) {
             e.printStackTrace()
-            emptyList<TestTable>()
+            emptyList<TestMybatisTable>()
         }.ok()
     }
 }

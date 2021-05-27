@@ -1,6 +1,6 @@
 package com.angcyo.spring.mysql.example
 
-import com.angcyo.spring.mysql.test.TestEntity
+import com.angcyo.spring.mysql.test.TestJpaEntity
 import com.angcyo.spring.util.nowTimeString
 import org.springframework.data.domain.Example
 import org.springframework.data.domain.ExampleMatcher
@@ -16,7 +16,7 @@ import org.springframework.data.domain.ExampleMatcher
 
 object ExampleUtil {
     fun test() {
-        val entity = TestEntity()
+        val entity = TestJpaEntity()
         entity.data = nowTimeString()
 
         //val example = Example.of(entity)
@@ -26,6 +26,6 @@ object ExampleUtil {
             .withIncludeNullValues()
             .withStringMatcher(ExampleMatcher.StringMatcher.DEFAULT)
 
-        val example = Example.of<TestEntity>(entity, matcher)
+        val example = Example.of<TestJpaEntity>(entity, matcher)
     }
 }

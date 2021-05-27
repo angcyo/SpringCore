@@ -8,5 +8,5 @@ import org.springframework.data.jpa.repository.JpaRepository
  * @date 2020/11/04
  */
 
-interface MysqlTestRepository : JpaRepository<TestEntity, Long> {
+interface MysqlTestRepository : JpaRepository<TestJpaEntity, Long> {
 }
