@@ -3,11 +3,10 @@ package com.angcyo.spring.security.service
 import com.angcyo.spring.base.ApplicationProperties
 import com.angcyo.spring.redis.Redis
 import com.angcyo.spring.security.SecurityConstants
-import com.angcyo.spring.security.controller.RegisterBean
+import com.angcyo.spring.security.bean.AccountQueryParam
+import com.angcyo.spring.security.bean.RegisterReqBean
 import com.angcyo.spring.security.controller.codeKey
 import com.angcyo.spring.security.entity.AuthEntity
-import com.angcyo.spring.security.entity.RoleEntity
-import com.angcyo.spring.security.entity.Roles
 import com.angcyo.spring.util.oneDaySec
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.security.core.context.SecurityContextHolder
@@ -15,6 +14,7 @@ import org.springframework.security.core.userdetails.UserDetailsService
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import java.util.*
 import javax.servlet.http.HttpServletRequest
 
 /**
@@ -37,12 +37,6 @@ class AuthService {
     }
 
     @Autowired
-    lateinit var authRepository: AuthRepository
-
-    @Autowired
-    lateinit var roleRepository: RoleRepository
-
-    @Autowired
     lateinit var passwordEncoder: PasswordEncoder
 
     @Autowired
@@ -57,18 +51,19 @@ class AuthService {
     val tokenPrefix: String
         get() = "${applicationProperties.name}.TOKEN."
 
-    fun setImageCode(request: HttpServletRequest, type: Int, code: String) {
-        redis["${imageCodePrefix}.${type}.${request.codeKey()}", code] = 1 * 60
+    /**临时保存图形验证码*/
+    fun setImageCode(request: HttpServletRequest, type: Int, code: String, time: Long = 1 * 60) {
+        redis["${imageCodePrefix}.${type}.${request.codeKey()}", code] = time
     }
 
+    /**获取保存过的验证码*/
     fun getImageCode(request: HttpServletRequest, type: Int): String? {
         return redis["${imageCodePrefix}.${type}.${request.codeKey()}"]?.toString()
     }
 
+    /**清除验证码缓存*/
     fun clearImageCode(request: HttpServletRequest, type: Int) {
-        request.getSession(false)?.run {
-            redis.del("${imageCodePrefix}.${type}.${id}")
-        }
+        redis.del("${imageCodePrefix}.${type}.${request.codeKey()}")
     }
 
     /**[rawPassword] 实际的密码,比如angcyo
@@ -83,17 +78,48 @@ class AuthService {
     /**是否可以注册
      * [first] 是否可以注册
      * [second] 不可以注册的原因*/
-    fun canRegister(bean: RegisterBean): Pair<Boolean, String?> {
-        val isUsernameExist = bean.username.isNullOrBlank() || authRepository.existsByUsername(bean.username!!)
+    fun canRegister(bean: RegisterReqBean): Pair<Boolean, String?> {
+        /*val isUsernameExist = bean.username.isNullOrBlank() || authRepository.existsByUsername(bean.username!!)
         if (isUsernameExist) {
             return false to "用户名已存在"
-        }
+        }*/
         return true to null
+    }
+
+    @Autowired
+    lateinit var accountService: AccountService
+
+    /**判断帐号是否存在*/
+    fun isAccountExist(account: String?) {
+        /*accountService.count(AccountQueryParam().apply {
+            name = account
+        })*/
     }
 
     /**注册用户, 写入数据库*/
     @Transactional
-    fun register(bean: RegisterBean): AuthEntity? {
+    fun register(bean: RegisterReqBean): AuthEntity? {
+        isAccountExist(bean.username)
+        /*if (bean.type == WebType.value) {
+            //web 注册类型, 需要验证验证码
+
+            val imageCode = authService.getImageCode(request, CODE_TYPE_REGISTER) ?: return "验证码已过期".error()
+
+            if (bean.code.isNullOrBlank() || bean.code?.lowercase(Locale.getDefault()) != imageCode.lowercase(Locale.getDefault())) {
+                return "验证码错误".error()
+            }
+        }
+
+        val pair = canRegister(bean)
+        if (!pair.first) {
+            clearImageCode(request, CODE_TYPE_REGISTER)
+            return pair.second.error()
+        }
+
+        val entity = register(bean)
+        entity
+
+
         val entity = authRepository.save(AuthEntity().apply {
             username = bean.username
             password = passwordEncoder.encode(bean.password)
@@ -103,17 +129,20 @@ class AuthService {
             role = Roles.USER
             des = Roles.USER
         }))
-        return entity
+        return entity*/
+
+        return null
     }
 
     /**[UserDetailsService]需要获取的用户, 系统会自动校验密码是否匹配
      * 这里只需要从数据库查找授权用户信息, 并返回即可*/
     fun loadAuth(username: String): AuthEntity? {
-        val authEntity = authRepository.findByUsername(username)
+        /*val authEntity = authRepository.findByUsername(username)
         authEntity?.apply {
             roles = roleRepository.findAllByAuthId(id)
         }
-        return authEntity
+        return authEntity*/
+        return null
     }
 
     /**检查用户的token, 是否和redis里面的一样

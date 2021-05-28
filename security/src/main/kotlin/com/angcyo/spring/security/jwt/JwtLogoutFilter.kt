@@ -17,9 +17,11 @@ import javax.servlet.http.HttpServletResponse
  */
 
 @Deprecated("使用[SecurityConfiguration]中配置")
-class JwtLogoutFilter(logoutSuccessHandler: LogoutSuccessHandler,
-                      vararg handlers: LogoutHandler)
-    : LogoutFilter(logoutSuccessHandler, *handlers) {
+class JwtLogoutFilter(
+    logoutSuccessHandler: LogoutSuccessHandler,
+    vararg handlers: LogoutHandler
+) : LogoutFilter(logoutSuccessHandler, *handlers) {
+
     init {
         //设置授权接口地址
         setFilterProcessesUrl(SecurityConstants.AUTH_LOGOUT_URL)

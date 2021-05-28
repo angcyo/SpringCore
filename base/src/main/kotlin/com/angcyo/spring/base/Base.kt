@@ -1,6 +1,7 @@
 package com.angcyo.spring.base
 
 import com.angcyo.spring.util.L
+import org.springframework.beans.BeansException
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.ApplicationArguments
 import org.springframework.context.ApplicationContext
@@ -28,6 +29,7 @@ class Base : ApplicationContextAware {
         /**保存应用程序上下文对象*/
         lateinit var applicationContext: ApplicationContext
 
+        @Throws(BeansException::class)
         fun <T> getBean(name: String): T? {
             if (applicationContext.containsBean(name)) {
                 return applicationContext.getBean(name) as T
@@ -35,7 +37,8 @@ class Base : ApplicationContextAware {
             return null
         }
 
-        fun <T> getBean(requiredType: Class<T>): T? {
+        @Throws(BeansException::class)
+        fun <T> getBean(requiredType: Class<T>): T {
             return applicationContext.getBean(requiredType)
         }
     }

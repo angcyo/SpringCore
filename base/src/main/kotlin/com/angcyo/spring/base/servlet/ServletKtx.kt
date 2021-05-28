@@ -86,18 +86,8 @@ fun HttpServletResponse.send(
     code: Int = HttpServletResponse.SC_OK,
     type: String = "application/json"
 ) {
-    status = code
-    contentType = type
     characterEncoding = "UTF-8"
-    if (message == null) {
-        setContentLengthLong(-1)
-        writer.close()
-    } else {
-        setContentLengthLong(message.toByteArray().size.toLong())
-        writer.use {
-            it.print(message)
-        }
-    }
+    send(message?.toByteArray(Charsets.UTF_8), code, type)
 }
 
 /**发送一个Rest格式的错误数据*/

@@ -1,9 +1,9 @@
 package com.angcyo.spring.security.jwt
 
-import com.angcyo.spring.util.L
 import com.angcyo.spring.security.SecurityConstants
 import com.angcyo.spring.security.UserDetailsServiceImpl
 import com.angcyo.spring.security.service.AuthService
+import com.angcyo.spring.util.L
 import org.springframework.http.HttpHeaders
 import org.springframework.security.authentication.AuthenticationManager
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
@@ -18,24 +18,32 @@ import javax.servlet.http.HttpServletResponse
  * https://dev.to/kubadlo/spring-security-with-jwt-3j76
  * https://github.com/SpringStudioIst/spring-security-jwt-guide
  *
- * 授权过程
- * 从请求头中[ecurityConstants.TOKEN_HEADER]获取token
+ * 验证传过来的Token是否有效
+ * 从请求头中[com.angcyo.spring.security.SecurityConstants.TOKEN_HEADER]获取token
  * */
-class JwtAuthorizationFilter(authenticationManager: AuthenticationManager?,
-                             val userDetailsService: UserDetailsServiceImpl,
-                             val authService: AuthService) :
-        BasicAuthenticationFilter(authenticationManager) {
+class JwtAuthorizationFilter(
+    authenticationManager: AuthenticationManager?,
+    val userDetailsService: UserDetailsServiceImpl,
+    val authService: AuthService
+) : BasicAuthenticationFilter(authenticationManager) {
 
-    override fun doFilterInternal(request: HttpServletRequest, response: HttpServletResponse, filterChain: FilterChain) {
+    /**请求拦截, 验证Token*/
+    override fun doFilterInternal(
+        request: HttpServletRequest,
+        response: HttpServletResponse,
+        filterChain: FilterChain
+    ) {
         val authentication = getAuthentication(request)
         if (authentication == null) {
             SecurityContextHolder.clearContext()
+            //SecurityContextHolder.getContext().authentication = UsernamePasswordAuthenticationToken("111", "123")
         } else {
             SecurityContextHolder.getContext().authentication = authentication
         }
         filterChain.doFilter(request, response)
     }
 
+    /**获取授权*/
     private fun getAuthentication(request: HttpServletRequest): UsernamePasswordAuthenticationToken? {
         val token = request.getHeader(SecurityConstants.TOKEN_HEADER)
         var authentication = JWT.parseToken(token)?.run {

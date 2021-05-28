@@ -35,6 +35,7 @@ abstract class BaseAuditTable {
     @IsAutoIncrement
     @TableId(value = "id", type = IdType.AUTO)
     @ApiModelProperty("数据Id")
+    @com.gitee.sunchenbin.mybatis.actable.annotation.Column(comment = "主键")
     open var id: Long? = null
 
     @Column(updatable = false)
@@ -42,13 +43,14 @@ abstract class BaseAuditTable {
     @DateTimeFormat(pattern = Base.DEFAULT_DATE_TIME_FORMATTER)
     @JsonFormat(pattern = Base.DEFAULT_DATE_TIME_FORMATTER, timezone = "GMT+8")
     @TableField(fill = FieldFill.INSERT)
+    @com.gitee.sunchenbin.mybatis.actable.annotation.Column(comment = "记录创建时间")
     open var createdAt: LocalDateTime? = null
 
-    @com.gitee.sunchenbin.mybatis.actable.annotation.Column
     @ApiModelProperty("更新时间")
     @DateTimeFormat(pattern = Base.DEFAULT_DATE_TIME_FORMATTER)
     @JsonFormat(pattern = Base.DEFAULT_DATE_TIME_FORMATTER, timezone = "GMT+8")
     @TableField(fill = FieldFill.INSERT_UPDATE)
+    @com.gitee.sunchenbin.mybatis.actable.annotation.Column(comment = "记录更新时间")
     open var updatedAt: LocalDateTime? = null
 
     @CreatedBy
@@ -56,18 +58,19 @@ abstract class BaseAuditTable {
     @JsonIgnore
     @ApiModelProperty("创建者")
     @TableField(fill = FieldFill.INSERT)
+    @com.gitee.sunchenbin.mybatis.actable.annotation.Column(comment = "记录创建者")
     open var createdBy: String? = null
 
     @LastModifiedBy
     @JsonIgnore
-    @com.gitee.sunchenbin.mybatis.actable.annotation.Column
     @ApiModelProperty("更新者")
     @TableField(fill = FieldFill.INSERT_UPDATE)
+    @com.gitee.sunchenbin.mybatis.actable.annotation.Column(comment = "记录更新者")
     open var updatedBy: String? = null
 
     //@TableLogic(value = "0", delval = "1")
     //@TableField(fill = FieldFill.INSERT) //,使用delete语句时自动生效
-    @com.gitee.sunchenbin.mybatis.actable.annotation.Column
     @ApiModelProperty("逻辑删除（0 未删除、1 删除）")
+    @com.gitee.sunchenbin.mybatis.actable.annotation.Column(comment = "逻辑删除（0 未删除、1 删除）")
     open var deleteFlag: Int? = null
 }

@@ -20,6 +20,9 @@ dependencies {
     implementation(project(":SpringCore:mysql"))
     implementation(project(":SpringCore:redis"))
     //implementation(project(":SpringCore:swagger"))
+
+    //用户登录授权
+    api(project(":SpringCore:mybatisplus"))
 }
 
 tasks.getByName<org.springframework.boot.gradle.tasks.bundling.BootJar>("bootJar") {

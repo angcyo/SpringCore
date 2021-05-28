@@ -1,4 +1,4 @@
-package com.angcyo.spring.mybatis.plus.test
+package com.angcyo.spring.mybatis.plus.test.mapper
 
 import com.angcyo.spring.mybatis.plus.test.table.TestMybatisTable
 import com.baomidou.mybatisplus.core.mapper.BaseMapper

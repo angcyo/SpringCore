@@ -5,6 +5,8 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper
+import com.gitee.sunchenbin.mybatis.actable.utils.ColumnUtils
+import com.google.common.base.CaseFormat
 
 /**
  * Email:angcyo@126.com
@@ -54,3 +56,15 @@ fun AbstractWrapper<*, String, *>.deleteFlag(delete: Boolean? = false) {
         else -> ne("deleteFlag", 1)
     }
 }
+
+/**UserName 转换成 user_name
+ * [com.gitee.sunchenbin.mybatis.actable.utils.ColumnUtils.getTableName]*/
+fun lowerName(value: String) = CaseFormat.LOWER_CAMEL.to(
+    CaseFormat.LOWER_UNDERSCORE,
+    value.replace(ColumnUtils.SQL_ESCAPE_CHARACTER, "")
+).lowercase()
+
+fun String.toLowerName() = lowerName(this)
+
+/**user_name 转换成 UserName*/
+fun lowerCamel(value: String) = CaseFormat.LOWER_UNDERSCORE.to(CaseFormat.LOWER_CAMEL, value)

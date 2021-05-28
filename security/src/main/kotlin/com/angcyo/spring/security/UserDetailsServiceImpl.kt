@@ -14,8 +14,8 @@ import org.springframework.stereotype.Service
  */
 @Service
 class UserDetailsServiceImpl(val authService: AuthService) : UserDetailsService {
-    override fun loadUserByUsername(name: String): UserDetails {
-        val entity: AuthEntity = authService.loadAuth(name) ?: throw UsernameNotFoundException("未找到用户:$name")
+    override fun loadUserByUsername(username: String): UserDetails {
+        val entity: AuthEntity = authService.loadAuth(username) ?: throw UsernameNotFoundException("未找到用户:$username")
         return JwtUserDetails(entity)
     }
 }

@@ -1,4 +1,4 @@
-package com.angcyo.spring.security.controller
+package com.angcyo.spring.security.bean
 
 import io.swagger.annotations.ApiModel
 import io.swagger.annotations.ApiModelProperty
@@ -14,7 +14,7 @@ import javax.validation.constraints.Size
  */
 
 @ApiModel("注册信息")
-class RegisterBean {
+class RegisterReqBean {
 
     @ApiModelProperty("注册用户名")
     @NotBlank(message = "用户名不能为空")
@@ -32,9 +32,3 @@ class RegisterBean {
     @ApiModelProperty("注册时的验证码")
     var code: String? = null
 }
-
-/**注册类型*/
-sealed class RegisterType(val value: String)
-object AndroidType : RegisterType("android")
-object IosType : RegisterType("ios")
-object WebType : RegisterType("web")

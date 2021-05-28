@@ -33,12 +33,12 @@ fun Func<*, String>.order(page: RequestPage) {
     val desc = page.desc
     if (!desc.isNullOrEmpty()) {
         //降序
-        orderByDesc(*desc.split(RequestPage.SPLIT).map { it.queryColumn() }.toTypedArray())
+        orderByDesc(null, *desc.split(RequestPage.SPLIT).map { it.queryColumn() }.toTypedArray())
     }
 
     val asc = page.asc
     if (!asc.isNullOrEmpty()) {
         //升序
-        orderByAsc(*asc.split(RequestPage.SPLIT).map { it.queryColumn() }.toTypedArray())
+        orderByAsc(null, *asc.split(RequestPage.SPLIT).map { it.queryColumn() }.toTypedArray())
     }
 }

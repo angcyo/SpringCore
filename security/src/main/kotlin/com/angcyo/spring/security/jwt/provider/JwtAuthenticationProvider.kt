@@ -1,8 +1,7 @@
-package com.angcyo.spring.security.jwt
+package com.angcyo.spring.security.jwt.provider
 
 import com.angcyo.spring.security.entity.AuthEntity
 import com.angcyo.spring.security.entity.toAuthorities
-import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.security.authentication.AuthenticationProvider
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
 import org.springframework.security.core.Authentication
@@ -17,16 +16,13 @@ import org.springframework.security.crypto.password.PasswordEncoder
  * https://blog.csdn.net/qq_35915384/article/details/80227274
  */
 
-class JwtAuthenticationProvider : AuthenticationProvider {
-
-    @Autowired
-    lateinit var passwordEncoder: PasswordEncoder
+class JwtAuthenticationProvider(val passwordEncoder: PasswordEncoder) : AuthenticationProvider {
 
     /**
      * 验证登录信息,若登陆成功,设置 Authentication
      */
     @Throws(AuthenticationException::class)
-    override fun authenticate(authentication: Authentication): Authentication? {
+    override fun authenticate(authentication: Authentication): Authentication {
         val principal = authentication.principal
         val credentials = authentication.credentials
         if (principal is AuthEntity && credentials is String) {
@@ -42,7 +38,7 @@ class JwtAuthenticationProvider : AuthenticationProvider {
      */
     override fun supports(authentication: Class<*>): Boolean {
         return UsernamePasswordAuthenticationToken::class.java
-                .isAssignableFrom(authentication)
+            .isAssignableFrom(authentication)
     }
 
     /* override fun supports(authentication: Class<*>): Boolean {

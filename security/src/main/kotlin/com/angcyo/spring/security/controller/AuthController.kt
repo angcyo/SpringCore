@@ -1,12 +1,13 @@
 package com.angcyo.spring.security.controller
 
 import com.angcyo.spring.base.data.Result
-import com.angcyo.spring.base.data.error
+import com.angcyo.spring.base.data.ok
 import com.angcyo.spring.base.data.result
+import com.angcyo.spring.base.servlet.body
 import com.angcyo.spring.base.servlet.param
 import com.angcyo.spring.base.servlet.send
-import com.angcyo.spring.redis.Redis
 import com.angcyo.spring.security.SecurityConstants
+import com.angcyo.spring.security.bean.RegisterReqBean
 import com.angcyo.spring.security.entity.AuthEntity
 import com.angcyo.spring.security.service.AuthService
 import com.angcyo.spring.security.service.AuthService.Companion.CODE_TYPE_REGISTER
@@ -21,10 +22,7 @@ import io.swagger.annotations.ApiOperation
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.validation.BindingResult
 import org.springframework.validation.annotation.Validated
-import org.springframework.web.bind.annotation.GetMapping
-import org.springframework.web.bind.annotation.PostMapping
-import org.springframework.web.bind.annotation.RequestBody
-import org.springframework.web.bind.annotation.RestController
+import org.springframework.web.bind.annotation.*
 import javax.servlet.http.HttpServletRequest
 import javax.servlet.http.HttpServletResponse
 
@@ -43,9 +41,6 @@ class AuthController {
     @Autowired
     lateinit var authService: AuthService
 
-    @Autowired
-    lateinit var redis: Redis
-
     @GetMapping(SecurityConstants.AUTH_REGISTER_CODE_URL)
     @ApiOperation("获取注册时的图形验证码")
     @ApiImplicitParams(
@@ -55,7 +50,7 @@ class AuthController {
         ApiImplicitParam(name = "w", value = "验证码的宽度", required = false, dataTypeClass = Int::class),
         ApiImplicitParam(name = "h", value = "验证码的高度", required = false, dataTypeClass = Int::class)
     )
-    fun imageCode(request: HttpServletRequest, response: HttpServletResponse) {
+    fun getImageCode(request: HttpServletRequest, response: HttpServletResponse) {
 
         val type: Int = request.getParameter("type")?.toIntOrNull() ?: CODE_TYPE_REGISTER
         val length: Int = request.getParameter("l")?.toIntOrNull() ?: 4
@@ -87,34 +82,23 @@ class AuthController {
     @ApiOperation("注册用户")
     @ApiImplicitParam(name = "uuid", value = "客户端id", required = true, dataTypeClass = String::class)
     fun register(
-        @RequestBody @Validated bean: RegisterBean, /*不支持kotlin的data class*/
+        @RequestBody @Validated bean: RegisterReqBean, /*不支持kotlin的data class*/
         bindingResult: BindingResult,/*必须放在模型属性之后, 否则无效*/
         request: HttpServletRequest
     ): Result<AuthEntity?>? {
         return bindingResult.result {
-
-            if (bean.type == WebType.value) {
-                //web 注册类型, 需要验证验证码
-
-                val imageCode = authService.getImageCode(request, CODE_TYPE_REGISTER) ?: return "验证码已过期".error()
-
-                if (bean.code.isNullOrBlank() || bean.code?.toLowerCase() != imageCode.toLowerCase()) {
-                    return "验证码错误".error()
-                }
-            }
-
-            val pair = authService.canRegister(bean)
-            if (!pair.first) {
-                authService.clearImageCode(request, CODE_TYPE_REGISTER)
-                return pair.second.error()
-            }
-
-            val entity = authService.register(bean)
-            entity
+            authService.register(bean)
         }
+    }
+
+    @RequestMapping("/auth/test")
+    @ApiOperation("授权测试")
+    fun test(request: HttpServletRequest): Result<String>? {
+        return request.body()?.ok()
     }
 }
 
+/**获取客户端唯一标识的key*/
 fun HttpServletRequest.codeKey(): String {
     val uuid = param("uuid")
     var key = ""

@@ -7,6 +7,7 @@ import org.springframework.context.annotation.Import
 import java.lang.annotation.Inherited
 
 /**
+ * 是否激活RSA 数据加密
  * Author:Bobby
  * DateTime:2019/4/9 16:44
  */
