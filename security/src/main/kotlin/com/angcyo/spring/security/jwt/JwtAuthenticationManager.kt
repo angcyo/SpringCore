@@ -1,7 +1,9 @@
 package com.angcyo.spring.security.jwt
 
+import com.angcyo.spring.security.jwt.token.ResponseAuthenticationToken
 import org.springframework.security.authentication.AuthenticationManager
 import org.springframework.security.authentication.AuthenticationProvider
+import org.springframework.security.authentication.BadCredentialsException
 import org.springframework.security.core.Authentication
 import org.springframework.stereotype.Component
 
@@ -26,6 +28,10 @@ class JwtAuthenticationManager : AuthenticationManager {
     var defaultAuthenticationProviderList = mutableListOf<AuthenticationProvider>()
 
     override fun authenticate(authentication: Authentication?): Authentication? {
+        if (authentication is ResponseAuthenticationToken) {
+            return authentication
+        }
+
         var result: Authentication? = null
 
         //1:
@@ -56,6 +62,10 @@ class JwtAuthenticationManager : AuthenticationManager {
             }
         }
 
-        return result ?: authentication
+        if (result == null) {
+            throw BadCredentialsException("非法登录!")
+        }
+
+        return result
     }
 }

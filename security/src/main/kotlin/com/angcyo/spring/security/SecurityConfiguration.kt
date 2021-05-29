@@ -1,19 +1,17 @@
 package com.angcyo.spring.security
 
 import com.angcyo.spring.security.jwt.*
-import com.angcyo.spring.security.jwt.provider.JwtAuthenticationProvider
+import com.angcyo.spring.security.jwt.provider.UsernamePasswordAuthenticationProvider
 import com.angcyo.spring.security.service.AuthService
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.Bean
 import org.springframework.security.authentication.AuthenticationManager
-import org.springframework.security.authentication.AuthenticationProvider
 import org.springframework.security.authentication.ProviderManager
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder
 import org.springframework.security.config.annotation.web.builders.HttpSecurity
 import org.springframework.security.config.annotation.web.builders.WebSecurity
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter
-import org.springframework.security.core.userdetails.UserDetailsService
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter
@@ -67,9 +65,6 @@ class SecurityConfiguration : WebSecurityConfigurerAdapter() {
         }
     }
 
-    @Autowired
-    lateinit var userDetailsServiceImpl: UserDetailsServiceImpl
-
     /**1. 通过重载，配置user-detail服务*/
     override fun configure(auth: AuthenticationManagerBuilder) {
         //super.configure(auth)
@@ -83,10 +78,11 @@ class SecurityConfiguration : WebSecurityConfigurerAdapter() {
              val authenticationProvider = it.getAuthenticationProvider()
              //auth.authenticationProvider(authenticationProvider)
          }*/
+
         // 设置自定义的userDetailsService以及密码编码器, 用于登录接口验证判断
-        auth.authenticationProvider(authenticationProvider())
-            .userDetailsService(userDetailsServiceImpl)
-            .passwordEncoder(passwordEncoder())//.password(passwordEncoder())
+        /* auth.authenticationProvider(authenticationProvider())
+             .userDetailsService(userDetailsServiceImpl)
+             .passwordEncoder(passwordEncoder())//.password(passwordEncoder())*/
     }
 
     @Bean
@@ -101,27 +97,12 @@ class SecurityConfiguration : WebSecurityConfigurerAdapter() {
         return source
     }
 
-    /**
-     * 认证 AuthenticationProvider
-     */
-    @Bean
-    fun authenticationProvider(): AuthenticationProvider {
-        return JwtAuthenticationProvider(passwordEncoder())
-    }
-
     /**自定义的授权管理, 用来分配不同的授权方式*/
     override fun authenticationManager(): AuthenticationManager {
         //return super.authenticationManager()
-        return JwtAuthenticationManager()
-    }
-
-    /**2. */
-    override fun userDetailsService(): UserDetailsService {
-        return super.userDetailsService()
-    }
-
-    override fun userDetailsServiceBean(): UserDetailsService {
-        return super.userDetailsServiceBean()
+        return JwtAuthenticationManager().apply {
+            defaultAuthenticationProviderList.add(UsernamePasswordAuthenticationProvider())
+        }
     }
 
     @Autowired
@@ -140,7 +121,9 @@ class SecurityConfiguration : WebSecurityConfigurerAdapter() {
             .authorizeRequests()
             .antMatchers(*SECURITY_WHITE_LIST.toTypedArray()).permitAll()
             .antMatchers(
+                SecurityConstants.AUTH_LOGIN_URL,
                 SecurityConstants.AUTH_REGISTER_URL,
+                SecurityConstants.AUTH_REGISTER_CODE_URL,
             ).permitAll()
             .anyRequest().authenticated()
             //.and().formLogin().loginPage().failureUrl()
@@ -151,7 +134,7 @@ class SecurityConfiguration : WebSecurityConfigurerAdapter() {
                 JwtLoginFilter(authenticationManager, authService),
                 UsernamePasswordAuthenticationFilter::class.java
             )
-            .addFilter(JwtAuthorizationFilter(authenticationManager, userDetailsServiceImpl, authService))
+            .addFilter(JwtAuthorizationFilter(authenticationManager, authService))
             //.addFilter(JwtLogoutFilter(SecurityLogoutSuccessHandler(), SecurityLogoutHandler()))
             //.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
             .sessionManagement().apply {

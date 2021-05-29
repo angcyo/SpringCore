@@ -8,7 +8,7 @@ package com.angcyo.spring.mybatis.plus.auto.annotation
  * @author angcyo
  * @date 2021/05/28
  */
-enum class Where {
+enum class WhereEnum {
 
     /**
      * 等于 =

@@ -1,6 +1,6 @@
 package com.angcyo.spring.security.mapper
 
-import com.angcyo.spring.mybatis.plus.auto.BaseAutoMapper
+import com.angcyo.spring.mybatis.plus.auto.IBaseAutoMapper
 import com.angcyo.spring.security.table.PermissionTable
 
 /**
@@ -8,4 +8,4 @@ import com.angcyo.spring.security.table.PermissionTable
  * @author angcyo
  * @date 2021/05/28
  */
-interface IPermissionMapper : BaseAutoMapper<PermissionTable>
+interface IPermissionMapper : IBaseAutoMapper<PermissionTable>

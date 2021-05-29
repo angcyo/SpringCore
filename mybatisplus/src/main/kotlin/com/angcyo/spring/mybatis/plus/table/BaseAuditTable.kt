@@ -72,5 +72,5 @@ abstract class BaseAuditTable {
     //@TableField(fill = FieldFill.INSERT) //,使用delete语句时自动生效
     @ApiModelProperty("逻辑删除（0 未删除、1 删除）")
     @com.gitee.sunchenbin.mybatis.actable.annotation.Column(comment = "逻辑删除（0 未删除、1 删除）")
-    open var deleteFlag: Int? = null
+    open var deleteFlag: Int? = 0
 }

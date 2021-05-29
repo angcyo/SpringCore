@@ -3,17 +3,15 @@ package com.angcyo.spring.security.jwt
 import com.angcyo.spring.base.data.ok
 import com.angcyo.spring.base.data.resultError
 import com.angcyo.spring.base.json.toJackson
-import com.angcyo.spring.base.json.toJacksonIgnore
 import com.angcyo.spring.base.servlet.fromJson
 import com.angcyo.spring.base.servlet.send
 import com.angcyo.spring.base.servlet.sendError
 import com.angcyo.spring.security.SecurityConstants
-import com.angcyo.spring.security.entity.AuthEntity
-import com.angcyo.spring.security.entity.toAuthorities
+import com.angcyo.spring.security.bean.AuthRepBean
 import com.angcyo.spring.security.bean.AuthReqBean
-import com.angcyo.spring.security.jwt.provider.RequestAuthenticationToken
+import com.angcyo.spring.security.jwt.token.RequestAuthenticationToken
+import com.angcyo.spring.security.jwt.token.ResponseAuthenticationToken
 import com.angcyo.spring.security.service.AuthService
-import com.angcyo.spring.util.str
 import org.springframework.security.authentication.AuthenticationManager
 import org.springframework.security.authentication.event.InteractiveAuthenticationSuccessEvent
 import org.springframework.security.core.Authentication
@@ -58,52 +56,17 @@ class JwtLoginFilter(
             return null
         }
 
-        /*if (bean == null) {
-            response.sendError("参数为空")
+        if (bean.account.isNullOrEmpty()) {
+            response.sendError("无效的账号或密码")
             return null
         }
 
-        val validate = bean.validate()
-        if (!validate.isNullOrEmpty()) {
-            response.send(validate.result().toJson())
+        if (!authService.accountService.isAccountExist(bean.account)) {
+            response.sendError("无效的账号或密码")
             return null
         }
-
-        if (bean.type == WebType.value) {
-            //web 登录需要验证 code 码
-            if (bean.code.isNullOrBlank()) {
-                response.sendError("验证码不正确")
-                return null
-            }
-            val imageCode = authService.getImageCode(request, AuthService.CODE_TYPE_LOGIN)
-            if (imageCode == null) {
-                response.sendError("验证码已过期")
-                return null
-            }
-            if (bean.code?.toLowerCase() != imageCode.toLowerCase()) {
-                response.sendError("验证码不正确")
-                return null
-            }
-        }*/
 
         return authenticationManager.authenticate(RequestAuthenticationToken(bean))
-
-        /*val entity: AuthEntity
-        try {
-            entity = authService.loadAuth(bean.username!!) ?: throw UsernameNotFoundException("not found")
-            if (!authService.validatePassword(bean.password, entity.password)) {
-                throw PasswordException("密码不正确")
-            }
-        } catch (e: Exception) {
-            response.sendError("用户名或密码不正确")
-            return null
-        }
-
-        //授权
-        val authRequest = UsernamePasswordAuthenticationToken(entity, bean.password)
-        // Allow subclasses to set the "details" property
-        setDetails(request, authRequest)
-        return authenticationManager.authenticate(authRequest)*/
     }
 
     /**认证成功后的回调
@@ -114,10 +77,7 @@ class JwtLoginFilter(
         filterChain: FilterChain,
         authentication: Authentication
     ) {
-        //super会执行授权成功的重定向
-
-        val entity = authentication.principal
-        if (entity is AuthEntity) {
+        if (authentication is ResponseAuthenticationToken) {
             //1
             SecurityContextHolder.getContext().authentication = authentication
 
@@ -126,29 +86,28 @@ class JwtLoginFilter(
 
             //3 Fire event
             eventPublisher?.publishEvent(
-                InteractiveAuthenticationSuccessEvent(
-                    authentication, this.javaClass
-                )
+                InteractiveAuthenticationSuccessEvent(authentication, ResponseAuthenticationToken::class.java)
             )
 
-            //4
-            val roles = entity.roles.toAuthorities()
-            val username = entity.username.str()
-            val token = JWT.generateToken(username, roles)
-            entity.token = /*SecurityConstants.TOKEN_PREFIX + */token
+            //4 使用用户的id,创建token
+            val user = authentication.user
+            val flag = "${user.id}"
+            val token = JWT.generateToken(flag)
 
             //5 将token保存至redis
-            authService._loginEnd(username, token)
+            authService._loginEnd(flag, token)
 
             //6 清除验证码
-            authService.clearImageCode(request, AuthService.CODE_TYPE_LOGIN)
+            authService.clearImageCode(request, AuthService.CODE_TYPE_REGISTER)
 
-            response.send(entity.ok<AuthEntity>().toJacksonIgnore("roles", "enable"))
-            //response.send(entity.ok<AuthEntity>().toJacksonOnly("username", "token"))
+            val repBean = AuthRepBean()
+            repBean.id = user.id
+            repBean.nickname = user.nickname
+            repBean.token = token
+            response.send(repBean.ok<AuthRepBean>().toJackson())
         } else {
-            response.send("登录成功")
-
-            //super.successfulAuthentication(request, response, filterChain, authentication)
+            //super会执行授权成功的重定向
+            super.successfulAuthentication(request, response, filterChain, authentication)
         }
     }
 

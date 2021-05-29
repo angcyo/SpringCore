@@ -11,5 +11,5 @@ package com.angcyo.spring.mybatis.plus.auto.annotation
 @MustBeDocumented
 annotation class AutoWhere(
     /**需要进行的比较条件*/
-    val value: Where = Where.eq
+    val value: WhereEnum = WhereEnum.eq
 )

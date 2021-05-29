@@ -7,7 +7,7 @@ dependencies {
     //https://jcenter.bintray.com/com/baomidou/mybatis-plus-boot-starter
     //https://mybatis.plus/guide/
     //https://github.com/baomidou/mybatis-plus
-    api("com.baomidou:mybatis-plus-boot-starter:3.4.3")
+    api("com.baomidou:mybatis-plus-boot-starter:3.4.4-SNAPSHOT")
 
     //runtimeOnly("mysql:mysql-connector-java")
     //https://mvnrepository.com/artifact/com.gitee.sunchenbin.mybatis.actable/mybatis-enhance-actable

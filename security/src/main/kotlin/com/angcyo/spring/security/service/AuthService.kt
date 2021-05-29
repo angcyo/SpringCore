@@ -1,20 +1,20 @@
 package com.angcyo.spring.security.service
 
-import com.angcyo.spring.base.ApplicationProperties
+import com.angcyo.spring.base.AppProperties
+import com.angcyo.spring.base.beanOf
+import com.angcyo.spring.base.extension.apiError
 import com.angcyo.spring.redis.Redis
 import com.angcyo.spring.security.SecurityConstants
-import com.angcyo.spring.security.bean.AccountQueryParam
 import com.angcyo.spring.security.bean.RegisterReqBean
-import com.angcyo.spring.security.controller.codeKey
-import com.angcyo.spring.security.entity.AuthEntity
+import com.angcyo.spring.security.bean.SaveAccountReqBean
+import com.angcyo.spring.security.table.AccountTable
+import com.angcyo.spring.security.table.UserTable
 import com.angcyo.spring.util.oneDaySec
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.security.core.context.SecurityContextHolder
-import org.springframework.security.core.userdetails.UserDetailsService
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
-import java.util.*
 import javax.servlet.http.HttpServletRequest
 
 /**
@@ -43,13 +43,15 @@ class AuthService {
     lateinit var redis: Redis
 
     @Autowired
-    lateinit var applicationProperties: ApplicationProperties
-
-    val imageCodePrefix: String
-        get() = "${applicationProperties.name}.CODE.IMAGE."
+    lateinit var applicationProperties: AppProperties
 
     val tokenPrefix: String
-        get() = "${applicationProperties.name}.TOKEN."
+        get() = "${applicationProperties.name}.TOKEN"
+
+    //<editor-fold desc="验证码相关">
+
+    val imageCodePrefix: String
+        get() = "${applicationProperties.name}.CODE.IMAGE"
 
     /**临时保存图形验证码*/
     fun setImageCode(request: HttpServletRequest, type: Int, code: String, time: Long = 1 * 60) {
@@ -66,104 +68,92 @@ class AuthService {
         redis.del("${imageCodePrefix}.${type}.${request.codeKey()}")
     }
 
-    /**[rawPassword] 实际的密码,比如angcyo
-     * [encodedPassword] 加密后的密码, 数据库中的密码*/
-    fun validatePassword(rawPassword: CharSequence?, encodedPassword: String?): Boolean {
-        if (rawPassword.isNullOrEmpty() || encodedPassword.isNullOrEmpty()) {
-            return false
-        }
-        return passwordEncoder.matches(rawPassword, encodedPassword)
-    }
-
-    /**是否可以注册
-     * [first] 是否可以注册
-     * [second] 不可以注册的原因*/
-    fun canRegister(bean: RegisterReqBean): Pair<Boolean, String?> {
-        /*val isUsernameExist = bean.username.isNullOrBlank() || authRepository.existsByUsername(bean.username!!)
-        if (isUsernameExist) {
-            return false to "用户名已存在"
-        }*/
-        return true to null
-    }
+    //</editor-fold desc="验证码相关">
 
     @Autowired
     lateinit var accountService: AccountService
 
-    /**判断帐号是否存在*/
-    fun isAccountExist(account: String?) {
-        /*accountService.count(AccountQueryParam().apply {
-            name = account
-        })*/
+    @Autowired
+    lateinit var userService: UserService
+
+    /**保存一个帐号*/
+    @SaveAccount
+    @Transactional
+    fun saveAccount(req: SaveAccountReqBean): UserTable {
+        val username = req.registerReqBean?.username
+
+        //用户
+        val user = UserTable()
+        user.state = 1
+        user.nickname = username
+        user.password = passwordEncoder.encode(req.registerReqBean?.password)
+        userService.save(user)
+
+        //创建帐号,用户登录用户
+        val account = AccountTable()
+        account.name = username
+        account.userId = user.id //帐号关联用户
+        accountService.save(account)
+
+        return user
     }
 
     /**注册用户, 写入数据库*/
     @Transactional
-    fun register(bean: RegisterReqBean): AuthEntity? {
-        isAccountExist(bean.username)
-        /*if (bean.type == WebType.value) {
-            //web 注册类型, 需要验证验证码
-
-            val imageCode = authService.getImageCode(request, CODE_TYPE_REGISTER) ?: return "验证码已过期".error()
-
-            if (bean.code.isNullOrBlank() || bean.code?.lowercase(Locale.getDefault()) != imageCode.lowercase(Locale.getDefault())) {
-                return "验证码错误".error()
-            }
+    fun register(bean: RegisterReqBean): UserTable? {
+        if (accountService.isAccountExist(bean.username)) {
+            apiError("帐号已存在")
         }
 
-        val pair = canRegister(bean)
-        if (!pair.first) {
-            clearImageCode(request, CODE_TYPE_REGISTER)
-            return pair.second.error()
-        }
-
-        val entity = register(bean)
-        entity
-
-
-        val entity = authRepository.save(AuthEntity().apply {
-            username = bean.username
-            password = passwordEncoder.encode(bean.password)
+        return beanOf<AuthService>().saveAccount(SaveAccountReqBean().apply {
+            registerReqBean = bean
         })
-        entity.roles = listOf(roleRepository.save(RoleEntity().apply {
-            authId = entity.id
-            role = Roles.USER
-            des = Roles.USER
-        }))
-        return entity*/
-
-        return null
     }
 
-    /**[UserDetailsService]需要获取的用户, 系统会自动校验密码是否匹配
-     * 这里只需要从数据库查找授权用户信息, 并返回即可*/
-    fun loadAuth(username: String): AuthEntity? {
-        /*val authEntity = authRepository.findByUsername(username)
-        authEntity?.apply {
-            roles = roleRepository.findAllByAuthId(id)
+    /**临时用户对象*/
+    fun tempUserTable() = UserTable().apply {
+        nickname = "临时用户"
+        description = "临时用户"
+    }
+
+    /**redis 存储token的key*/
+    fun userTokenKey(username: String): String {
+        //客户端类型, 允许多端登录
+        val clientType = currentClientType()
+        val appProperties = beanOf<AppProperties>()
+
+        return if (appProperties.multiLogin) {
+            "${tokenPrefix}.${clientType}.$username"
+        } else {
+            "${tokenPrefix}.$username"
         }
-        return authEntity*/
-        return null
     }
 
     /**检查用户的token, 是否和redis里面的一样
      * [token] 支持包含/不包含前缀的token*/
     fun _checkTokenValid(username: String, token: String): Boolean {
-        val redisToken = redis["${tokenPrefix}.$username"]
-        if (token.startsWith(SecurityConstants.TOKEN_PREFIX)) {
-            return SecurityConstants.TOKEN_PREFIX + redisToken == token
+        val key = userTokenKey(username)
+        if (redis.hasKey(key)) {
+            val redisToken = redis[key]
+            if (token.startsWith(SecurityConstants.TOKEN_PREFIX)) {
+                return SecurityConstants.TOKEN_PREFIX + redisToken == token
+            }
+            return redisToken == token
+        } else {
+            return false
         }
-        return redisToken == token
     }
 
-    /**[token] 不含前缀的token*/
-    fun _loginEnd(username: String, token: String) {
+    /**[token] 不含前缀的token
+     * [time] token过期时间, 秒, 默认1天*/
+    fun _loginEnd(username: String, token: String, time: Long = oneDaySec) {
         //保存token, 一天超时
-        redis["${tokenPrefix}.$username", token] = oneDaySec
+        redis[userTokenKey(username), token] = time
     }
 
     /**退出登录*/
     fun _logoutEnd(username: String) {
         SecurityContextHolder.clearContext()
-        redis.del("${tokenPrefix}.$username")
+        redis.del(userTokenKey(username))
     }
 }

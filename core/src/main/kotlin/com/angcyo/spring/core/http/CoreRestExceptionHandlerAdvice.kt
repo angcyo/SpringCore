@@ -2,7 +2,6 @@ package com.angcyo.spring.core.http
 
 import com.angcyo.spring.base.data.Result
 import com.angcyo.spring.base.data.error
-import com.angcyo.spring.core.http.extension.ApiException
 import com.angcyo.spring.util.str
 import org.springframework.web.bind.MethodArgumentNotValidException
 import org.springframework.web.bind.annotation.ExceptionHandler
@@ -24,11 +23,6 @@ class CoreRestExceptionHandlerAdvice {
     fun methodArgumentNotValidException(exception: MethodArgumentNotValidException): Result<String>? {
         // 从异常对象中拿到ObjectError对象
         return exception.bindingResult.allErrors.joinToString { it.defaultMessage.str() }.error()
-    }
-
-    @ExceptionHandler(ApiException::class)
-    fun apiExtension(exception: ApiException): Result<String>? {
-        return exception.message.error()
     }
 
     @ExceptionHandler(NestedServletException::class)

@@ -6,13 +6,12 @@ import com.angcyo.spring.mybatis.plus.auto.param.BaseAutoPageParam
 /**
  * Email:angcyo@126.com
  * @author angcyo
- * @date 2021/05/28
+ * @date 2021/05/29
  */
 
-/**帐号表的查询参数
- * [com.angcyo.spring.security.table.AccountTable]*/
-class AccountQueryParam : BaseAutoPageParam() {
-
+/**用户表的查询参数
+ * [com.angcyo.spring.security.table.UserTable]*/
+class UserQueryParam : BaseAutoPageParam() {
     @AutoWhere
-    var name: String? = null
+    var nickname: String? = null
 }

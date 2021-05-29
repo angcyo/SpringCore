@@ -30,9 +30,9 @@ import javax.validation.groups.Default
  */
 
 data class Result<T>(
-    var code: Int = SUCCESS_CODE,
-    var msg: String? = "Success",
-    var data: T? = null
+        var code: Int = SUCCESS_CODE,
+        var msg: String? = "Success",
+        var data: T? = null
 ) {
     companion object {
 
@@ -44,14 +44,14 @@ data class Result<T>(
 
 /**无论如何都返回成功*/
 fun <T> Any?.ok(msg: String? = null, checkNull: Boolean = false) = if (checkNull && this == null) {
-    resultError(msg ?: "Error")
+    resultError(msg ?: "Data is Null Error.")
 } else {
     Result(msg = msg ?: "Success", data = this as T)
 }
 
 /**不为空时, 才返回成功; 否则返回失败*/
 fun <T> Any?.okIfNull(msg: String? = if (this == null) "Error" else "Success") = if (this == null) {
-    resultError(msg ?: "Error")
+    resultError(msg ?: "Data is Null Error.")
 } else {
     Result(msg = msg, data = this as T)
 }

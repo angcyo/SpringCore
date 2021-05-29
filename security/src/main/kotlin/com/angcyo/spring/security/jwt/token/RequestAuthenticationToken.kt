@@ -1,4 +1,4 @@
-package com.angcyo.spring.security.jwt.provider
+package com.angcyo.spring.security.jwt.token
 
 import com.angcyo.spring.security.bean.AuthReqBean
 import org.springframework.security.authentication.AbstractAuthenticationToken

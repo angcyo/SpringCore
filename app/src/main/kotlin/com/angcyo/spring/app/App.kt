@@ -1,6 +1,6 @@
 package com.angcyo.spring.app
 
-import com.angcyo.spring.base.ApplicationProperties
+import com.angcyo.spring.base.AppProperties
 import com.angcyo.spring.util.*
 import org.springframework.context.ConfigurableApplicationContext
 
@@ -23,7 +23,7 @@ object App {
 
             //启动耗时输出
             val nowTime = nowTime()
-            val app: ApplicationProperties = getBean(ApplicationProperties::class.java)
+            val app: AppProperties = getBean(AppProperties::class.java)
             val duration = (nowTime - startTime).toElapsedTime()
             L.w("${app.name ?: "SpringBoot"} 启动结束,耗时:${duration}☞ http://${getLocalHost()}:${getServerPort()} http://localhost:${getServerPort()}")
         }

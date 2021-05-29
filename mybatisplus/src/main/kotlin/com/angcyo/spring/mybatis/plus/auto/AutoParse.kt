@@ -1,27 +1,192 @@
 package com.angcyo.spring.mybatis.plus.auto
 
+import com.angcyo.spring.mybatis.plus.auto.annotation.AutoColumns
+import com.angcyo.spring.mybatis.plus.auto.annotation.AutoWhere
+import com.angcyo.spring.mybatis.plus.auto.annotation.WhereEnum
+import com.angcyo.spring.mybatis.plus.auto.param.BaseAutoPageParam
+import com.angcyo.spring.mybatis.plus.auto.param.BaseAutoQueryParam
 import com.angcyo.spring.mybatis.plus.auto.param.IAutoParam
+import com.angcyo.spring.mybatis.plus.toLowerName
+import com.angcyo.spring.util.L
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper
 import com.baomidou.mybatisplus.core.toolkit.ReflectionKit
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page
+import java.lang.reflect.Field
 
 /**
  * Email:angcyo@126.com
  * @author angcyo
  * @date 2021/05/28
  */
-object AutoParse {
+class AutoParse<Table> {
+
+    /**请求页码*/
+    fun page(param: BaseAutoPageParam): Page<Table> {
+        val page = Page<Table>(param.pageIndex, param.pageSize)
+        page.maxLimit = param.pageSize
+        return page
+    }
 
     /**根据[param]声明的约束, 自动赋值给[queryWrapper]
      * [org.springframework.beans.BeanUtils.getPropertyDescriptors]
      * */
-    fun <Table> parse(queryWrapper: QueryWrapper<Table>, param: IAutoParam): QueryWrapper<Table> {
-        ReflectionKit.getFieldMap(param.javaClass).forEach { entry ->
-            val name = entry.key
-            val field = entry.value
+    fun parse(queryWrapper: QueryWrapper<Table>, param: IAutoParam): QueryWrapper<Table> {
+        //选择列
+        _handleSelector(queryWrapper, param)
 
-            println("$name $field")
-        }
+        //查询
+        _handleQuery(queryWrapper, param)
+
+        //排序
+        _handleOrder(queryWrapper, param)
+
+        val targetSql = queryWrapper.targetSql
+        L.i("sql->$targetSql")
         return queryWrapper
     }
 
+    /**处理需要指定选择返回的列*/
+    fun _handleSelector(queryWrapper: QueryWrapper<Table>, param: IAutoParam) {
+        val columnList = mutableListOf<String>()
+
+        param.eachAnnotation<AutoColumns> { field ->
+            val fieldValue = field.get(param)
+            if (fieldValue is String) {
+                fieldValue.split(BaseAutoQueryParam.SPLIT).mapTo(columnList) { it.toLowerName() }
+            }
+        }
+
+        queryWrapper.select(*columnList.toTypedArray())
+    }
+
+    /**处理查询语句*/
+    fun _handleQuery(queryWrapper: QueryWrapper<Table>, param: IAutoParam) {
+        val autoWhereFieldList = mutableListOf<Field>()
+        var or: Any? = null
+        var orList: List<Any?>? = null
+
+        ReflectionKit.getFieldList(param.javaClass).forEach { field ->
+            field.annotation<AutoWhere> {
+                val fieldValue = field.get(param)
+
+                if (fieldValue == null) {
+                    //空值处理
+                    if (value == WhereEnum.isNull ||
+                        value == WhereEnum.isNotNull
+                    ) {
+                        autoWhereFieldList.add(field)
+                    }
+                } else {
+                    if (field.name == "or") {
+                        //特殊字段, or, 等价于 WhereEnum.or
+                        if (fieldValue.javaClass.isAssignableFrom(List::class.java)) {
+                            orList = fieldValue as List<Any?>?
+                        } else {
+                            or = fieldValue
+                        }
+                    } else {
+                        autoWhereFieldList.add(field)
+                    }
+                }
+            }
+        }
+
+        //and 条件
+        if (autoWhereFieldList.isNotEmpty()) {
+            queryWrapper.and { wrapper ->
+                autoWhereFieldList.forEach { field ->
+                    _handleWhere(wrapper, field, param)
+                }
+            }
+        }
+
+        //or条件
+        if (or != null && or is IAutoParam) {
+            queryWrapper.or { wrapper ->
+                _handleQuery(wrapper, or as IAutoParam)
+            }
+        }
+
+        //or list 条件
+        if (!orList.isNullOrEmpty()) {
+            orList?.forEach { _or ->
+                if (_or != null && _or is IAutoParam) {
+                    queryWrapper.or { wrapper ->
+                        _handleQuery(wrapper, _or)
+                    }
+                }
+            }
+        }
+    }
+
+    fun _handleWhere(queryWrapper: QueryWrapper<Table>, field: Field, obj: Any) {
+        field.annotation<AutoWhere> {
+            val column = field.name.toLowerName()
+            val fieldValue = field.get(obj)
+            _handleWhere(queryWrapper, column, value, fieldValue)
+        }
+    }
+
+    /**处理Where表达式*/
+    fun _handleWhere(queryWrapper: QueryWrapper<Table>, column: String, where: WhereEnum, value: Any?) {
+        when (where) {
+            WhereEnum.eq -> queryWrapper.eq(column, value)
+            WhereEnum.ne -> queryWrapper.ne(column, value)
+            WhereEnum.gt -> queryWrapper.gt(column, value)
+            WhereEnum.ge -> queryWrapper.ge(column, value)
+            WhereEnum.lt -> queryWrapper.lt(column, value)
+            WhereEnum.le -> queryWrapper.le(column, value)
+            WhereEnum.like -> queryWrapper.like(column, value)
+            WhereEnum.notLike -> queryWrapper.notLike(column, value)
+            WhereEnum.likeLeft -> queryWrapper.likeLeft(column, value)
+            WhereEnum.likeRight -> queryWrapper.likeRight(column, value)
+            WhereEnum.isNull -> queryWrapper.isNull(column)
+            WhereEnum.isNotNull -> queryWrapper.isNotNull(column)
+            else -> {
+                val valueClass = value?.javaClass
+                if (valueClass?.isAssignableFrom(List::class.java) == true) {
+                    val valueList = value as List<*>
+                    when (where) {
+                        WhereEnum.between -> queryWrapper.between(
+                            column,
+                            valueList.getOrNull(0),
+                            valueList.getOrNull(1)
+                        )
+                        WhereEnum.notBetween -> queryWrapper.notBetween(
+                            column,
+                            valueList.getOrNull(0),
+                            valueList.getOrNull(1)
+                        )
+                        WhereEnum.`in` -> queryWrapper.`in`(column, valueList)
+                        WhereEnum.notIn -> queryWrapper.notIn(column, valueList)
+                    }
+                }
+            }
+            //Where.groupBy -> queryWrapper.groupBy(column, value)
+            //Where.exists -> queryWrapper.exists(column, value)
+        }
+    }
+
+    /**处理排序字段*/
+    fun _handleOrder(queryWrapper: QueryWrapper<Table>, param: IAutoParam) {
+        if (param is BaseAutoQueryParam) {
+            val desc = param.desc
+            if (!desc.isNullOrEmpty()) {
+                //降序
+                queryWrapper.orderByDesc(
+                    null,
+                    *desc.split(BaseAutoQueryParam.SPLIT).map { it.toLowerName() }.toTypedArray()
+                )
+            }
+
+            val asc = param.asc
+            if (!asc.isNullOrEmpty()) {
+                //升序
+                queryWrapper.orderByAsc(
+                    null,
+                    *asc.split(BaseAutoQueryParam.SPLIT).map { it.toLowerName() }.toTypedArray()
+                )
+            }
+        }
+    }
 }

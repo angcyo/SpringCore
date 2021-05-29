@@ -8,4 +8,4 @@ import com.baomidou.mybatisplus.core.mapper.BaseMapper
  * @date 2021/05/28
  */
 
-interface BaseAutoMapper<Table> : BaseMapper<Table>
+interface IBaseAutoMapper<Table> : BaseMapper<Table>

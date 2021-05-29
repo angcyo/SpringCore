@@ -1,10 +1,9 @@
 package com.angcyo.spring.security.service
 
-import com.angcyo.spring.mybatis.plus.table.BaseAuditTable
+import com.angcyo.spring.mybatis.plus.auto.BaseAutoMybatisServiceImpl
+import com.angcyo.spring.security.bean.AccountQueryParam
 import com.angcyo.spring.security.mapper.IAccountMapper
 import com.angcyo.spring.security.table.AccountTable
-import com.baomidou.mybatisplus.core.mapper.BaseMapper
-import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl
 import org.springframework.stereotype.Service
 
 /**
@@ -13,8 +12,13 @@ import org.springframework.stereotype.Service
  * @date 2021/05/28
  */
 
-abstract class BaseMybatisServiceImpl3<M : BaseMapper<T>, T : BaseAuditTable> : ServiceImpl<M, T>()
-
-//class AccountService : BaseAutoMybatisServiceImpl<IAccountMapper, AccountTable>()
 @Service
-class AccountService : BaseMybatisServiceImpl3<IAccountMapper, AccountTable>()
+class AccountService : BaseAutoMybatisServiceImpl<IAccountMapper, AccountTable>() {
+
+    /**判断帐号是否存在*/
+    fun isAccountExist(account: String?): Boolean {
+        return count(AccountQueryParam().apply {
+            name = account
+        }) > 0
+    }
+}

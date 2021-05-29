@@ -20,8 +20,8 @@ class MybatisTableMetaObjectHandler : MetaObjectHandler {
         //strictInsertFill(metaObject, "deleteFlag", Int::class.java, 0)
 
         //审计
-//        strictInsertFill(metaObject, "createdBy", String::class.java, "xxx")
-//        strictInsertFill(metaObject, "updatedBy", String::class.java, "xxx")
+        //strictInsertFill(metaObject, "createdBy", String::class.java, "xxx")
+        //strictInsertFill(metaObject, "updatedBy", String::class.java, "xxx")
     }
 
     override fun updateFill(metaObject: MetaObject?) {

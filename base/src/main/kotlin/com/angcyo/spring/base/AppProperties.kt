@@ -20,8 +20,8 @@ import org.springframework.stereotype.Component
  * https://blog.csdn.net/weixin_33910385/article/details/89688284
  *
  * ```
- * val app: ApplicationProperties = getBean(ApplicationProperties::class.java)
- * val app: ApplicationProperties = getBean("applicationProperties") as ApplicationProperties
+ * val app: AppProperties = getBean(AppProperties::class.java)
+ * val app: AppProperties = getBean("appProperties") as AppProperties
  * ```
  *
  * Email:angcyo@126.com
@@ -31,11 +31,15 @@ import org.springframework.stereotype.Component
 
 @Component
 @ConfigurationProperties(prefix = "app")
-class ApplicationProperties {
+class AppProperties {
 
     /**项目应用名*/
     var name: String? = null
 
     /**应用构建时间*/
     var time: String? = nowTimeString()
+
+    /**是否允许多端登录, 否则统一时间只能一个设备登录
+     * [com.angcyo.spring.security.jwt.JwtLoginFilter.successfulAuthentication]*/
+    var multiLogin: Boolean = true
 }

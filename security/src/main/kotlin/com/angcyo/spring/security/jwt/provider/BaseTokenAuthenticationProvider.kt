@@ -1,6 +1,7 @@
 package com.angcyo.spring.security.jwt.provider
 
 import com.angcyo.spring.security.bean.AuthReqBean
+import com.angcyo.spring.security.jwt.token.RequestAuthenticationToken
 import org.springframework.security.authentication.AuthenticationProvider
 import org.springframework.security.core.Authentication
 
@@ -12,14 +13,14 @@ import org.springframework.security.core.Authentication
  * @date 2021/05/28
  */
 
-abstract class TokenAuthenticationProvider : AuthenticationProvider {
+abstract class BaseTokenAuthenticationProvider : AuthenticationProvider {
 
     override fun supports(authentication: Class<*>?): Boolean {
         if (authentication == null) {
             return false
         }
         return RequestAuthenticationToken::class.java
-            .isAssignableFrom(authentication)
+                .isAssignableFrom(authentication)
     }
 
     override fun authenticate(authentication: Authentication?): Authentication? {

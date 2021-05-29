@@ -4,21 +4,16 @@ import com.angcyo.spring.base.data.Result
 import com.angcyo.spring.base.data.ok
 import com.angcyo.spring.base.data.result
 import com.angcyo.spring.base.servlet.body
-import com.angcyo.spring.base.servlet.param
 import com.angcyo.spring.base.servlet.send
 import com.angcyo.spring.security.SecurityConstants
+import com.angcyo.spring.security.bean.AuthRepBean
+import com.angcyo.spring.security.bean.AuthReqBean
 import com.angcyo.spring.security.bean.RegisterReqBean
-import com.angcyo.spring.security.entity.AuthEntity
 import com.angcyo.spring.security.service.AuthService
 import com.angcyo.spring.security.service.AuthService.Companion.CODE_TYPE_REGISTER
 import com.angcyo.spring.util.ImageCode
 import com.angcyo.spring.util.L
-import com.angcyo.spring.util.elseNull
-import com.angcyo.spring.util.uuid
-import io.swagger.annotations.Api
-import io.swagger.annotations.ApiImplicitParam
-import io.swagger.annotations.ApiImplicitParams
-import io.swagger.annotations.ApiOperation
+import io.swagger.annotations.*
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.validation.BindingResult
 import org.springframework.validation.annotation.Validated
@@ -44,7 +39,7 @@ class AuthController {
     @GetMapping(SecurityConstants.AUTH_REGISTER_CODE_URL)
     @ApiOperation("获取注册时的图形验证码")
     @ApiImplicitParams(
-        ApiImplicitParam(name = "uuid", value = "客户端id", required = true, dataTypeClass = String::class),
+        ApiImplicitParam(name = "clientUuid", value = "客户端的UUID", required = true, dataTypeClass = String::class),
         ApiImplicitParam(name = "type", value = "验证码类型", required = true, dataTypeClass = Int::class),
         ApiImplicitParam(name = "l", value = "验证码的长度", required = false, dataTypeClass = Int::class),
         ApiImplicitParam(name = "w", value = "验证码的宽度", required = false, dataTypeClass = Int::class),
@@ -80,15 +75,22 @@ class AuthController {
      * */
     @PostMapping(SecurityConstants.AUTH_REGISTER_URL)
     @ApiOperation("注册用户")
-    @ApiImplicitParam(name = "uuid", value = "客户端id", required = true, dataTypeClass = String::class)
+    //@ApiImplicitParam(name = "uuid", value = "客户端id", required = true, dataTypeClass = String::class)
     fun register(
-        @RequestBody @Validated bean: RegisterReqBean, /*不支持kotlin的data class*/
+        @ApiParam @RequestBody @Validated bean: RegisterReqBean, /*不支持kotlin的data class*/
         bindingResult: BindingResult,/*必须放在模型属性之后, 否则无效*/
         request: HttpServletRequest
-    ): Result<AuthEntity?>? {
+    ): Result<Boolean>? {
         return bindingResult.result {
-            authService.register(bean)
+            authService.register(bean) != null
         }
+    }
+
+    /**登录接口, 用来生成Swagger文档*/
+    @ApiOperation("授权登录")
+    @PostMapping(SecurityConstants.AUTH_LOGIN_URL)
+    fun login(@ApiParam("授权登录参数") @RequestBody authReqBean: AuthReqBean): Result<AuthRepBean>? {
+        return null
     }
 
     @RequestMapping("/auth/test")
@@ -96,21 +98,4 @@ class AuthController {
     fun test(request: HttpServletRequest): Result<String>? {
         return request.body()?.ok()
     }
-}
-
-/**获取客户端唯一标识的key*/
-fun HttpServletRequest.codeKey(): String {
-    val uuid = param("uuid")
-    var key = ""
-    if (uuid.isNullOrEmpty()) {
-        //根据session id, 将code 存到redis
-        getSession(true)?.apply {
-            key = id
-        }.elseNull {
-            key = uuid()
-        }
-    } else {
-        key = uuid
-    }
-    return key
 }

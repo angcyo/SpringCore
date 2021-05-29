@@ -18,9 +18,11 @@ import javax.servlet.http.HttpServletResponse
 @Component
 class JwtLogoutSuccessHandler : LogoutSuccessHandler {
 
-    override fun onLogoutSuccess(request: HttpServletRequest,
-                                 response: HttpServletResponse,
-                                 authentication: Authentication?) {
+    override fun onLogoutSuccess(
+        request: HttpServletRequest,
+        response: HttpServletResponse,
+        authentication: Authentication?
+    ) {
         L.i("[SecurityLogoutSuccessHandler] 注销成功: ${request.requestURL}")
     }
 }

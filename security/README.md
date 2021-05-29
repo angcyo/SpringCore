@@ -8,7 +8,8 @@ https://www.jianshu.com/p/d5ce890c67f7
 
 #### AuthenticationManager
 
-用户认证的管理类，所有的认证请求（比如login）都会通过提交一个token给AuthenticationManager的authenticate()方法来实现。当然事情肯定不是它来做，具体校验动作会由AuthenticationManager将请求转发给具体的实现类来做。根据实现反馈的结果再调用具体的Handler来给用户以反馈。这个类基本等同于shiro的SecurityManager。
+用户认证的管理类，所有的认证请求（比如login）都会通过提交一个token给AuthenticationManager的authenticate()
+方法来实现。当然事情肯定不是它来做，具体校验动作会由AuthenticationManager将请求转发给具体的实现类来做。根据实现反馈的结果再调用具体的Handler来给用户以反馈。这个类基本等同于shiro的SecurityManager。
 
 #### AuthenticationProvider
 
@@ -25,7 +26,8 @@ https://www.jianshu.com/p/d5ce890c67f7
 
 #### SecurityContext
 
-当用户通过认证之后，就会为这个用户生成一个唯一的SecurityContext，里面包含用户的认证信息Authentication。通过SecurityContext我们可以获取到用户的标识Principle和授权信息GrantedAuthrity。在系统的任何地方只要通过SecurityHolder.getSecruityContext()就可以获取到SecurityContext。在Shiro中通过SecurityUtils.getSubject()到达同样的目的。
+当用户通过认证之后，就会为这个用户生成一个唯一的SecurityContext，里面包含用户的认证信息Authentication。通过SecurityContext我们可以获取到用户的标识Principle和授权信息GrantedAuthrity。在系统的任何地方只要通过SecurityHolder.getSecruityContext()
+就可以获取到SecurityContext。在Shiro中通过SecurityUtils.getSubject()到达同样的目的。
 
 ![](https://upload-images.jianshu.io/upload_images/13282795-62fd0c22e989fa0c.jpg)
 
@@ -38,6 +40,11 @@ https://spring.io/projects/spring-security
 https://github.com/spring-projects/spring-security/tree/5.4.1/samples/boot/helloworld
 
 # 使用方法
+
+请求头:
+
+- `clientType` 客户端类型
+- `clientUuid` 客户端标识
 
 ## 1.注册
 

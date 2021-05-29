@@ -19,7 +19,11 @@ class JwtAccessDeniedHandler : AccessDeniedHandler {
      * 将调用此方法发送403响应以及错误信息
      */
     @Throws(IOException::class)
-    override fun handle(request: HttpServletRequest, response: HttpServletResponse, accessDeniedException: AccessDeniedException) {
+    override fun handle(
+        request: HttpServletRequest,
+        response: HttpServletResponse,
+        accessDeniedException: AccessDeniedException
+    ) {
         val exception = AccessDeniedException("Sorry you don not enough permissions to access it!")
         response.sendError(HttpServletResponse.SC_FORBIDDEN, exception.message)
 

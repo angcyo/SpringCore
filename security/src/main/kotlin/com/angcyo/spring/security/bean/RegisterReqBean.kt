@@ -13,7 +13,7 @@ import javax.validation.constraints.Size
  * 注册需要用的参数, Data Class 编译之后会丢失java注解, 所以换成 class
  */
 
-@ApiModel("注册信息")
+@ApiModel("注册账号请求参数")
 class RegisterReqBean {
 
     @ApiModelProperty("注册用户名")
@@ -27,7 +27,7 @@ class RegisterReqBean {
     var password: String? = null
 
     @ApiModelProperty("注册客户端的类型(android/ios/web)")
-    var type: String? = null
+    var clientType: String? = null
 
     @ApiModelProperty("注册时的验证码")
     var code: String? = null

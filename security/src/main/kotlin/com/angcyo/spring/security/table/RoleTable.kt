@@ -1,8 +1,9 @@
 package com.angcyo.spring.security.table
 
 import com.angcyo.spring.mybatis.plus.table.BaseAuditTable
+import com.baomidou.mybatisplus.annotation.TableName
 import com.gitee.sunchenbin.mybatis.actable.annotation.Column
-import com.gitee.sunchenbin.mybatis.actable.annotation.Table
+import com.gitee.sunchenbin.mybatis.actable.annotation.TableComment
 
 /**
  * Email:angcyo@126.com
@@ -10,7 +11,8 @@ import com.gitee.sunchenbin.mybatis.actable.annotation.Table
  * @date 2021/05/28
  */
 
-@Table(name = "role", comment = "用户角色表")
+@TableName("role")
+@TableComment("用户角色表")
 class RoleTable : BaseAuditTable() {
 
     @Column(comment = "角色的名称")
