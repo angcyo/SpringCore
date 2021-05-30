@@ -6,9 +6,11 @@ import org.springframework.context.annotation.Configuration
 import springfox.documentation.builders.ApiInfoBuilder
 import springfox.documentation.builders.PathSelectors
 import springfox.documentation.builders.RequestHandlerSelectors
-import springfox.documentation.service.ApiInfo
-import springfox.documentation.service.Contact
+import springfox.documentation.builders.RequestParameterBuilder
+import springfox.documentation.schema.ScalarType
+import springfox.documentation.service.*
 import springfox.documentation.spi.DocumentationType
+import springfox.documentation.spi.service.contexts.SecurityContext
 import springfox.documentation.spring.web.plugins.Docket
 
 /**
@@ -22,6 +24,9 @@ import springfox.documentation.spring.web.plugins.Docket
  * Swagger3
  * https://blog.csdn.net/weixin_43740223/article/details/108491386
  * https://blog.csdn.net/wangzhihao1994/article/details/108408420
+ *
+ * //springfox.documentation.swagger-ui.enabled=true
+ * https://www.cnblogs.com/architectforest/p/13470170.html
  */
 
 @Configuration
@@ -40,17 +45,54 @@ class Swagger3Configuration {
     @Autowired
     lateinit var swaggerProperties: SwaggerProperties
 
+    /**https://blog.csdn.net/H_233/article/details/103129250*/
     @Bean
     fun createRestApi(): Docket {
         return Docket(DocumentationType.OAS_30)
+            .groupName("RestfulApi")
             .enable(swaggerProperties.enable)
             .apiInfo(apiInfo())
             .select()
             //.apis(RequestHandlerSelectors.withMethodAnnotation(ApiOperation::class.java))
+            // 包扫描范围（对指定的包下进行扫描，如果标注有相关swagger注解，则生成相应文档）
             .apis(RequestHandlerSelectors.basePackage("com.angcyo.spring"))
             //.paths(PathSelectors.regex("/public.*"))
+            // 过滤掉哪些path不用生成swagger
             .paths(PathSelectors.any()) // 可以根据url路径设置哪些请求加入文档，忽略哪些请求
             .build()
+            // 忽略该参数在swagger上的显示
+            .ignoredParameterTypes()
+            // 配置swagger接口安全校验规则
+            .securitySchemes(securitySchemes())
+            // 配置swagger接口安全校验上下文中的信息（包含安全权限与安全校验生效的接口路径）
+            .securityContexts(securityContexts())
+            //全局参数
+            .globalRequestParameters(
+                listOf(
+                    RequestParameterBuilder().apply {
+                        name("clientUuid")
+                        description("客户端唯一标识")
+                        required(false)
+                        `in`(ParameterType.HEADER)
+                        query {
+                            it.model {
+                                it.scalarModel(ScalarType.STRING)
+                            }
+                        }
+                    }.build(),
+                    RequestParameterBuilder().apply {
+                        name("clientType")
+                        description("客户端的类型")
+                        required(false)
+                        `in`(ParameterType.HEADER)
+                        query {
+                            it.model {
+                                it.scalarModel(ScalarType.STRING)
+                            }
+                        }
+                    }.build()
+                )
+            )
     }
 
     private fun apiInfo(): ApiInfo {
@@ -61,5 +103,22 @@ class Swagger3Configuration {
             .contact(Contact("angcyo", "https://www.angcyo.com", "angcyo@126.com"))
             .termsOfServiceUrl(SWAGGER_LICENSES) // 设置文档的License信息->1.3 License information
             .build()
+    }
+
+    private fun securitySchemes(): List<ApiKey> {
+        return listOf(ApiKey("Authorization", "Authorization", "header"))
+    }
+
+    private fun securityContexts(): List<SecurityContext> {
+        return listOf(
+            SecurityContext.builder()
+                .securityReferences(defaultAuth())
+                .forPaths(PathSelectors.any())
+                .build()
+        )
+    }
+
+    private fun defaultAuth(): List<SecurityReference> {
+        return listOf(SecurityReference("Authorization", arrayOf(AuthorizationScope("global", "accessEverything"))))
     }
 }

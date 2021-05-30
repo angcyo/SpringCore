@@ -93,7 +93,7 @@ class AuthController {
         return null
     }
 
-    @RequestMapping("/auth/test")
+    @RequestMapping("/auth/test", method = [RequestMethod.GET, RequestMethod.POST])
     @ApiOperation("授权测试")
     fun test(request: HttpServletRequest): Result<String>? {
         return request.body()?.ok()
