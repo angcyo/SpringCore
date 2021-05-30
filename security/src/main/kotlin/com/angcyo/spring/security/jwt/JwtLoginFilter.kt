@@ -1,7 +1,6 @@
 package com.angcyo.spring.security.jwt
 
 import com.angcyo.spring.base.data.ok
-import com.angcyo.spring.base.data.resultError
 import com.angcyo.spring.base.json.toJackson
 import com.angcyo.spring.base.servlet.fromJson
 import com.angcyo.spring.base.servlet.send
@@ -13,10 +12,8 @@ import com.angcyo.spring.security.jwt.token.RequestAuthenticationToken
 import com.angcyo.spring.security.jwt.token.ResponseAuthenticationToken
 import com.angcyo.spring.security.service.AuthService
 import org.springframework.security.authentication.AuthenticationManager
-import org.springframework.security.authentication.event.InteractiveAuthenticationSuccessEvent
 import org.springframework.security.core.Authentication
 import org.springframework.security.core.AuthenticationException
-import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.security.web.authentication.AbstractAuthenticationProcessingFilter
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher
 import org.springframework.web.bind.annotation.RequestMethod
@@ -39,7 +36,7 @@ class JwtLoginFilter(
     val authService: AuthService
 ) : AbstractAuthenticationProcessingFilter(
     AntPathRequestMatcher(SecurityConstants.AUTH_LOGIN_URL, RequestMethod.POST.toString())
-) {
+), IAuthorizationHandle {
 
     init {
         //设置授权接口地址
@@ -78,16 +75,9 @@ class JwtLoginFilter(
         authentication: Authentication
     ) {
         if (authentication is ResponseAuthenticationToken) {
-            //1
-            SecurityContextHolder.getContext().authentication = authentication
 
             //2
             rememberMeServices.loginSuccess(request, response, authentication)
-
-            //3 Fire event
-            eventPublisher?.publishEvent(
-                InteractiveAuthenticationSuccessEvent(authentication, ResponseAuthenticationToken::class.java)
-            )
 
             //4 使用用户的id,创建token
             val user = authentication.user
@@ -105,6 +95,8 @@ class JwtLoginFilter(
             repBean.nickname = user.nickname
             repBean.token = token
             response.send(repBean.ok<AuthRepBean>().toJackson())
+
+            onDoSuccessfulAuthentication(eventPublisher, request, response, authentication)
         } else {
             //super会执行授权成功的重定向
             super.successfulAuthentication(request, response, filterChain, authentication)
@@ -118,17 +110,8 @@ class JwtLoginFilter(
         failed: AuthenticationException
     ) {
         //super.unsuccessfulAuthentication(request, response, failed)
-        SecurityContextHolder.clearContext()
         rememberMeServices.loginFail(request, response)
-        response.send(
-            resultError<String>(failed.message, HttpServletResponse.SC_UNAUTHORIZED).toJackson(),
-            HttpServletResponse.SC_UNAUTHORIZED
-        )
-
-        /*  //response.sendError(HttpServletResponse.SC_UNAUTHORIZED, failed.message)
-          val username = request.getParameter(SecurityConstants.KEY_USERNAME)
-          response.send(HttpServletResponse.SC_UNAUTHORIZED, "$username 授权失败.")
-          //super.unsuccessfulAuthentication(request, response, failed)*/
+        onDoUnsuccessfulAuthentication(eventPublisher, request, response, failed)
     }
 
     override fun doFilter(req: ServletRequest?, res: ServletResponse?, chain: FilterChain?) {

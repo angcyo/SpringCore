@@ -18,7 +18,7 @@ class HelloController {
 
     @RequestMapping("/hello")
     fun hello(): String? {
-        return HelloController::class.java.bean()?.hello2("default value")
+        return HelloController::class.java.bean().hello2("default value")
     }
 
     @RequestMapping("/hello/{value}")

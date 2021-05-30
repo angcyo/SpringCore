@@ -1,6 +1,7 @@
 package com.angcyo.spring.mybatis.plus.auto
 
 import com.baomidou.mybatisplus.core.toolkit.ReflectionKit
+import org.springframework.util.ReflectionUtils
 import java.lang.reflect.Field
 
 /**
@@ -13,7 +14,8 @@ import java.lang.reflect.Field
 inline fun <reified Auto : Annotation> Field.annotation(dsl: Auto.() -> Unit) {
     val auto = getDeclaredAnnotation(Auto::class.java)
     if (auto != null) {
-        isAccessible = true
+        //isAccessible = true
+        ReflectionUtils.makeAccessible(this)
         auto.dsl()
     }
 }

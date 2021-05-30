@@ -4,6 +4,7 @@ import com.angcyo.spring.security.jwt.*
 import com.angcyo.spring.security.jwt.provider.UsernamePasswordAuthenticationProvider
 import com.angcyo.spring.security.service.AuthService
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.context.ApplicationEventPublisher
 import org.springframework.context.annotation.Bean
 import org.springframework.security.authentication.AuthenticationManager
 import org.springframework.security.authentication.ProviderManager
@@ -108,6 +109,9 @@ class SecurityConfiguration : WebSecurityConfigurerAdapter() {
     @Autowired
     lateinit var authService: AuthService
 
+    @Autowired
+    lateinit var applicationEventPublisher: ApplicationEventPublisher
+
     /**3. 通过重载，配置如何通过拦截器保护请求*/
     override fun configure(http: HttpSecurity) {
         //super.configure(http)
@@ -131,10 +135,15 @@ class SecurityConfiguration : WebSecurityConfigurerAdapter() {
             //.addFilterBefore()
             //.addFilter(JwtLoginFilter(authenticationManager, authService))
             .addFilterAt(
-                JwtLoginFilter(authenticationManager, authService),
+                JwtLoginFilter(authenticationManager, authService).apply {
+                    setApplicationEventPublisher(applicationEventPublisher)
+                },
                 UsernamePasswordAuthenticationFilter::class.java
             )
-            .addFilter(JwtAuthorizationFilter(authenticationManager, authService))
+            .addFilter(JwtAuthorizationFilter(authenticationManager, authService).apply {
+                setApplicationEventPublisher(applicationEventPublisher)
+            })
+            //.addFilterAfter(JwtPermissionListener(), JwtAuthorizationFilter::class.java)
             //.addFilter(JwtLogoutFilter(SecurityLogoutSuccessHandler(), SecurityLogoutHandler()))
             //.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
             .sessionManagement().apply {

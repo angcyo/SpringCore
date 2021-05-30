@@ -10,6 +10,8 @@ import java.util.*
  * @date 2020/11/04
  */
 
+fun threadName() = Thread.currentThread().name
+
 /**
  * 根据Bean的名字, 扩展获取Bean对象
  * */

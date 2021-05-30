@@ -6,9 +6,14 @@ import com.angcyo.spring.security.bean.UserQueryParam
 import com.angcyo.spring.security.jwt.token.ResponseAuthenticationToken
 import com.angcyo.spring.security.service.AuthService
 import com.angcyo.spring.util.L
+import org.springframework.context.ApplicationEventPublisher
+import org.springframework.context.ApplicationEventPublisherAware
 import org.springframework.http.HttpHeaders
 import org.springframework.security.authentication.AuthenticationManager
+import org.springframework.security.core.Authentication
+import org.springframework.security.core.AuthenticationException
 import org.springframework.security.core.context.SecurityContextHolder
+import org.springframework.security.core.userdetails.UsernameNotFoundException
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter
 import javax.servlet.FilterChain
 import javax.servlet.http.HttpServletRequest
@@ -25,7 +30,7 @@ import javax.servlet.http.HttpServletResponse
 class JwtAuthorizationFilter(
     authenticationManager: AuthenticationManager?,
     val authService: AuthService
-) : BasicAuthenticationFilter(authenticationManager) {
+) : BasicAuthenticationFilter(authenticationManager), ApplicationEventPublisherAware, IAuthorizationHandle {
 
     /**请求拦截, 验证Token*/
     override fun doFilterInternal(
@@ -33,11 +38,27 @@ class JwtAuthorizationFilter(
         response: HttpServletResponse,
         filterChain: FilterChain
     ) {
-        val authentication = getAuthentication(request)
-        if (authentication == null) {
+        try {
+            val authentication = getAuthentication(request)
+            if (authentication == null) {
+                SecurityContextHolder.clearContext()
+                val ex = UsernameNotFoundException("无效的TOKEN")
+                onUnsuccessfulAuthentication(request, response, ex)
+                //authenticationEntryPoint.commence(request, response, ex)
+            } else {
+                SecurityContextHolder.getContext().authentication = authentication
+                onSuccessfulAuthentication(request, response, authentication)
+            }
+        } catch (ex: PermissionException) {
             SecurityContextHolder.clearContext()
-        } else {
-            SecurityContextHolder.getContext().authentication = authentication
+            logger.debug("Failed to process authentication request", ex)
+            onUnsuccessfulAuthentication(request, response, ex)
+            return
+        } catch (ex: AuthenticationException) {
+            SecurityContextHolder.clearContext()
+            logger.debug("Failed to process authentication request", ex)
+            onUnsuccessfulAuthentication(request, response, ex)
+            return
         }
         filterChain.doFilter(request, response)
     }
@@ -80,5 +101,29 @@ class JwtAuthorizationFilter(
         }
 
         return authentication
+    }
+
+    override fun onSuccessfulAuthentication(
+        request: HttpServletRequest?,
+        response: HttpServletResponse?,
+        authResult: Authentication?
+    ) {
+        super.onSuccessfulAuthentication(request, response, authResult)
+        onDoSuccessfulAuthentication(eventPublisher, request, response, authResult)
+    }
+
+    override fun onUnsuccessfulAuthentication(
+        request: HttpServletRequest?,
+        response: HttpServletResponse?,
+        failed: AuthenticationException?
+    ) {
+        super.onUnsuccessfulAuthentication(request, response, failed)
+        onDoUnsuccessfulAuthentication(eventPublisher, request, response, failed)
+    }
+
+    var eventPublisher: ApplicationEventPublisher? = null
+
+    override fun setApplicationEventPublisher(applicationEventPublisher: ApplicationEventPublisher) {
+        eventPublisher = applicationEventPublisher
     }
 }

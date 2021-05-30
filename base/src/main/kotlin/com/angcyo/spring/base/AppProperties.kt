@@ -42,4 +42,10 @@ class AppProperties {
     /**是否允许多端登录, 否则统一时间只能一个设备登录
      * [com.angcyo.spring.security.jwt.JwtLoginFilter.successfulAuthentication]*/
     var multiLogin: Boolean = true
+
+    /**
+     * 是否激活uri权限控制
+     * [com.angcyo.spring.security.jwt.JwtPermissionListener]
+     * */
+    var enablePermission: Boolean = false
 }
