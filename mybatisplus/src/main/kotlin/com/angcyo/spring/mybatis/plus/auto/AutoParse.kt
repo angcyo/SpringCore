@@ -117,9 +117,22 @@ class AutoParse<Table> {
         }
 
         //and条件
-
+        if (and != null && and is IAutoParam) {
+            queryWrapper.and { wrapper ->
+                _handleQuery(wrapper, and as IAutoParam)
+            }
+        }
 
         //and list条件
+        if (!andList.isNullOrEmpty()) {
+            andList?.forEach { _and ->
+                if (_and != null && _and is IAutoParam) {
+                    queryWrapper.and { wrapper ->
+                        _handleQuery(wrapper, _and)
+                    }
+                }
+            }
+        }
 
         //or条件
         if (or != null && or is IAutoParam) {
@@ -169,7 +182,6 @@ class AutoParse<Table> {
             WhereEnum.notExists -> queryWrapper.notExists(column, value?.toString()?.toSafeSql())
             WhereEnum.last -> queryWrapper.last(value?.toString()?.toSafeSql())
             WhereEnum.apply -> queryWrapper.apply(value?.toString()?.toSafeSql())
-            //WhereEnum.groupBy -> queryWrapper.groupBy(value?.toString()?.toSafeSql())
             else -> {
                 val valueClass = value?.javaClass
                 if (valueClass?.isAssignableFrom(List::class.java) == true) {
@@ -185,8 +197,18 @@ class AutoParse<Table> {
                             valueList.getOrNull(0),
                             valueList.getOrNull(1)
                         )
+                        WhereEnum.groupBy -> {
+                            val stringList = valueList as List<String>
+                            queryWrapper.groupBy(stringList.first().toString().toSafeSql(), *stringList.toTypedArray())
+                        }
                         WhereEnum.`in` -> queryWrapper.`in`(column, valueList)
                         WhereEnum.notIn -> queryWrapper.notIn(column, valueList)
+                    }
+                } else {
+                    when (where) {
+                        WhereEnum.groupBy -> {
+                            queryWrapper.groupBy(value.toString().toSafeSql())
+                        }
                     }
                 }
             }
@@ -199,19 +221,15 @@ class AutoParse<Table> {
             val desc = param.desc
             if (!desc.isNullOrEmpty()) {
                 //降序
-                queryWrapper.orderByDesc(
-                    null,
-                    *desc.split(BaseAutoQueryParam.SPLIT).map { it.toLowerName() }.toTypedArray()
-                )
+                val array = desc.split(BaseAutoQueryParam.SPLIT).map { it.toLowerName() }.toTypedArray()
+                queryWrapper.orderByDesc(array.first(), *array)
             }
 
             val asc = param.asc
             if (!asc.isNullOrEmpty()) {
                 //升序
-                queryWrapper.orderByAsc(
-                    null,
-                    *asc.split(BaseAutoQueryParam.SPLIT).map { it.toLowerName() }.toTypedArray()
-                )
+                val array = asc.split(BaseAutoQueryParam.SPLIT).map { it.toLowerName() }.toTypedArray()
+                queryWrapper.orderByAsc(array.first(), *array)
             }
         }
     }
