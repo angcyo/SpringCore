@@ -30,9 +30,9 @@ import javax.validation.groups.Default
  */
 
 data class Result<T>(
-        var code: Int = SUCCESS_CODE,
-        var msg: String? = "Success",
-        var data: T? = null
+    var code: Int = SUCCESS_CODE,
+    var msg: String? = "Success",
+    var data: T? = null
 ) {
     companion object {
 
@@ -85,7 +85,10 @@ inline fun <T> BindingResult.result(checkNull: Boolean = true, responseEntity: (
     }
 }
 
-/**[validator]验证数据是否正确*/
+/**[validator]验证数据是否正确
+ * [propertyName] 单独指定需要验证的字段, 不指定表示bean的所以字段
+ * @return 返回空集合, 表示全部正确. 否则表示错误信息.
+ * */
 fun Any.validate(vararg propertyName: String): Set<ConstraintViolation<Any>> {
     val validator = Validation.buildDefaultValidatorFactory().validator
     if (propertyName.isNullOrEmpty()) {

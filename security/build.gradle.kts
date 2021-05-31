@@ -17,7 +17,6 @@ dependencies {
     runtimeOnly("io.jsonwebtoken:jjwt-impl:0.11.2")
 
     //mysql entity
-    implementation(project(":SpringCore:mysql"))
     implementation(project(":SpringCore:redis"))
     //implementation(project(":SpringCore:swagger"))
 

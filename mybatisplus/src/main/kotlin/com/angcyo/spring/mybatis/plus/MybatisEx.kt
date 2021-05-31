@@ -68,3 +68,6 @@ fun String.toLowerName() = lowerName(this)
 
 /**user_name 转换成 UserName*/
 fun lowerCamel(value: String) = CaseFormat.LOWER_UNDERSCORE.to(CaseFormat.LOWER_CAMEL, value)
+
+/**转换成安全的sql语句, 防止sql注入*/
+fun String.toSafeSql() = replace("\\", "\\\\").replace("'", "\\'")

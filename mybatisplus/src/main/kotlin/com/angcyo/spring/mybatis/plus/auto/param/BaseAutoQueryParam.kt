@@ -4,6 +4,9 @@ import com.angcyo.spring.mybatis.plus.auto.annotation.AutoWhere
 import io.swagger.annotations.ApiModelProperty
 
 /**
+ * 两个特殊字段 or 和 and
+ * [com.angcyo.spring.mybatis.plus.auto.AutoParse._handleQuery]
+ *
  * Email:angcyo@126.com
  * @author angcyo
  * @date 2021/05/29

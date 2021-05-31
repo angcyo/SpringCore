@@ -13,7 +13,6 @@ import org.springframework.security.authentication.AuthenticationManager
 import org.springframework.security.core.Authentication
 import org.springframework.security.core.AuthenticationException
 import org.springframework.security.core.context.SecurityContextHolder
-import org.springframework.security.core.userdetails.UsernameNotFoundException
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter
 import javax.servlet.FilterChain
 import javax.servlet.http.HttpServletRequest
@@ -42,8 +41,8 @@ class JwtAuthorizationFilter(
             val authentication = getAuthentication(request)
             if (authentication == null) {
                 SecurityContextHolder.clearContext()
-                val ex = UsernameNotFoundException("无效的TOKEN")
-                onUnsuccessfulAuthentication(request, response, ex)
+                //val ex = UsernameNotFoundException("无效的TOKEN")
+                //onUnsuccessfulAuthentication(request, response, ex)
                 //authenticationEntryPoint.commence(request, response, ex)
             } else {
                 SecurityContextHolder.getContext().authentication = authentication

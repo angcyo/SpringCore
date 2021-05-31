@@ -63,7 +63,7 @@ class JwtAuthenticationManager : AuthenticationManager {
         }
 
         if (result == null) {
-            throw BadCredentialsException("非法登录!")
+            throw BadCredentialsException("无法访问!")
         }
 
         return result

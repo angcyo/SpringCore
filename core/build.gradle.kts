@@ -2,7 +2,7 @@ dependencies {
     api(project(":SpringCore:base"))
     api(project(":SpringCore:log"))
     //api(project(":SpringCore:swagger"))
-    api(project(":SpringCore:mysql"))
+    api(project(":SpringCore:mybatisplus"))
 
     testImplementation("org.springframework.boot:spring-boot-starter-test") {
         exclude("org.junit.vintage", "junit-vintage-engine")

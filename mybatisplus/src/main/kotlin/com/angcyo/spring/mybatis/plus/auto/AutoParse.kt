@@ -7,6 +7,7 @@ import com.angcyo.spring.mybatis.plus.auto.param.BaseAutoPageParam
 import com.angcyo.spring.mybatis.plus.auto.param.BaseAutoQueryParam
 import com.angcyo.spring.mybatis.plus.auto.param.IAutoParam
 import com.angcyo.spring.mybatis.plus.toLowerName
+import com.angcyo.spring.mybatis.plus.toSafeSql
 import com.angcyo.spring.util.L
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper
 import com.baomidou.mybatisplus.core.toolkit.ReflectionKit
@@ -62,6 +63,10 @@ class AutoParse<Table> {
     /**处理查询语句*/
     fun _handleQuery(queryWrapper: QueryWrapper<Table>, param: IAutoParam) {
         val autoWhereFieldList = mutableListOf<Field>()
+
+        var and: Any? = null
+        var andList: List<Any?>? = null
+
         var or: Any? = null
         var orList: List<Any?>? = null
 
@@ -77,7 +82,14 @@ class AutoParse<Table> {
                         autoWhereFieldList.add(field)
                     }
                 } else {
-                    if (field.name == "or") {
+                    if (field.name == "and") {
+                        //特殊字段, and, 等价于 WhereEnum.and
+                        if (fieldValue.javaClass.isAssignableFrom(List::class.java)) {
+                            andList = fieldValue as List<Any?>?
+                        } else {
+                            and = fieldValue
+                        }
+                    } else if (field.name == "or") {
                         //特殊字段, or, 等价于 WhereEnum.or
                         if (fieldValue.javaClass.isAssignableFrom(List::class.java)) {
                             orList = fieldValue as List<Any?>?
@@ -91,14 +103,23 @@ class AutoParse<Table> {
             }
         }
 
-        //and 条件
+        //默认字段的 条件处理
         if (autoWhereFieldList.isNotEmpty()) {
-            queryWrapper.and { wrapper ->
-                autoWhereFieldList.forEach { field ->
-                    _handleWhere(wrapper, field, param)
+            val autoWhere = param.javaClass.annotation<AutoWhere>()
+            if (autoWhere == null || autoWhere.value == WhereEnum.and) {
+                //默认所有字段 and 条件处理
+                queryWrapper.and { wrapper ->
+                    autoWhereFieldList.forEach { field ->
+                        _handleWhere(wrapper, field, param)
+                    }
                 }
             }
         }
+
+        //and条件
+
+
+        //and list条件
 
         //or条件
         if (or != null && or is IAutoParam) {
@@ -142,6 +163,13 @@ class AutoParse<Table> {
             WhereEnum.likeRight -> queryWrapper.likeRight(column, value)
             WhereEnum.isNull -> queryWrapper.isNull(column)
             WhereEnum.isNotNull -> queryWrapper.isNotNull(column)
+            WhereEnum.inSql -> queryWrapper.inSql(column, value?.toString()?.toSafeSql())
+            WhereEnum.notInSql -> queryWrapper.notInSql(column, value?.toString()?.toSafeSql())
+            WhereEnum.exists -> queryWrapper.exists(column, value?.toString()?.toSafeSql())
+            WhereEnum.notExists -> queryWrapper.notExists(column, value?.toString()?.toSafeSql())
+            WhereEnum.last -> queryWrapper.last(value?.toString()?.toSafeSql())
+            WhereEnum.apply -> queryWrapper.apply(value?.toString()?.toSafeSql())
+            //WhereEnum.groupBy -> queryWrapper.groupBy(value?.toString()?.toSafeSql())
             else -> {
                 val valueClass = value?.javaClass
                 if (valueClass?.isAssignableFrom(List::class.java) == true) {
@@ -162,8 +190,6 @@ class AutoParse<Table> {
                     }
                 }
             }
-            //Where.groupBy -> queryWrapper.groupBy(column, value)
-            //Where.exists -> queryWrapper.exists(column, value)
         }
     }
 

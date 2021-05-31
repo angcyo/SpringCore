@@ -2,6 +2,7 @@ package com.angcyo.spring.mybatis.plus.auto
 
 import com.baomidou.mybatisplus.core.toolkit.ReflectionKit
 import org.springframework.util.ReflectionUtils
+import java.lang.reflect.AnnotatedElement
 import java.lang.reflect.Field
 
 /**
@@ -11,12 +12,17 @@ import java.lang.reflect.Field
  */
 
 /**快速获取注解类*/
-inline fun <reified Auto : Annotation> Field.annotation(dsl: Auto.() -> Unit) {
+inline fun <reified Auto : Annotation> AnnotatedElement.annotation(dsl: Auto.() -> Unit = {}): Auto? {
     val auto = getDeclaredAnnotation(Auto::class.java)
-    if (auto != null) {
+    return if (auto != null) {
         //isAccessible = true
-        ReflectionUtils.makeAccessible(this)
+        if (this is Field) {
+            ReflectionUtils.makeAccessible(this)
+        }
         auto.dsl()
+        auto
+    } else {
+        null
     }
 }
 

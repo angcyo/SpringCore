@@ -1,4 +1,4 @@
-package com.angcyo.spring.mysql.annotation
+package com.angcyo.spring.mybatis.plus.annotation
 
 import com.angcyo.spring.base.Base
 import com.fasterxml.jackson.annotation.JsonFormat

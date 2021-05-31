@@ -32,7 +32,7 @@ class JwtPermissionListener : ApplicationListener<InteractiveAuthenticationSucce
                 val path = request()?.servletPath
                 if (!path.isNullOrEmpty()) {
                     if (path != SecurityConstants.AUTH_LOGIN_URL) {
-                        permissionException("无权访问:$path")
+                        //permissionException("无权访问:$path")
                     }
                 }
             }
