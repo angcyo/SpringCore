@@ -74,3 +74,29 @@ fun CharSequence?.patternList(
     }
     return result
 }
+
+/**[CharSequence]中是否包含指定[text]
+ * [match] 是否是全匹配, 否则包含即可*/
+fun CharSequence?.have(text: CharSequence?, match: Boolean = false): Boolean {
+    if (text == null) {
+        return false
+    }
+    if (this == null) {
+        return false
+    }
+    if (this.str() == text.str()) {
+        return true
+    }
+    return try {
+        val regex = text.toString().toRegex()
+        if (match) {
+            this.matches(regex)
+        } else {
+            this.contains(regex)
+        }
+    } catch (e: Exception) {
+        //java.util.regex.PatternSyntaxException: Missing closing bracket in character class near index 19
+        e.printStackTrace()
+        false
+    }
+}
