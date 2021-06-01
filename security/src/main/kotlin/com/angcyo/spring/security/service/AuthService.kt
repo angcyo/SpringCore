@@ -7,6 +7,8 @@ import com.angcyo.spring.redis.Redis
 import com.angcyo.spring.security.SecurityConstants
 import com.angcyo.spring.security.bean.RegisterReqBean
 import com.angcyo.spring.security.bean.SaveAccountReqBean
+import com.angcyo.spring.security.service.annotation.RegisterAccount
+import com.angcyo.spring.security.service.annotation.SaveAccount
 import com.angcyo.spring.security.table.AccountTable
 import com.angcyo.spring.security.table.UserTable
 import com.angcyo.spring.util.oneDaySec
@@ -80,7 +82,7 @@ class AuthService {
     @SaveAccount
     @Transactional
     fun saveAccount(req: SaveAccountReqBean): UserTable {
-        val username = req.registerReqBean?.username
+        val username = req.registerReqBean?.account
 
         //用户
         val user = UserTable()
@@ -99,9 +101,10 @@ class AuthService {
     }
 
     /**注册用户, 写入数据库*/
+    @RegisterAccount
     @Transactional
     fun register(bean: RegisterReqBean): UserTable? {
-        if (accountService.isAccountExist(bean.username)) {
+        if (accountService.isAccountExist(bean.account)) {
             apiError("帐号已存在")
         }
 

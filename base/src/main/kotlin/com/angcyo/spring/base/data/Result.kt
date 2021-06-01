@@ -39,6 +39,22 @@ data class Result<T>(
         /**错误码*/
         const val ERROR_CODE = 501
         const val SUCCESS_CODE = 200
+
+        fun <T> ok(data: T? = null): Result<T> {
+            return Result<T>().apply {
+                code = SUCCESS_CODE
+                msg = "Success"
+                this.data = data
+            }
+        }
+
+        fun <T> error(data: T? = null): Result<T> {
+            return Result<T>().apply {
+                code = ERROR_CODE
+                msg = "Error"
+                this.data = data
+            }
+        }
     }
 }
 
@@ -76,7 +92,15 @@ inline fun <T> BindingResult.result(checkNull: Boolean = true, responseEntity: (
         }.error()
     } else {
         try {
-            responseEntity().ok(checkNull = checkNull)
+            val resultEntity = responseEntity()
+            if (checkNull &&
+                (resultEntity is Boolean && resultEntity == false ||
+                        resultEntity == null)
+            ) {
+                Result.error(resultEntity)
+            } else {
+                Result.ok(resultEntity)
+            }
         } catch (e: NoSuchElementException) {
             e.toString().error()
         } catch (e: Exception) {

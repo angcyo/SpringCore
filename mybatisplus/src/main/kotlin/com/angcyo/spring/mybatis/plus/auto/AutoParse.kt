@@ -1,15 +1,20 @@
 package com.angcyo.spring.mybatis.plus.auto
 
+import com.angcyo.spring.base.beanOf
 import com.angcyo.spring.mybatis.plus.auto.annotation.AutoColumns
+import com.angcyo.spring.mybatis.plus.auto.annotation.AutoFill
 import com.angcyo.spring.mybatis.plus.auto.annotation.AutoWhere
 import com.angcyo.spring.mybatis.plus.auto.annotation.WhereEnum
 import com.angcyo.spring.mybatis.plus.auto.param.BaseAutoPageParam
 import com.angcyo.spring.mybatis.plus.auto.param.BaseAutoQueryParam
 import com.angcyo.spring.mybatis.plus.auto.param.IAutoParam
+import com.angcyo.spring.mybatis.plus.auto.param.PlaceholderAutoParam
 import com.angcyo.spring.mybatis.plus.toLowerName
 import com.angcyo.spring.mybatis.plus.toSafeSql
 import com.angcyo.spring.util.L
+import com.baomidou.mybatisplus.core.conditions.AbstractWrapper
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper
+import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper
 import com.baomidou.mybatisplus.core.toolkit.ReflectionKit
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page
 import java.lang.reflect.Field
@@ -31,7 +36,7 @@ class AutoParse<Table> {
     /**根据[param]声明的约束, 自动赋值给[queryWrapper]
      * [org.springframework.beans.BeanUtils.getPropertyDescriptors]
      * */
-    fun parse(queryWrapper: QueryWrapper<Table>, param: IAutoParam): QueryWrapper<Table> {
+    fun parseQuery(queryWrapper: QueryWrapper<Table>, param: IAutoParam): QueryWrapper<Table> {
         //选择列
         _handleSelector(queryWrapper, param)
 
@@ -44,6 +49,78 @@ class AutoParse<Table> {
         val targetSql = queryWrapper.targetSql
         L.i("sql->$targetSql")
         return queryWrapper
+    }
+
+    /**根据[param]声明的约束, 自动赋值给[updateWrapper] */
+    fun parseUpdate(updateWrapper: UpdateWrapper<Table>, param: IAutoParam): UpdateWrapper<Table> {
+        _handleQuery(updateWrapper, param)
+        return updateWrapper
+    }
+
+    /**自动解析并填充对象
+     * [com.angcyo.spring.mybatis.plus.auto.annotation.AutoFill]
+     * @return 是否解析成功, 没有出现错误*/
+    fun parseFill(param: IAutoParam): Boolean {
+        var haveError = false
+        param.eachAnnotation<AutoFill> { field ->
+            if (!_handleFill(this, field, param)) {
+                haveError = true
+            }
+        }
+        return !haveError
+    }
+
+    fun _handleFill(fill: AutoFill, field: Field, obj: IAutoParam): Boolean {
+
+        //反射获取对应服务
+        var service: Any? = null
+        if (fill.service !is PlaceholderAutoMybatisService) {
+            service = beanOf(fill.service.java)
+        } else if (fill.serviceName.isNotEmpty()) {
+            service = beanOf(fill.serviceName)
+        }
+
+        //通过服务传递参数查询数据
+        if (service != null && service is IBaseAutoMybatisService<*>) {
+            val queryParamKey = fill.query.ifEmpty {
+                "${field.name}Query"
+            }
+
+            val queryParam = obj.getMember(queryParamKey)
+            val result = if (queryParam is IAutoParam) {
+                service.autoList(queryParam)
+            } else {
+                service.autoList(PlaceholderAutoParam())
+            }
+
+            val targetResult = mutableListOf<Any?>()
+
+            //需要获取到的数据字段
+            if (fill.field.isEmpty()) {
+                //为空表示需要获取整个对象
+                targetResult.addAll(result)
+            } else {
+                for (item in result) {
+                    targetResult.add(item.getMember(fill.field))
+                }
+            }
+
+            //对数据进行赋值处理
+            if (field.isList()) {
+                field.set(obj, targetResult)
+
+                if (targetResult.isNullOrEmpty() && fill.errorOnNull) {
+                    return false
+                }
+            } else {
+                val first = targetResult.firstOrNull()
+                field.set(obj, first)
+                if (first == null && fill.errorOnNull) {
+                    return false
+                }
+            }
+        }
+        return true
     }
 
     /**处理需要指定选择返回的列*/
@@ -61,7 +138,10 @@ class AutoParse<Table> {
     }
 
     /**处理查询语句*/
-    fun _handleQuery(queryWrapper: QueryWrapper<Table>, param: IAutoParam) {
+    fun <Wrapper : AbstractWrapper<Table, String, Wrapper>> _handleQuery(
+        wrapper: AbstractWrapper<Table, String, Wrapper>,
+        param: IAutoParam
+    ) {
         val autoWhereFieldList = mutableListOf<Field>()
 
         var and: Any? = null
@@ -84,14 +164,14 @@ class AutoParse<Table> {
                 } else {
                     if (field.name == "and") {
                         //特殊字段, and, 等价于 WhereEnum.and
-                        if (fieldValue.javaClass.isAssignableFrom(List::class.java)) {
+                        if (fieldValue.isList()) {
                             andList = fieldValue as List<Any?>?
                         } else {
                             and = fieldValue
                         }
                     } else if (field.name == "or") {
                         //特殊字段, or, 等价于 WhereEnum.or
-                        if (fieldValue.javaClass.isAssignableFrom(List::class.java)) {
+                        if (fieldValue.isList()) {
                             orList = fieldValue as List<Any?>?
                         } else {
                             or = fieldValue
@@ -108,7 +188,7 @@ class AutoParse<Table> {
             val autoWhere = param.javaClass.annotation<AutoWhere>()
             if (autoWhere == null || autoWhere.value == WhereEnum.and) {
                 //默认所有字段 and 条件处理
-                queryWrapper.and { wrapper ->
+                wrapper.and { wrapper ->
                     autoWhereFieldList.forEach { field ->
                         _handleWhere(wrapper, field, param)
                     }
@@ -118,7 +198,7 @@ class AutoParse<Table> {
 
         //and条件
         if (and != null && and is IAutoParam) {
-            queryWrapper.and { wrapper ->
+            wrapper.and { wrapper ->
                 _handleQuery(wrapper, and as IAutoParam)
             }
         }
@@ -127,7 +207,7 @@ class AutoParse<Table> {
         if (!andList.isNullOrEmpty()) {
             andList?.forEach { _and ->
                 if (_and != null && _and is IAutoParam) {
-                    queryWrapper.and { wrapper ->
+                    wrapper.and { wrapper ->
                         _handleQuery(wrapper, _and)
                     }
                 }
@@ -136,7 +216,7 @@ class AutoParse<Table> {
 
         //or条件
         if (or != null && or is IAutoParam) {
-            queryWrapper.or { wrapper ->
+            wrapper.or { wrapper ->
                 _handleQuery(wrapper, or as IAutoParam)
             }
         }
@@ -145,7 +225,7 @@ class AutoParse<Table> {
         if (!orList.isNullOrEmpty()) {
             orList?.forEach { _or ->
                 if (_or != null && _or is IAutoParam) {
-                    queryWrapper.or { wrapper ->
+                    wrapper.or { wrapper ->
                         _handleQuery(wrapper, _or)
                     }
                 }
@@ -153,61 +233,70 @@ class AutoParse<Table> {
         }
     }
 
-    fun _handleWhere(queryWrapper: QueryWrapper<Table>, field: Field, obj: Any) {
+    fun <Wrapper : AbstractWrapper<Table, String, Wrapper>> _handleWhere(
+        wrapper: AbstractWrapper<Table, String, Wrapper>,
+        field: Field,
+        obj: Any
+    ) {
         field.annotation<AutoWhere> {
             val column = field.name.toLowerName()
             val fieldValue = field.get(obj)
-            _handleWhere(queryWrapper, column, value, fieldValue)
+            _handleWhere(wrapper, column, value, fieldValue)
         }
     }
 
     /**处理Where表达式*/
-    fun _handleWhere(queryWrapper: QueryWrapper<Table>, column: String, where: WhereEnum, value: Any?) {
+    fun <Wrapper : AbstractWrapper<Table, String, Wrapper>> _handleWhere(
+        wrapper: AbstractWrapper<Table, String, Wrapper>,
+        column: String,
+        where: WhereEnum,
+        value: Any?
+    ) {
         when (where) {
-            WhereEnum.eq -> queryWrapper.eq(column, value)
-            WhereEnum.ne -> queryWrapper.ne(column, value)
-            WhereEnum.gt -> queryWrapper.gt(column, value)
-            WhereEnum.ge -> queryWrapper.ge(column, value)
-            WhereEnum.lt -> queryWrapper.lt(column, value)
-            WhereEnum.le -> queryWrapper.le(column, value)
-            WhereEnum.like -> queryWrapper.like(column, value)
-            WhereEnum.notLike -> queryWrapper.notLike(column, value)
-            WhereEnum.likeLeft -> queryWrapper.likeLeft(column, value)
-            WhereEnum.likeRight -> queryWrapper.likeRight(column, value)
-            WhereEnum.isNull -> queryWrapper.isNull(column)
-            WhereEnum.isNotNull -> queryWrapper.isNotNull(column)
-            WhereEnum.inSql -> queryWrapper.inSql(column, value?.toString()?.toSafeSql())
-            WhereEnum.notInSql -> queryWrapper.notInSql(column, value?.toString()?.toSafeSql())
-            WhereEnum.exists -> queryWrapper.exists(column, value?.toString()?.toSafeSql())
-            WhereEnum.notExists -> queryWrapper.notExists(column, value?.toString()?.toSafeSql())
-            WhereEnum.last -> queryWrapper.last(value?.toString()?.toSafeSql())
-            WhereEnum.apply -> queryWrapper.apply(value?.toString()?.toSafeSql())
+            WhereEnum.eq -> wrapper.eq(column, value)
+            WhereEnum.ne -> wrapper.ne(column, value)
+            WhereEnum.gt -> wrapper.gt(column, value)
+            WhereEnum.ge -> wrapper.ge(column, value)
+            WhereEnum.lt -> wrapper.lt(column, value)
+            WhereEnum.le -> wrapper.le(column, value)
+            WhereEnum.like -> wrapper.like(column, value)
+            WhereEnum.notLike -> wrapper.notLike(column, value)
+            WhereEnum.likeLeft -> wrapper.likeLeft(column, value)
+            WhereEnum.likeRight -> wrapper.likeRight(column, value)
+            WhereEnum.isNull -> wrapper.isNull(column)
+            WhereEnum.isNotNull -> wrapper.isNotNull(column)
+            WhereEnum.inSql -> wrapper.inSql(column, value?.toString()?.toSafeSql())
+            WhereEnum.notInSql -> wrapper.notInSql(column, value?.toString()?.toSafeSql())
+            WhereEnum.exists -> wrapper.exists(column, value?.toString()?.toSafeSql())
+            WhereEnum.notExists -> wrapper.notExists(column, value?.toString()?.toSafeSql())
+            WhereEnum.last -> wrapper.last(value?.toString()?.toSafeSql())
+            WhereEnum.apply -> wrapper.apply(value?.toString()?.toSafeSql())
             else -> {
                 val valueClass = value?.javaClass
-                if (valueClass?.isAssignableFrom(List::class.java) == true) {
+                if (valueClass?.isList() == true) {
                     val valueList = value as List<*>
                     when (where) {
-                        WhereEnum.between -> queryWrapper.between(
+                        WhereEnum.between -> wrapper.between(
                             column,
                             valueList.getOrNull(0),
                             valueList.getOrNull(1)
                         )
-                        WhereEnum.notBetween -> queryWrapper.notBetween(
+                        WhereEnum.notBetween -> wrapper.notBetween(
                             column,
                             valueList.getOrNull(0),
                             valueList.getOrNull(1)
                         )
                         WhereEnum.groupBy -> {
                             val stringList = valueList as List<String>
-                            queryWrapper.groupBy(stringList.first().toString().toSafeSql(), *stringList.toTypedArray())
+                            wrapper.groupBy(stringList.first().toString().toSafeSql(), *stringList.toTypedArray())
                         }
-                        WhereEnum.`in` -> queryWrapper.`in`(column, valueList)
-                        WhereEnum.notIn -> queryWrapper.notIn(column, valueList)
+                        WhereEnum.`in` -> wrapper.`in`(column, valueList)
+                        WhereEnum.notIn -> wrapper.notIn(column, valueList)
                     }
                 } else {
                     when (where) {
                         WhereEnum.groupBy -> {
-                            queryWrapper.groupBy(value.toString().toSafeSql())
+                            wrapper.groupBy(value.toString().toSafeSql())
                         }
                     }
                 }

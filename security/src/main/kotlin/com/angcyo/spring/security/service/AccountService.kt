@@ -17,7 +17,7 @@ class AccountService : BaseAutoMybatisServiceImpl<IAccountMapper, AccountTable>(
 
     /**判断帐号是否存在*/
     fun isAccountExist(account: String?): Boolean {
-        return count(AccountQueryParam().apply {
+        return autoCount(AccountQueryParam().apply {
             name = account
         }) > 0
     }

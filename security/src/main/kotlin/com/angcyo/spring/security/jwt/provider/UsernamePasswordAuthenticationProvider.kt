@@ -29,7 +29,7 @@ class UsernamePasswordAuthenticationProvider : BaseTokenAuthenticationProvider()
 
             val authService = beanOf<AuthService>()
             //获取帐号
-            val accountList = authService.accountService.list(AccountQueryParam().apply {
+            val accountList = authService.accountService.autoList(AccountQueryParam().apply {
                 name = authReqBean.account
             })
             if (accountList.isEmpty()) {
@@ -38,7 +38,7 @@ class UsernamePasswordAuthenticationProvider : BaseTokenAuthenticationProvider()
 
             val account = accountList.first()
             //通过帐号, 获取对应的用户
-            val user = authService.userService.list(UserQueryParam().apply {
+            val user = authService.userService.autoList(UserQueryParam().apply {
                 id = account.userId
             }).firstOrNull() ?: throw  UsernameNotFoundException("账号不存在")
 

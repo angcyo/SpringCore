@@ -70,7 +70,7 @@ class JwtAuthorizationFilter(
         var authentication: ResponseAuthenticationToken? = JWT.parseToken(token)?.run {
             val userId = first
             if (authService._checkTokenValid(userId, token)) {
-                val user = authService.userService.list(UserQueryParam().apply {
+                val user = authService.userService.autoList(UserQueryParam().apply {
                     id = userId.toLongOrNull()
                 }).firstOrNull()
                 if (user == null) {

@@ -16,14 +16,14 @@ import javax.validation.constraints.Size
 @ApiModel("注册账号请求参数")
 class RegisterReqBean {
 
-    @ApiModelProperty("注册用户名")
-    @NotBlank(message = "用户名不能为空")
-    @Size(min = 4, message = "用户名至少4个字符")
-    var username: String? = null
+    @ApiModelProperty("注册的账号, 也是默认的用户昵称", required = true)
+    @NotBlank(message = "账号不能为空")
+    @Size(min = 4, max = 20, message = "账号至少4个字符")
+    var account: String? = null
 
-    @ApiModelProperty("注册用户密码")
+    @ApiModelProperty("注册账号的密码")
     @NotBlank(message = "密码不能为空")
-    @Size(min = 6, message = "密码至少6个字符")
+    @Size(min = 6, max = 20, message = "密码至少6个字符")
     var password: String? = null
 
     @ApiModelProperty("注册时的验证码")

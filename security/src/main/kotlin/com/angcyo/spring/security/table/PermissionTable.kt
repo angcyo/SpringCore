@@ -1,5 +1,8 @@
 package com.angcyo.spring.security.table
 
+import com.angcyo.spring.mybatis.plus.auto.annotation.AutoQuery
+import com.angcyo.spring.mybatis.plus.auto.annotation.AutoWhere
+import com.angcyo.spring.mybatis.plus.auto.param.IAutoParam
 import com.angcyo.spring.mybatis.plus.table.BaseAuditTable
 import com.baomidou.mybatisplus.annotation.TableName
 import com.gitee.sunchenbin.mybatis.actable.annotation.Column
@@ -13,9 +16,11 @@ import com.gitee.sunchenbin.mybatis.actable.annotation.TableComment
 
 @TableName("permission")
 @TableComment("权限表, 角色可以访问的api资源")
-class PermissionTable : BaseAuditTable() {
+@AutoQuery(updateFailToSave = true)
+class PermissionTable : BaseAuditTable(), IAutoParam {
 
     @Column(comment = "权限的名称")
+    @AutoWhere
     var name: String? = null
 
     @Column(comment = "权限的描述")

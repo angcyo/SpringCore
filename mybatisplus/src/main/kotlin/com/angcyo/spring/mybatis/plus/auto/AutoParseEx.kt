@@ -34,3 +34,55 @@ inline fun <reified Auto : Annotation> Any.eachAnnotation(dsl: Auto.(field: Fiel
         }
     }
 }
+
+/**是否有指定的注解*/
+inline fun <reified Auto : Annotation> Any.haveAnnotation(): Boolean {
+    var have = false
+    for (field in ReflectionKit.getFieldList(this.javaClass)) {
+        val annotation = field.annotation<Auto>()
+        if (annotation != null && field.get(this) != null) {
+            have = true
+        }
+        if (have) {
+            break
+        }
+    }
+    return have
+}
+
+/**
+ * 从一个对象中, 获取指定的成员对象
+ */
+fun Any?.getMember(member: String): Any? {
+    return this?.run { this.getMember(this.javaClass, member) }
+}
+
+fun Any?.getMember(
+    cls: Class<*>,
+    member: String
+): Any? {
+    var result: Any? = null
+    try {
+        var cl: Class<*>? = cls
+        while (cl != null) {
+            try {
+                val memberField = cl.getDeclaredField(member)
+                //memberField.isAccessible = true
+                ReflectionUtils.makeAccessible(memberField)
+                result = memberField[this]
+                return result
+            } catch (e: NoSuchFieldException) {
+                cl = cl.superclass
+            }
+        }
+    } catch (e: Exception) {
+        //L.i("错误:" + cls.getSimpleName() + " ->" + e.getMessage());
+    }
+    return result
+}
+
+fun Any.isList() = if (this is Field) {
+    type.isAssignableFrom(List::class.java)
+} else {
+    javaClass.isAssignableFrom(List::class.java)
+}
