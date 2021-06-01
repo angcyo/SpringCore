@@ -26,9 +26,6 @@ class RegisterReqBean {
     @Size(min = 6, message = "密码至少6个字符")
     var password: String? = null
 
-    @ApiModelProperty("注册客户端的类型(android/ios/web)")
-    var clientType: String? = null
-
     @ApiModelProperty("注册时的验证码")
     var code: String? = null
 }

@@ -45,6 +45,32 @@ class Swagger3Configuration {
     @Autowired
     lateinit var swaggerProperties: SwaggerProperties
 
+    /**全局请求参数配置*/
+    fun globalRequestParameters(): List<RequestParameter> {
+        val result = mutableListOf<RequestParameter>()
+
+        swaggerProperties.header?.forEach { entry ->
+            val key = entry.key
+            val value = entry.value
+
+            result.add(
+                RequestParameterBuilder().apply {
+                    name(key)
+                    description(value)
+                    required(false)
+                    `in`(ParameterType.HEADER)
+                    query {
+                        it.model {
+                            it.scalarModel(ScalarType.STRING)
+                        }
+                    }
+                }.build()
+            )
+        }
+
+        return result
+    }
+
     /**https://blog.csdn.net/H_233/article/details/103129250*/
     @Bean
     fun createRestApi(): Docket {
@@ -67,32 +93,7 @@ class Swagger3Configuration {
             // 配置swagger接口安全校验上下文中的信息（包含安全权限与安全校验生效的接口路径）
             .securityContexts(securityContexts())
             //全局参数
-            .globalRequestParameters(
-                listOf(
-                    RequestParameterBuilder().apply {
-                        name("clientUuid")
-                        description("客户端唯一标识")
-                        required(false)
-                        `in`(ParameterType.HEADER)
-                        query {
-                            it.model {
-                                it.scalarModel(ScalarType.STRING)
-                            }
-                        }
-                    }.build(),
-                    RequestParameterBuilder().apply {
-                        name("clientType")
-                        description("客户端的类型")
-                        required(false)
-                        `in`(ParameterType.HEADER)
-                        query {
-                            it.model {
-                                it.scalarModel(ScalarType.STRING)
-                            }
-                        }
-                    }.build()
-                )
-            )
+            .globalRequestParameters(globalRequestParameters())
     }
 
     private fun apiInfo(): ApiInfo {
