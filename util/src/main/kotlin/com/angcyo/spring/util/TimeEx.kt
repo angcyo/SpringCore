@@ -174,6 +174,8 @@ fun Long.toTimes(): LongArray {
  *  toElapsedTime( pattern = intArrayOf(-1, 1, 1), units = arrayOf("", "", ":", ":", ":") )
  *</pre>
  *
+ *  pattern :0智能判断 1强制 -1忽略
+ *
  * @param pattern 默认为智能判断值<=0时, 不返回. 如果需要强制返回, 设置1, 强制不返回设置-1
  * @param h24 24小时制
  * */

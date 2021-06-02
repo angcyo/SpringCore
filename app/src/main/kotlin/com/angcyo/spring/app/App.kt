@@ -24,7 +24,7 @@ object App {
             //启动耗时输出
             val nowTime = nowTime()
             val app: AppProperties = getBean(AppProperties::class.java)
-            val duration = (nowTime - startTime).toElapsedTime()
+            val duration = (nowTime - startTime).toElapsedTime(intArrayOf(1, 1, 1))
             L.w("${app.name ?: "SpringBoot"} 启动结束,耗时:${duration}☞ http://${getLocalHost()}:${getServerPort()} http://localhost:${getServerPort()}")
         }
     }

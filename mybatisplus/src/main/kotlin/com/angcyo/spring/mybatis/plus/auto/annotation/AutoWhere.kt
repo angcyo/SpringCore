@@ -1,6 +1,9 @@
 package com.angcyo.spring.mybatis.plus.auto.annotation
 
 /**
+ * 自动查询的Where条件生成规则
+ *
+ * [com.angcyo.spring.mybatis.plus.auto.annotation.WhereEnum]
  * Email:angcyo@126.com
  * @author angcyo
  * @date 2021/05/28

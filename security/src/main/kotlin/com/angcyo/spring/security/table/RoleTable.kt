@@ -1,6 +1,7 @@
 package com.angcyo.spring.security.table
 
 import com.angcyo.spring.mybatis.plus.auto.annotation.AutoQuery
+import com.angcyo.spring.mybatis.plus.auto.annotation.AutoUpdateBy
 import com.angcyo.spring.mybatis.plus.auto.annotation.AutoWhere
 import com.angcyo.spring.mybatis.plus.auto.param.IAutoParam
 import com.angcyo.spring.mybatis.plus.table.BaseAuditTable
@@ -21,6 +22,7 @@ class RoleTable : BaseAuditTable(), IAutoParam {
 
     @Column(comment = "角色的名称")
     @AutoWhere
+    @AutoUpdateBy
     var name: String? = null
 
     @Column(comment = "角色的描述")

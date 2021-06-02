@@ -35,13 +35,35 @@ inline fun <reified Auto : Annotation> Any.eachAnnotation(dsl: Auto.(field: Fiel
     }
 }
 
+/**获取对象中所有指定注解的字段*/
+inline fun <reified Auto : Annotation> Any.annotations(checkNullValue: Boolean = false): List<Field> {
+    val result = mutableListOf<Field>()
+    for (field in ReflectionKit.getFieldList(this.javaClass)) {
+        val annotation = field.annotation<Auto>()
+        if (annotation != null) {
+            if (checkNullValue) {
+                if (field.get(this) != null) {
+                    result.add(field)
+                }
+            } else {
+                result.add(field)
+            }
+        }
+    }
+    return result
+}
+
 /**是否有指定的注解*/
-inline fun <reified Auto : Annotation> Any.haveAnnotation(): Boolean {
+inline fun <reified Auto : Annotation> Any.haveAnnotation(checkNullValue: Boolean = false): Boolean {
     var have = false
     for (field in ReflectionKit.getFieldList(this.javaClass)) {
         val annotation = field.annotation<Auto>()
-        if (annotation != null && field.get(this) != null) {
-            have = true
+        if (annotation != null) {
+            have = if (checkNullValue) {
+                field.get(this) != null
+            } else {
+                true
+            }
         }
         if (have) {
             break
@@ -54,31 +76,22 @@ inline fun <reified Auto : Annotation> Any.haveAnnotation(): Boolean {
  * 从一个对象中, 获取指定的成员对象
  */
 fun Any?.getMember(member: String): Any? {
-    return this?.run { this.getMember(this.javaClass, member) }
+    return ReflectionKit.getFieldValue(this, member)
 }
 
-fun Any?.getMember(
-    cls: Class<*>,
-    member: String
-): Any? {
-    var result: Any? = null
-    try {
-        var cl: Class<*>? = cls
-        while (cl != null) {
-            try {
-                val memberField = cl.getDeclaredField(member)
-                //memberField.isAccessible = true
-                ReflectionUtils.makeAccessible(memberField)
-                result = memberField[this]
-                return result
-            } catch (e: NoSuchFieldException) {
-                cl = cl.superclass
-            }
-        }
+/***/
+fun Any.setMember(member: String, value: Any?): Boolean {
+    val cls: Class<*> = this.javaClass
+    val fieldMaps = ReflectionKit.getFieldMap(cls)
+    return try {
+        val field = fieldMaps[member]
+        field!!.isAccessible = true
+        field.set(this, value)
+        true
     } catch (e: Exception) {
-        //L.i("错误:" + cls.getSimpleName() + " ->" + e.getMessage());
+        e.printStackTrace()
+        false
     }
-    return result
 }
 
 fun Any.isList() = if (this is Field) {
