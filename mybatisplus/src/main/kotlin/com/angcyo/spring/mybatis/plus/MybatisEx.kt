@@ -7,6 +7,8 @@ import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper
 import com.gitee.sunchenbin.mybatis.actable.utils.ColumnUtils
 import com.google.common.base.CaseFormat
+import kotlin.reflect.KClass
+import kotlin.reflect.KProperty
 
 /**
  * Email:angcyo@126.com
@@ -71,3 +73,9 @@ fun lowerCamel(value: String) = CaseFormat.LOWER_UNDERSCORE.to(CaseFormat.LOWER_
 
 /**转换成安全的sql语句, 防止sql注入*/
 fun String.toSafeSql() = replace("\\", "\\\\").replace("'", "\\'")
+
+/**获取class对应的表名*/
+fun KClass<*>.tableName() = ColumnUtils.getTableName(this.java)
+fun Class<*>.tableName() = ColumnUtils.getTableName(this)
+
+fun KProperty<*>.columnName() = name.toLowerName()

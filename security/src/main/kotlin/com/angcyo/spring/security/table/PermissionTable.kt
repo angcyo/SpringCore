@@ -10,6 +10,9 @@ import com.gitee.sunchenbin.mybatis.actable.annotation.Column
 import com.gitee.sunchenbin.mybatis.actable.annotation.TableComment
 
 /**
+ * [com.angcyo.spring.security.jwt.JwtPermissionListener]
+ * [com.angcyo.spring.security.service.PermissionManagerService.havePermission]
+ *
  * Email:angcyo@126.com
  * @author angcyo
  * @date 2021/05/28
