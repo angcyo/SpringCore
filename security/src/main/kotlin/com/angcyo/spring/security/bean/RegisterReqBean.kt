@@ -21,11 +21,17 @@ class RegisterReqBean {
     @Size(min = 4, max = 20, message = "账号至少4个字符")
     var account: String? = null
 
-    @ApiModelProperty("注册账号的密码")
+    @ApiModelProperty("注册账号的密码, 如果未指定密码, 默认就是账号")
     @NotBlank(message = "密码不能为空")
     @Size(min = 6, max = 20, message = "密码至少6个字符")
     var password: String? = null
 
     @ApiModelProperty("注册时的验证码")
     var code: String? = null
+
+    @ApiModelProperty("授权类型,默认是password. password/code等")
+    var grantType: String? = GrantType.Password.value
+
+    @ApiModelProperty("安全校验码")
+    var securityCode: String? = null
 }

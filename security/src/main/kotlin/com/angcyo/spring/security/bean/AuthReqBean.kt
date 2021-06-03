@@ -21,9 +21,9 @@ class AuthReqBean {
     @ApiModelProperty("如果是验证码登录, 则验证码放这里")
     var code: Long? = null
 
-    @ApiModelProperty("客户端类型, android/ios/web/等. 请在请求头中指定.")
+    @ApiModelProperty("客户端类型,默认是web. android/ios/web/等. 请在请求头中指定.")
     var clientType: String? = ClientType.Web.value
 
-    @ApiModelProperty("授权类型, password/code等")
+    @ApiModelProperty("授权类型,默认是password. password/code等")
     var grantType: String? = GrantType.Password.value
 }

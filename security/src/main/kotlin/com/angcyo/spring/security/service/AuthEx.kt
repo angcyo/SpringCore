@@ -1,5 +1,6 @@
 package com.angcyo.spring.security.service
 
+import com.angcyo.spring.base.extension.apiError
 import com.angcyo.spring.base.servlet.param
 import com.angcyo.spring.base.servlet.request
 import com.angcyo.spring.security.bean.ClientType
@@ -22,7 +23,8 @@ fun HttpServletRequest.codeKey(): String {
         getSession(true)?.apply {
             key = id
         }.elseNull {
-            key = uuid()
+            //key = uuid()
+            apiError("无效的客户端标识")
         }
     } else {
         key = uuid
@@ -32,6 +34,7 @@ fun HttpServletRequest.codeKey(): String {
 
 /**客户端类型*/
 fun currentClientType() = request()?.clientType() ?: ClientType.Web.value
+fun currentClientUuid() = request()?.clientUuid()
 
 /**客户端的uuid*/
 fun HttpServletRequest.clientUuid() = param("clientUuid")

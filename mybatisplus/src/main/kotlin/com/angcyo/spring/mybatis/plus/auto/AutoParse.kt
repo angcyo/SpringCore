@@ -83,9 +83,9 @@ class AutoParse<Table> {
         if (service != null && service is IBaseAutoMybatisService<*>) {
 
             val queryColumn = fill.queryColumn
-            val queryValueKey = fill.queryValue
+            val queryValueKey = fill.queryValueField
             val result = if (queryColumn.isEmpty()) {
-                val queryParamKey = fill.query.ifEmpty {
+                val queryParamKey = fill.queryParamField.ifEmpty {
                     "${field.name}Query"
                 }
                 when (val queryParam = obj.getMember(queryParamKey)) {
@@ -104,12 +104,12 @@ class AutoParse<Table> {
             val targetResult = mutableListOf<Any?>()
 
             //需要获取到的数据字段
-            if (fill.field.isEmpty()) {
+            if (fill.targetField.isEmpty()) {
                 //为空表示需要获取整个对象
                 targetResult.addAll(result)
             } else {
                 for (item in result) {
-                    targetResult.add(item.getMember(fill.field))
+                    targetResult.add(item.getMember(fill.targetField))
                 }
             }
 

@@ -37,10 +37,7 @@ class JwtPermissionListener : ApplicationListener<InteractiveAuthenticationSucce
     @PostConstruct
     fun initPost() {
         whiteList.addAll(SecurityConfiguration.SECURITY_WHITE_LIST)
-        whiteList.add(SecurityConstants.AUTH_LOGIN_URL)
-        whiteList.add(SecurityConstants.AUTH_LOGOUT_URL)
-        whiteList.add(SecurityConstants.AUTH_REGISTER_URL)
-        whiteList.add(SecurityConstants.AUTH_REGISTER_CODE_URL)
+        whiteList.addAll(SecurityConstants.AUTH_URL_LIST)
     }
 
     @Autowired

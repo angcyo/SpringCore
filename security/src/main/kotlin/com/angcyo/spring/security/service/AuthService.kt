@@ -5,19 +5,23 @@ import com.angcyo.spring.base.beanOf
 import com.angcyo.spring.base.extension.apiError
 import com.angcyo.spring.redis.Redis
 import com.angcyo.spring.security.SecurityConstants
+import com.angcyo.spring.security.bean.CodeType
+import com.angcyo.spring.security.bean.GrantType
 import com.angcyo.spring.security.bean.RegisterReqBean
 import com.angcyo.spring.security.bean.SaveAccountReqBean
+import com.angcyo.spring.security.jwt.event.RegisterAccountEvent
 import com.angcyo.spring.security.service.annotation.RegisterAccount
 import com.angcyo.spring.security.service.annotation.SaveAccount
 import com.angcyo.spring.security.table.AccountTable
 import com.angcyo.spring.security.table.UserTable
+import com.angcyo.spring.util.ImageCode
 import com.angcyo.spring.util.oneDaySec
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.context.ApplicationEventPublisher
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
-import javax.servlet.http.HttpServletRequest
 
 /**
  * Email:angcyo@126.com
@@ -29,14 +33,6 @@ import javax.servlet.http.HttpServletRequest
 
 @Service
 class AuthService {
-
-    companion object {
-        /**注册时的验证码类型*/
-        const val CODE_TYPE_REGISTER = 1
-
-        /**登录时的验证码类型*/
-        const val CODE_TYPE_LOGIN = 2
-    }
 
     @Autowired
     lateinit var passwordEncoder: PasswordEncoder
@@ -50,24 +46,57 @@ class AuthService {
     val tokenPrefix: String
         get() = "${applicationProperties.name}.TOKEN"
 
+    val sendCodePrefix: String
+        get() = "${applicationProperties.name}.CODE.SEND"
+
     //<editor-fold desc="验证码相关">
 
     val imageCodePrefix: String
         get() = "${applicationProperties.name}.CODE.IMAGE"
 
-    /**临时保存图形验证码*/
-    fun setImageCode(request: HttpServletRequest, type: Int, code: String, time: Long = 1 * 60) {
-        redis["${imageCodePrefix}.${type}.${request.codeKey()}", code] = time
+    fun imageCodeKey(uuid: String, type: Int): String {
+        return "${imageCodePrefix}.${type}.${uuid}"
+    }
+
+    /**临时保存图形验证码
+     * [time] 有效时长默认1分钟*/
+    fun setImageCode(uuid: String, type: Int, code: String, time: Long = 1 * 60) {
+        redis[imageCodeKey(uuid, type), code] = time
     }
 
     /**获取保存过的验证码*/
-    fun getImageCode(request: HttpServletRequest, type: Int): String? {
-        return redis["${imageCodePrefix}.${type}.${request.codeKey()}"]?.toString()
+    fun getImageCode(uuid: String, type: Int): String? {
+        return redis[imageCodeKey(uuid, type)]?.toString()
     }
 
     /**清除验证码缓存*/
-    fun clearImageCode(request: HttpServletRequest, type: Int) {
-        redis.del("${imageCodePrefix}.${type}.${request.codeKey()}")
+    fun clearImageCode(uuid: String, type: Int) {
+        redis.del(imageCodeKey(uuid, type))
+    }
+
+    fun sendCodeKey(uuid: String, target: String, type: Int): String {
+        return "${sendCodePrefix}.${type}.${uuid}.${target}"
+    }
+
+    /**发送一个验证码
+     * [target] 发送的目标, 目前支持手机号, 邮箱号
+     * [uuid] 目标客户端
+     * [code] 需要发送的验证码
+     * [type] 验证码类型
+     * [time] 有效时长默认5分钟*/
+    fun sendCode(uuid: String, target: String, type: Int, time: Long = 5 * 60): Boolean {
+        //code: String
+        //需要发送的验证码
+        val code = ImageCode.generateCode(6)
+        return redis.set(sendCodeKey(uuid, target, type), code, time)
+    }
+
+    fun getSendCode(uuid: String, target: String, type: Int): String? {
+        return redis[sendCodeKey(uuid, target, type)]?.toString()
+    }
+
+    fun clearSendCode(uuid: String, target: String, type: Int) {
+        redis.del(sendCodeKey(uuid, target, type))
     }
 
     //</editor-fold desc="验证码相关">
@@ -77,6 +106,9 @@ class AuthService {
 
     @Autowired
     lateinit var userService: UserService
+
+    @Autowired
+    lateinit var applicationEventPublisher: ApplicationEventPublisher
 
     /**保存一个帐号*/
     @SaveAccount
@@ -88,7 +120,7 @@ class AuthService {
         val user = UserTable()
         user.state = 1
         user.nickname = username
-        user.password = passwordEncoder.encode(req.registerReqBean?.password)
+        user.password = passwordEncoder.encode(req.registerReqBean?.password ?: username)
         userService.save(user)
 
         //创建帐号,用户登录用户
@@ -104,13 +136,36 @@ class AuthService {
     @RegisterAccount
     @Transactional
     fun register(bean: RegisterReqBean): UserTable? {
+        when (bean.grantType?.lowercase()) {
+            GrantType.Password.value -> {
+                //密码 授权注册方式
+            }
+            GrantType.Code.value -> {
+                //验证码 授权注册方式
+                val uuid = currentClientUuid()
+                if (uuid.isNullOrEmpty()) {
+                    apiError("无效的客户端")
+                }
+                val code = getSendCode(uuid, bean.account!!, CodeType.Register.value)
+                if (code != bean.code) {
+                    apiError("验证码不正确")
+                }
+            }
+            else -> apiError("无效的注册方式")
+        }
+
         if (accountService.isAccountExist(bean.account)) {
             apiError("帐号已存在")
         }
 
-        return beanOf<AuthService>().saveAccount(SaveAccountReqBean().apply {
+        val user = beanOf<AuthService>().saveAccount(SaveAccountReqBean().apply {
             registerReqBean = bean
         })
+
+        //发送注册账号成功事件
+        applicationEventPublisher.publishEvent(RegisterAccountEvent(bean, user))
+
+        return user
     }
 
     /**临时用户对象*/

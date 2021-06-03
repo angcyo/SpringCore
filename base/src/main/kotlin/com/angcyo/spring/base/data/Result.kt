@@ -58,6 +58,18 @@ data class Result<T>(
     }
 }
 
+/**自动判断是否返回成功/失败*/
+fun <T> Any?.result(successMsg: String = "Success", errorMsg: String = "Success"): Result<T> {
+    if (this == null || this == false) {
+        return Result.error(this as T).apply {
+            msg = errorMsg
+        }
+    }
+    return Result.ok(this as T).apply {
+        msg = successMsg
+    }
+}
+
 /**无论如何都返回成功*/
 fun <T> Any?.ok(msg: String? = null, checkNull: Boolean = false) = if (checkNull && this == null) {
     resultError(msg ?: "Data is Null Error.")

@@ -124,11 +124,7 @@ class SecurityConfiguration : WebSecurityConfigurerAdapter() {
             .csrf().disable()//CRSF禁用，因为不使用session
             .authorizeRequests()
             .antMatchers(*SECURITY_WHITE_LIST.toTypedArray()).permitAll()
-            .antMatchers(
-                SecurityConstants.AUTH_LOGIN_URL,
-                SecurityConstants.AUTH_REGISTER_URL,
-                SecurityConstants.AUTH_REGISTER_CODE_URL,
-            ).permitAll()
+            .antMatchers(*SecurityConstants.AUTH_URL_LIST.toTypedArray()).permitAll()
             .anyRequest().authenticated()
             //.and().formLogin().loginPage().failureUrl()
             .and()

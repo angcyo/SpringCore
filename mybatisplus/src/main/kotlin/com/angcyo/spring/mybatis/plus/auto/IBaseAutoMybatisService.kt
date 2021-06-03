@@ -1,13 +1,16 @@
 package com.angcyo.spring.mybatis.plus.auto
 
 import com.angcyo.spring.base.aspect.LogMethodTime
+import com.angcyo.spring.base.extension.apiError
 import com.angcyo.spring.mybatis.plus.auto.annotation.AutoQuery
 import com.angcyo.spring.mybatis.plus.auto.annotation.AutoResetBy
 import com.angcyo.spring.mybatis.plus.auto.annotation.AutoUpdateBy
 import com.angcyo.spring.mybatis.plus.auto.param.BaseAutoPageParam
 import com.angcyo.spring.mybatis.plus.auto.param.IAutoParam
+import com.angcyo.spring.mybatis.plus.keyName
 import com.angcyo.spring.mybatis.plus.service.IBaseMybatisService
 import com.angcyo.spring.mybatis.plus.table.BaseAuditTable
+import com.angcyo.spring.util.size
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper
 import com.baomidou.mybatisplus.core.metadata.IPage
@@ -114,6 +117,7 @@ interface IBaseAutoMybatisService<Table> : IBaseMybatisService<Table> {
                     updateSuccessList.add(targetTable)
                 } else {
                     updateFailList.add(targetTable)
+                    apiError("ID更新失败:${targetTable.id}")
                 }
             } else if (targetTable is IAutoParam && targetTable.haveAnnotation<AutoUpdateBy>(true)) {
                 //根据条件更新记录
@@ -125,6 +129,7 @@ interface IBaseAutoMybatisService<Table> : IBaseMybatisService<Table> {
                         saveList.add(targetTable)
                     } else {
                         updateFailList.add(targetTable)
+                        apiError("查询更新失败:${targetTable.javaClass}")
                     }
                 }
             } else {
@@ -137,10 +142,19 @@ interface IBaseAutoMybatisService<Table> : IBaseMybatisService<Table> {
             }
         }
 
-        //需要直接保存的记录
-        val saveResult = saveBatch(saveList)
+        if (saveList.isNotEmpty()) {
+            //需要直接保存的记录
+            val saveResult = saveBatch(saveList)
 
-        return saveResult && updateFailList.isEmpty()
+            if (!saveResult) {
+                apiError("保存失败:${saveList.size()}")
+            }
+
+            return saveResult && updateFailList.isEmpty()
+
+        }
+
+        return updateFailList.isEmpty()
     }
 
     fun autoResets(vararg tables: Any): Boolean {
@@ -235,7 +249,8 @@ interface IBaseAutoMybatisService<Table> : IBaseMybatisService<Table> {
                     //已经存在的记录, 在新的记录中没有找到, 则需要删除
                     removeList.add(existTable)
                 } else {
-                    find.setMember("id", existTable.getMember("id"))
+                    val idName = find.keyName()
+                    find.setMember(idName, existTable.getMember(idName))
                     updateList.add(find)
                 }
             }
@@ -245,7 +260,7 @@ interface IBaseAutoMybatisService<Table> : IBaseMybatisService<Table> {
             //开始操作
             if (removeList.isNotEmpty()) {
                 removeByIds(removeList.mapTo(mutableListOf()) {
-                    it.getMember("id") as Long
+                    it.getMember(it!!.keyName()) as Long
                 })
             }
             if (updateList.isNotEmpty()) {

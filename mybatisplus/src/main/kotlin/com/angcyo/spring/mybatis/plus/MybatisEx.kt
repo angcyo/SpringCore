@@ -6,6 +6,7 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper
 import com.gitee.sunchenbin.mybatis.actable.utils.ColumnUtils
+import com.gitee.sunchenbin.mybatis.actable.utils.FieldUtils
 import com.google.common.base.CaseFormat
 import kotlin.reflect.KClass
 import kotlin.reflect.KProperty
@@ -79,3 +80,6 @@ fun KClass<*>.tableName() = ColumnUtils.getTableName(this.java)
 fun Class<*>.tableName() = ColumnUtils.getTableName(this)
 
 fun KProperty<*>.columnName() = name.toLowerName()
+
+/**获取对象结构的主键属性名*/
+fun Any.keyName(def: String = "id") = FieldUtils.getKeyField(this)?.name?.toLowerName() ?: def

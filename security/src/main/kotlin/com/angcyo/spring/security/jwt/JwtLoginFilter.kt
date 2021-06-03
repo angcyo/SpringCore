@@ -8,9 +8,11 @@ import com.angcyo.spring.base.servlet.sendError
 import com.angcyo.spring.security.SecurityConstants
 import com.angcyo.spring.security.bean.AuthRepBean
 import com.angcyo.spring.security.bean.AuthReqBean
+import com.angcyo.spring.security.bean.CodeType
 import com.angcyo.spring.security.jwt.token.RequestAuthenticationToken
 import com.angcyo.spring.security.jwt.token.ResponseAuthenticationToken
 import com.angcyo.spring.security.service.AuthService
+import com.angcyo.spring.security.service.codeKey
 import org.springframework.security.authentication.AuthenticationManager
 import org.springframework.security.core.Authentication
 import org.springframework.security.core.AuthenticationException
@@ -86,9 +88,6 @@ class JwtLoginFilter(
 
             //5 将token保存至redis
             authService._loginEnd(flag, token)
-
-            //6 清除验证码
-            authService.clearImageCode(request, AuthService.CODE_TYPE_REGISTER)
 
             val repBean = AuthRepBean()
             repBean.id = user.id

@@ -21,7 +21,11 @@ import kotlin.random.Random.Default.nextInt
 
 object ImageCode {
 
-    private val FONT_TYPES = arrayOf("\u5b8b\u4f53", "\u65b0\u5b8b\u4f53", "\u9ed1\u4f53", "\u6977\u4f53", "\u96b6\u4e66")
+    private val FONT_TYPES =
+        arrayOf("\u5b8b\u4f53", "\u65b0\u5b8b\u4f53", "\u9ed1\u4f53", "\u6977\u4f53", "\u96b6\u4e66")
+
+    //验证码生成池
+    val CODE_CHAR = "abcdefghijklmnpqrstuvwxyzABCDEFGHIJKLMNPQRSTUVWXYZ123456789"
 
     /**
      * https://github.com/lingd3/Captcha
@@ -35,7 +39,7 @@ object ImageCode {
         fillBackground(graphics, width, height);
 
         //字典池, 去掉难分辨的字符O0
-        val ch = "abcdefghijklmnpqrstuvwxyzABCDEFGHIJKLMNPQRSTUVWXYZ123456789".toCharArray()
+        val ch = CODE_CHAR.toCharArray()
         val len = ch.size
 
         val textWidth = 15
@@ -54,9 +58,11 @@ object ImageCode {
             graphics.font = Font(FONT_TYPES[nextInt(FONT_TYPES.size)], Font.BOLD, 26)
             //设置x y 坐标
             val c = ch[index]
-            graphics.drawString(c.toString(),
-                    textWidth * i + nextInt(5, 10),
-                    19 + nextInt(2, 10))
+            graphics.drawString(
+                c.toString(),
+                textWidth * i + nextInt(5, 10),
+                19 + nextInt(2, 10)
+            )
             sb.append(c)
         }
 
@@ -65,6 +71,22 @@ object ImageCode {
         ImageIO.write(bi, "JPG", out)
 
         return code to out.toByteArray()
+    }
+
+    /**创建一个验证码*/
+    fun generateCode(length: Int = 4): String {
+        //字典池, 去掉难分辨的字符O0
+        val ch = CODE_CHAR.toCharArray()
+        val len = ch.size
+
+        var index: Int
+        val sb = StringBuffer()
+        for (i in 0 until length) {
+            index = nextInt(len)
+            val c = CODE_CHAR[index]
+            sb.append(c)
+        }
+        return sb.toString()
     }
 
     /**
@@ -103,9 +125,11 @@ object ImageCode {
         val charArray = randomStr.toCharArray()
         for (i in charArray.indices) {
             //设置RGB颜色算法参数
-            g.color = Color(nextInt(50, 100),
-                    nextInt(50, 100),
-                    nextInt(50, 100))
+            g.color = Color(
+                nextInt(50, 100),
+                nextInt(50, 100),
+                nextInt(50, 100)
+            )
             //设置字体大小，类型
             g.font = Font(FONT_TYPES[nextInt(FONT_TYPES.size)], Font.BOLD, 26)
             //设置x y 坐标

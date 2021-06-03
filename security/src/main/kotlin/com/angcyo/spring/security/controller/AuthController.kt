@@ -3,14 +3,13 @@ package com.angcyo.spring.security.controller
 import com.angcyo.spring.base.data.Result
 import com.angcyo.spring.base.data.ok
 import com.angcyo.spring.base.data.result
+import com.angcyo.spring.base.extension.apiError
 import com.angcyo.spring.base.servlet.body
 import com.angcyo.spring.base.servlet.send
 import com.angcyo.spring.security.SecurityConstants
-import com.angcyo.spring.security.bean.AuthRepBean
-import com.angcyo.spring.security.bean.AuthReqBean
-import com.angcyo.spring.security.bean.RegisterReqBean
+import com.angcyo.spring.security.bean.*
 import com.angcyo.spring.security.service.AuthService
-import com.angcyo.spring.security.service.AuthService.Companion.CODE_TYPE_REGISTER
+import com.angcyo.spring.security.service.codeKey
 import com.angcyo.spring.util.ImageCode
 import com.angcyo.spring.util.L
 import io.swagger.annotations.*
@@ -45,9 +44,9 @@ class AuthController {
         ApiImplicitParam(name = "w", value = "验证码的宽度", required = false, dataTypeClass = Int::class),
         ApiImplicitParam(name = "h", value = "验证码的高度", required = false, dataTypeClass = Int::class)
     )
-    fun getImageCode(request: HttpServletRequest, response: HttpServletResponse) {
+    fun getAuthImageCode(request: HttpServletRequest, response: HttpServletResponse) {
 
-        val type: Int = request.getParameter("type")?.toIntOrNull() ?: CODE_TYPE_REGISTER
+        val type: Int = request.getParameter("type")?.toIntOrNull() ?: CodeType.Register.value
         val length: Int = request.getParameter("l")?.toIntOrNull() ?: 4
         val width: Int = request.getParameter("w")?.toIntOrNull() ?: 80
         val height: Int = request.getParameter("h")?.toIntOrNull() ?: 28
@@ -55,7 +54,7 @@ class AuthController {
         val pair = ImageCode.generate(length, width, height)
 
         //根据session id, 将code 存到redis
-        authService.setImageCode(request, type, pair.first)
+        authService.setImageCode(request.codeKey(), type, pair.first)
 
         //将VerifyCode绑定session
         request.session.setAttribute("code.${type}", pair.first)
@@ -68,6 +67,19 @@ class AuthController {
         //设置响应内容类型
         response.send(pair.second, type = "image/jpeg")
         L.i("验证码${type}:${pair.first}")
+    }
+
+    @PostMapping(SecurityConstants.AUTH_SEND_CODE_URL)
+    @ApiOperation("发送验证码")
+    fun sendCode(request: HttpServletRequest, @RequestBody req: SendCodeReqBean): Result<Boolean> {
+
+        if (req.type == CodeType.Login.value) {
+            if (!authService.accountService.isAccountExist(req.target!!)) {
+                apiError("无效的账号")
+            }
+        }
+
+        return authService.sendCode(request.codeKey(), req.target!!, req.type!!).result()
     }
 
     /**
