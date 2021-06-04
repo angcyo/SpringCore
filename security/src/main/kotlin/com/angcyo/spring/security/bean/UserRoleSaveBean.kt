@@ -15,7 +15,8 @@ class UserRoleSaveBean : IAutoParam {
 
     var userId: Long? = null
 
-    @AutoFill(service = RoleService::class, queryColumn = "name", queryValueField = "roleName")
+    @AutoFill(service = RoleService::class, queryColumn = "name", queryParamField = "roleName")
     var roleId: Long? = null
+
     var roleName: String? = null
 }

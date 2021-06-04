@@ -2,9 +2,12 @@ package com.angcyo.spring.security.service
 
 import com.angcyo.spring.base.aspect.LogMethodTime
 import com.angcyo.spring.mybatis.plus.auto.BaseAutoMybatisServiceImpl
+import com.angcyo.spring.security.bean.UserRoleQueryBean
 import com.angcyo.spring.security.bean.UserRoleSaveBean
 import com.angcyo.spring.security.mapper.IUserRoleMapper
+import com.angcyo.spring.security.table.RoleTable
 import com.angcyo.spring.security.table.UserRoleReTable
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
@@ -17,10 +20,37 @@ import org.springframework.transaction.annotation.Transactional
 @Service
 class UserRoleService : BaseAutoMybatisServiceImpl<IUserRoleMapper, UserRoleReTable>() {
 
+    @Autowired
+    lateinit var roleService: RoleService
+
     /**充值用户对应的角色*/
     @LogMethodTime
     @Transactional
     fun resetUserRole(list: List<UserRoleSaveBean>) {
         autoReset(list)
+    }
+
+    /**用户是否有指定的角色名*/
+    fun haveRole(userId: Long, roleName: String): Boolean {
+        return getUserRoleList(userId).find { it.name == roleName } != null
+    }
+
+    /**获取用户对应的角色列表*/
+    fun getUserRoleList(userId: Long): List<RoleTable> {
+        val queryBean = UserRoleQueryBean().apply {
+            this.userId = userId
+        }
+        autoFill(queryBean)
+        return queryBean.roleList ?: emptyList()
+
+        /*val userRoleList = autoList(UserRoleQueryBean().apply {
+            this.userId = userId
+        })
+        val roleIdList = userRoleList.mapTo(mutableListOf()) {
+            it.roleId
+        }
+        return roleService.list(roleService.queryWrapper().apply {
+            `in`(RoleTable::id.columnName(), roleIdList)
+        })*/
     }
 }

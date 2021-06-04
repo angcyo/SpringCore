@@ -98,12 +98,13 @@ class SecurityConfiguration : WebSecurityConfigurerAdapter() {
         return source
     }
 
+    @Autowired
+    lateinit var jwtAuthenticationManager: JwtAuthenticationManager
+
     /**自定义的授权管理, 用来分配不同的授权方式*/
     override fun authenticationManager(): AuthenticationManager {
         //return super.authenticationManager()
-        return JwtAuthenticationManager().apply {
-            defaultAuthenticationProviderList.add(UsernamePasswordAuthenticationProvider())
-        }
+        return jwtAuthenticationManager
     }
 
     @Autowired
@@ -116,8 +117,13 @@ class SecurityConfiguration : WebSecurityConfigurerAdapter() {
     override fun configure(http: HttpSecurity) {
         //super.configure(http)
 
+        //授权管理
+        jwtAuthenticationManager.apply {
+            defaultAuthenticationProviderList.add(UsernamePasswordAuthenticationProvider())
+        }
+
         //manager
-        val authenticationManager = ProviderManager(emptyList(), authenticationManager())
+        val authenticationManager = ProviderManager(emptyList(), jwtAuthenticationManager)
 
         http.cors()//支持跨域
             .and()

@@ -5,7 +5,7 @@ import com.angcyo.spring.base.servlet.request
 import com.angcyo.spring.security.SecurityConfiguration
 import com.angcyo.spring.security.SecurityConstants
 import com.angcyo.spring.security.jwt.token.ResponseAuthenticationToken
-import com.angcyo.spring.security.service.PermissionManagerService
+import com.angcyo.spring.security.controller.PermissionManagerService
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.ApplicationListener
 import org.springframework.security.authentication.event.InteractiveAuthenticationSuccessEvent

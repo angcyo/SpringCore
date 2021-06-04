@@ -5,7 +5,6 @@ import com.angcyo.spring.base.servlet.param
 import com.angcyo.spring.base.servlet.request
 import com.angcyo.spring.security.bean.ClientType
 import com.angcyo.spring.util.elseNull
-import com.angcyo.spring.util.uuid
 import javax.servlet.http.HttpServletRequest
 
 /**
@@ -33,7 +32,7 @@ fun HttpServletRequest.codeKey(): String {
 }
 
 /**客户端类型*/
-fun currentClientType() = request()?.clientType() ?: ClientType.Web.value
+fun currentClientType(def: String = ClientType.Web.value) = request()?.clientType() ?: def
 fun currentClientUuid() = request()?.clientUuid()
 
 /**客户端的uuid*/

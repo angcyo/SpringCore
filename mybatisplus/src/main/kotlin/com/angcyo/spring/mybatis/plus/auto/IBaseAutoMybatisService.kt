@@ -2,14 +2,13 @@ package com.angcyo.spring.mybatis.plus.auto
 
 import com.angcyo.spring.base.aspect.LogMethodTime
 import com.angcyo.spring.base.extension.apiError
-import com.angcyo.spring.mybatis.plus.auto.annotation.AutoQuery
-import com.angcyo.spring.mybatis.plus.auto.annotation.AutoResetBy
-import com.angcyo.spring.mybatis.plus.auto.annotation.AutoUpdateBy
+import com.angcyo.spring.mybatis.plus.auto.annotation.*
 import com.angcyo.spring.mybatis.plus.auto.param.BaseAutoPageParam
 import com.angcyo.spring.mybatis.plus.auto.param.IAutoParam
 import com.angcyo.spring.mybatis.plus.keyName
 import com.angcyo.spring.mybatis.plus.service.IBaseMybatisService
 import com.angcyo.spring.mybatis.plus.table.BaseAuditTable
+import com.angcyo.spring.mybatis.plus.toLowerName
 import com.angcyo.spring.util.size
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper
@@ -43,13 +42,55 @@ interface IBaseAutoMybatisService<Table> : IBaseMybatisService<Table> {
         return count(buildAutoParse().parseQuery(queryWrapper(), param))
     }
 
+    /**根据[map], 查询出所有数据*/
     @LogMethodTime
     fun listOf(map: Map<String, Any>): List<Table> {
         return list(queryWrapper().apply {
             map.forEach { entry ->
-                eq(entry.key, entry.value)
+                val column = entry.key.toLowerName()
+                val value = entry.value
+                if (value is List<*>) {
+                    `in`(column, value)
+                } else {
+                    eq(column, value)
+                }
             }
         })
+    }
+
+    /**
+     * 通过[IAutoParam]对象查询出来的数据库记录,
+     * 重新赋值给[IAutoParam]对象中用[com.angcyo.spring.mybatis.plus.auto.annotation.AutoWhere]声明的属性
+     * */
+    fun fillWhereField(list: List<Table>, param: IAutoParam) {
+        if (list.isEmpty()) {
+            return
+        }
+        if (list.size() == 1) {
+            val first = list.first()
+            param.eachAnnotation<AutoWhere> { field ->
+                val key = column.ifEmpty { field.name }
+                //赋值属性值
+                field.set(param, first.getMember(key))
+            }
+        } else {
+            apiError("数据数量不匹配")
+        }
+    }
+
+    /**自动查询, 并且获取到返回值, 自动赋值, 然后在自动解析[AutoFill]填充*/
+    fun <T : IAutoParam> autoQueryFill(param: T): T {
+        val list = autoList(param)
+        fillWhereField(list, param)
+        val autoParse = buildAutoParse()
+        autoParse.parseFill(param)
+        return param
+    }
+
+    fun <T : IAutoParam> autoFill(param: T): T {
+        val autoParse = buildAutoParse()
+        autoParse.parseFill(param)
+        return param
     }
 
     /**根据[param], 自动查询出所有数据*/

@@ -29,7 +29,7 @@ import javax.servlet.http.HttpServletResponse
  */
 
 @RestController
-@Api(tags = ["授权控制器"])
+@Api(tags = ["授权相关的控制器"])
 class AuthController {
 
     @Autowired

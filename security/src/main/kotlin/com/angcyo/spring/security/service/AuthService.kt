@@ -147,7 +147,7 @@ class AuthService {
                     apiError("无效的客户端")
                 }
                 val code = getSendCode(uuid, bean.account!!, CodeType.Register.value)
-                if (code != bean.code) {
+                if (code == null || code != bean.code) {
                     apiError("验证码不正确")
                 }
             }

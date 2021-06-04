@@ -1,5 +1,6 @@
-package com.angcyo.spring.security.service
+package com.angcyo.spring.security.controller
 
+import com.angcyo.spring.security.service.PermissionService
 import com.angcyo.spring.util.L
 import com.angcyo.spring.util.have
 import org.springframework.beans.factory.annotation.Autowired

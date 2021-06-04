@@ -1,11 +1,11 @@
 package com.angcyo.spring.mybatis.plus.auto
 
 import com.angcyo.spring.base.beanOf
+import com.angcyo.spring.base.extension.apiError
 import com.angcyo.spring.mybatis.plus.auto.annotation.*
 import com.angcyo.spring.mybatis.plus.auto.param.BaseAutoPageParam
 import com.angcyo.spring.mybatis.plus.auto.param.BaseAutoQueryParam
 import com.angcyo.spring.mybatis.plus.auto.param.IAutoParam
-import com.angcyo.spring.mybatis.plus.auto.param.PlaceholderAutoParam
 import com.angcyo.spring.mybatis.plus.toLowerName
 import com.angcyo.spring.mybatis.plus.toSafeSql
 import com.angcyo.spring.util.L
@@ -81,24 +81,23 @@ class AutoParse<Table> {
 
         //通过服务传递参数查询数据
         if (service != null && service is IBaseAutoMybatisService<*>) {
-
             val queryColumn = fill.queryColumn
-            val queryValueKey = fill.queryValueField
+            val queryParamKey = fill.queryParamField.ifEmpty {
+                "${field.name}Query"
+            }
+            val queryParam = obj.getMember(queryParamKey) ?: apiError("无效的查询参数")
+
+            //查询结果
             val result = if (queryColumn.isEmpty()) {
-                val queryParamKey = fill.queryParamField.ifEmpty {
-                    "${field.name}Query"
-                }
-                when (val queryParam = obj.getMember(queryParamKey)) {
-                    is IAutoParam -> service.autoList(queryParam)
-                    else -> service.autoList(PlaceholderAutoParam())
+                //未指定查询列, 则可能是需要根据[IAutoParam]参数自动查询
+                if (queryParam is IAutoParam) {
+                    service.autoList(queryParam)
+                } else {
+                    apiError("无效的查询")
                 }
             } else {
-                val queryValue = obj.getMember(queryValueKey.ifEmpty { queryColumn })
-                if (queryValue == null) {
-                    emptyList()
-                } else {
-                    service.listOf(hashMapOf(queryColumn to queryValue))
-                }
+                //指定了需要查询的列
+                service.listOf(hashMapOf(queryColumn to queryParam))
             }
 
             val targetResult = mutableListOf<Any?>()
@@ -252,7 +251,9 @@ class AutoParse<Table> {
         obj: Any
     ) {
         field.annotation<AutoWhere> {
-            val column = field.name.toLowerName()
+            //要查询的列
+            val column = this.column.ifEmpty { field.name }.toLowerName()
+            //对应的值
             val fieldValue = field.get(obj)
             _handleWhere(wrapper, column, value, fieldValue)
         }

@@ -35,7 +35,7 @@ class LogTimeAspect {
             }
 
             val method = signature.toString()
-            L.w("${if (des.isNullOrEmpty()) "" else "[$des]"}调用耗时:${duration}☞${method}")
+            L.w("${if (des.isNullOrEmpty()) "" else "[$des]"}调用耗时:${duration}☞↓\n${method}")
             result
         } else {
             point.proceed(point.args)

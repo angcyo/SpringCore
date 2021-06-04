@@ -14,5 +14,9 @@ package com.angcyo.spring.mybatis.plus.auto.annotation
 @MustBeDocumented
 annotation class AutoWhere(
     /**需要进行的比较条件*/
-    val value: WhereEnum = WhereEnum.eq
+    val value: WhereEnum = WhereEnum.eq,
+
+    /**可以指定对应的查询列名,
+     * 如果不指定为空, 则使用属性名当做查询的列表*/
+    val column: String = "",
 )
