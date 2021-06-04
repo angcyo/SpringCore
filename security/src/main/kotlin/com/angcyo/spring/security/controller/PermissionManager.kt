@@ -15,7 +15,7 @@ import org.springframework.stereotype.Service
  */
 
 @Service
-class PermissionManagerService {
+class PermissionManager {
 
     @Autowired
     lateinit var permissionService: PermissionService
