@@ -2,8 +2,8 @@ package com.angcyo.spring.security.jwt
 
 import com.angcyo.spring.base.extension.apiError
 import com.angcyo.spring.security.SecurityConstants
+import com.angcyo.spring.security.bean.UserDetail
 import com.angcyo.spring.security.jwt.token.ResponseAuthenticationToken
-import com.angcyo.spring.security.table.UserTable
 import com.angcyo.spring.util.L
 import com.angcyo.spring.util.oneDay
 import io.jsonwebtoken.*
@@ -91,10 +91,10 @@ object JWT {
 }
 
 /**获取当前登录的用户信息*/
-fun currentUser(): UserTable {
+fun currentUser(): UserDetail {
     val authentication = SecurityContextHolder.getContext().authentication
     if (authentication is ResponseAuthenticationToken) {
-        return authentication.user
+        return authentication.userDetail
     }
     apiError("请先登录")
 }

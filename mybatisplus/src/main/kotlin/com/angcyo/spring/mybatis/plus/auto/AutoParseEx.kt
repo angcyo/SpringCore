@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.core.toolkit.ReflectionKit
 import org.springframework.util.ReflectionUtils
 import java.lang.reflect.AnnotatedElement
 import java.lang.reflect.Field
+import java.lang.reflect.Method
 
 /**
  * Email:angcyo@126.com
@@ -71,6 +72,27 @@ inline fun <reified Auto : Annotation> Any.haveAnnotation(checkNullValue: Boolea
     }
     return have
 }
+
+/**反射获取去对象的方法*/
+fun Any.getMethod(methodName: String, clz: Class<*> = javaClass): Method? {
+    var searchType: Class<*>? = clz
+    while (searchType != null) {
+        val methods = if (searchType.isInterface) searchType.methods else ReflectionUtils.getDeclaredMethods(searchType)
+        for (method in methods) {
+            if (methodName == method.name) {
+                return method
+            }
+        }
+        searchType = searchType.superclass
+    }
+    return null
+}
+
+/**反射调用对象的方法*/
+fun Any.invokeMethod(methodName: String, vararg args: Any?): Any? = invokeMethodClass(methodName, javaClass, *args)
+
+fun Any.invokeMethodClass(methodName: String, clz: Class<*> = javaClass, vararg args: Any?): Any? =
+    ReflectionUtils.invokeMethod(getMethod(methodName, clz)!!, this, *args)
 
 /**
  * 从一个对象中, 获取指定的成员对象

@@ -5,10 +5,7 @@ import com.angcyo.spring.base.beanOf
 import com.angcyo.spring.base.extension.apiError
 import com.angcyo.spring.redis.Redis
 import com.angcyo.spring.security.SecurityConstants
-import com.angcyo.spring.security.bean.CodeType
-import com.angcyo.spring.security.bean.GrantType
-import com.angcyo.spring.security.bean.RegisterReqBean
-import com.angcyo.spring.security.bean.SaveAccountReqBean
+import com.angcyo.spring.security.bean.*
 import com.angcyo.spring.security.jwt.event.RegisterAccountEvent
 import com.angcyo.spring.security.service.annotation.RegisterAccount
 import com.angcyo.spring.security.service.annotation.SaveAccount
@@ -172,6 +169,10 @@ class AuthService {
     fun tempUserTable() = UserTable().apply {
         nickname = "临时用户"
         description = "临时用户"
+    }
+
+    fun tempUserDetail() = UserDetail().apply {
+        userTable = tempUserTable()
     }
 
     /**redis 存储token的key*/

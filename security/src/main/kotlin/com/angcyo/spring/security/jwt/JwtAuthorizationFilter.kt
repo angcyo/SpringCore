@@ -2,6 +2,7 @@ package com.angcyo.spring.security.jwt
 
 import com.angcyo.spring.base.servlet.param
 import com.angcyo.spring.security.SecurityConstants
+import com.angcyo.spring.security.bean.UserDetail
 import com.angcyo.spring.security.bean.UserQueryParam
 import com.angcyo.spring.security.jwt.token.ResponseAuthenticationToken
 import com.angcyo.spring.security.service.AuthService
@@ -76,7 +77,11 @@ class JwtAuthorizationFilter(
                 if (user == null) {
                     null
                 } else {
-                    ResponseAuthenticationToken(user)
+                    val userDetail = UserDetail().apply {
+                        userTable = user
+                    }
+                    authService.userService.autoFill(userDetail)
+                    ResponseAuthenticationToken(userDetail)
                 }
             } else {
                 null
@@ -88,14 +93,14 @@ class JwtAuthorizationFilter(
         accept?.let {
             if (it.startsWith("image") || it.startsWith("video")) {
                 //访问媒体, 给一个临时的token
-                authentication = ResponseAuthenticationToken(authService.tempUserTable())
+                authentication = ResponseAuthenticationToken(authService.tempUserDetail())
             }
         }
 
         if (L.isDebug) {
             if (request.param("dev") == "truthy") {
                 //开发控制
-                authentication = ResponseAuthenticationToken(authService.tempUserTable())
+                authentication = ResponseAuthenticationToken(authService.tempUserDetail())
             }
         }
 

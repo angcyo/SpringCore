@@ -31,14 +31,26 @@ annotation class AutoFill(
     /**需要访问的服务全路径类名*/
     val serviceName: String = "",
 
+    /**需要调用的服务方法名
+     * 默认是[com.angcyo.spring.mybatis.plus.auto.IBaseAutoMybatisService.listOf]
+     * */
+    val serviceMethod: String = "",
+
+    /**从哪个属性中获取方法的参数
+     * 为空则不传递参数
+     * 支持[|]分割多个参数
+     * 支持[obj.id]对象引用*/
+    val methodParamField: String = "",
+
     //</editor-fold desc="数据来源的服务">
 
     //<editor-fold desc="查询的条件">
 
     /**
      * 从哪个属性名中获取查询的参数,需要传给服务的查询参数
-     * 默认是注解当前[属性名Query]字符串
-     * 比如:nameQuery*/
+     * 如果为空不指定, 则会使用[属性名Query]的字段.比如:nameQuery
+     * 支持.操作, 比如[obj.id], 则会获取[obj]对象的[id]属性的值
+     * */
     val queryParamField: String = "",
 
     /**简单的列查询

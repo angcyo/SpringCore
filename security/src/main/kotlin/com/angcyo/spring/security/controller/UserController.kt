@@ -35,7 +35,7 @@ class UserController {
     @ApiOperation("获取用户对应的角色列表")
     @ApiImplicitParam(name = "userId", value = "查询的用户id,默认自己")
     fun getUserRoleList(@RequestParam(required = false, name = "userId") id: Long? = null): Result<List<RoleTable>> {
-        val userId = id ?: currentUser().id
+        val userId = id ?: currentUser().userTable?.id
         val query = UserRoleQueryBean().apply {
             this.userId = userId
         }
@@ -52,7 +52,7 @@ class UserController {
             name = "userId"
         ) id: Long? = null
     ): Result<List<PermissionTable>> {
-        val userId = id ?: currentUser().id
+        val userId = id ?: currentUser().userTable?.id
         val query = UserPermissionQueryBean().apply {
             this.userId = userId
         }

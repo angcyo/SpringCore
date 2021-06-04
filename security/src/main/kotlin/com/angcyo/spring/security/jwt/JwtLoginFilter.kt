@@ -8,11 +8,9 @@ import com.angcyo.spring.base.servlet.sendError
 import com.angcyo.spring.security.SecurityConstants
 import com.angcyo.spring.security.bean.AuthRepBean
 import com.angcyo.spring.security.bean.AuthReqBean
-import com.angcyo.spring.security.bean.CodeType
 import com.angcyo.spring.security.jwt.token.RequestAuthenticationToken
 import com.angcyo.spring.security.jwt.token.ResponseAuthenticationToken
 import com.angcyo.spring.security.service.AuthService
-import com.angcyo.spring.security.service.codeKey
 import org.springframework.security.authentication.AuthenticationManager
 import org.springframework.security.core.Authentication
 import org.springframework.security.core.AuthenticationException
@@ -82,16 +80,16 @@ class JwtLoginFilter(
             rememberMeServices.loginSuccess(request, response, authentication)
 
             //4 使用用户的id,创建token
-            val user = authentication.user
-            val flag = "${user.id}"
+            val userDetail = authentication.userDetail
+            val flag = "${userDetail.userTable?.id}"
             val token = JWT.generateToken(flag)
 
             //5 将token保存至redis
             authService._loginEnd(flag, token)
 
             val repBean = AuthRepBean()
-            repBean.id = user.id
-            repBean.nickname = user.nickname
+            repBean.id = userDetail.userTable?.id
+            repBean.nickname = userDetail.userTable?.nickname
             repBean.token = token
             response.send(repBean.ok<AuthRepBean>().toJackson())
 

@@ -23,6 +23,31 @@ import java.lang.reflect.Field
  */
 class AutoParse<Table> {
 
+    companion object {
+        const val OBJ_DOT = "."
+    }
+
+    /**
+     * 获取对象的属性值
+     * [key] 需要获取的属性名, 支持 obj.id
+     * */
+    fun Any.getObjMember(key: String): Any? {
+        if (key.isEmpty()) {
+            apiError("无效的属性")
+        }
+        if (!key.contains(OBJ_DOT)) {
+            return getMember(key)
+        }
+        val keyList = key.split(OBJ_DOT)
+        var target: Any? = this
+        keyList.forEach { k ->
+            if (k.isNotEmpty()) {
+                target = target.getMember(k)
+            }
+        }
+        return target
+    }
+
     /**请求页码*/
     fun page(param: BaseAutoPageParam): Page<Table> {
         val page = Page<Table>(param.pageIndex, param.pageSize)
@@ -73,32 +98,70 @@ class AutoParse<Table> {
 
         //反射获取对应服务
         var service: Any? = null
+        var serviceClass: Class<*>? = null
         if (fill.service !is PlaceholderAutoMybatisService) {
+            serviceClass = fill.service.java
             service = beanOf(fill.service.java)
         } else if (fill.serviceName.isNotEmpty()) {
+            serviceClass = Class.forName(fill.serviceName)
             service = beanOf(fill.serviceName)
         }
 
-        //通过服务传递参数查询数据
-        if (service != null && service is IBaseAutoMybatisService<*>) {
-            val queryColumn = fill.queryColumn
-            val queryParamKey = fill.queryParamField.ifEmpty {
-                "${field.name}Query"
-            }
-            val queryParam = obj.getMember(queryParamKey) ?: apiError("无效的查询参数")
+        var result: List<Any?>? = null
 
-            //查询结果
-            val result = if (queryColumn.isEmpty()) {
-                //未指定查询列, 则可能是需要根据[IAutoParam]参数自动查询
-                if (queryParam is IAutoParam) {
-                    service.autoList(queryParam)
-                } else {
-                    apiError("无效的查询")
+        //------------------------------------调用方法----------------------------------------
+
+        //通过服务传递参数查询数据
+        if (service != null) {
+
+            if (fill.serviceMethod.isNotEmpty()) {
+                if (serviceClass == null) {
+                    apiError("无效的填充服务")
                 }
-            } else {
-                //指定了需要查询的列
-                service.listOf(hashMapOf(queryColumn to queryParam))
+                //需要调用指定的方法
+                val argList = fill.methodParamField.split("|")
+                val args = mutableListOf<Any?>()
+                argList.forEach { key ->
+                    args.add(obj.getObjMember(key))
+                }
+                //1.
+                val methodResult = if (args.isEmpty()) {
+                    service.invokeMethod(fill.serviceMethod)
+                } else {
+                    service.invokeMethodClass(fill.serviceMethod, serviceClass, *args.toTypedArray())
+                }
+                //2.
+                result = if (methodResult is List<*>) {
+                    methodResult
+                } else {
+                    mutableListOf(methodResult)
+                }
+            } else if (service is IBaseAutoMybatisService<*>) {
+                val queryColumn = fill.queryColumn
+                val queryParamKey = fill.queryParamField.ifEmpty {
+                    "${field.name}Query"
+                }
+                val queryParam = obj.getObjMember(queryParamKey) ?: apiError("无效的查询参数")
+
+                //查询结果
+                result = if (queryColumn.isEmpty()) {
+                    //未指定查询列, 则可能是需要根据[IAutoParam]参数自动查询
+                    if (queryParam is IAutoParam) {
+                        service.autoList(queryParam)
+                    } else {
+                        apiError("无效的查询")
+                    }
+                } else {
+                    //指定了需要查询的列
+                    service.listOf(hashMapOf(queryColumn to queryParam))
+                }
             }
+        }
+
+        //------------------------------------处理结果----------------------------------------
+
+        //返回值处理
+        if (result != null) {
 
             val targetResult = mutableListOf<Any?>()
 
@@ -108,7 +171,7 @@ class AutoParse<Table> {
                 targetResult.addAll(result)
             } else {
                 for (item in result) {
-                    targetResult.add(item.getMember(fill.targetField))
+                    targetResult.add(item!!.getObjMember(fill.targetField))
                 }
             }
 
@@ -127,6 +190,7 @@ class AutoParse<Table> {
                 }
             }
         }
+
         return true
     }
 

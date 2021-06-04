@@ -4,8 +4,8 @@ import com.angcyo.spring.base.AppProperties
 import com.angcyo.spring.base.servlet.request
 import com.angcyo.spring.security.SecurityConfiguration
 import com.angcyo.spring.security.SecurityConstants
-import com.angcyo.spring.security.jwt.token.ResponseAuthenticationToken
 import com.angcyo.spring.security.controller.PermissionManager
+import com.angcyo.spring.security.jwt.token.ResponseAuthenticationToken
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.ApplicationListener
 import org.springframework.security.authentication.event.InteractiveAuthenticationSuccessEvent
@@ -64,7 +64,7 @@ class JwtPermissionListener : ApplicationListener<InteractiveAuthenticationSucce
                     }
 
                     //权限验证
-                    authentication.user.id?.let { id ->
+                    authentication.userDetail.userTable?.id?.let { id ->
                         if (permissionManager.havePermission(id, path)) {
                             //有权限
                         } else {

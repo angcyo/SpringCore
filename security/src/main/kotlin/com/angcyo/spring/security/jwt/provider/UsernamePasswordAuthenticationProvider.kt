@@ -19,6 +19,8 @@ import org.springframework.security.crypto.password.PasswordEncoder
  */
 
 open class UsernamePasswordAuthenticationProvider : BaseTokenAuthenticationProvider() {
+
+    /**开始授权*/
     override fun auth(authReqBean: AuthReqBean): Authentication? {
 
         //查询到的账号列表
@@ -61,6 +63,7 @@ open class UsernamePasswordAuthenticationProvider : BaseTokenAuthenticationProvi
             })
         }
 
+        //帐号存在
         if (!accountList.isNullOrEmpty()) {
             if (accountList.isEmpty()) {
                 throw  UsernameNotFoundException("账号或密码不正确")
@@ -83,13 +86,25 @@ open class UsernamePasswordAuthenticationProvider : BaseTokenAuthenticationProvi
                 val passwordEncoder = beanOf<PasswordEncoder>()
                 if (passwordEncoder.matches(authReqBean.password, user.password)) {
                     //密码对上了
-                    result = ResponseAuthenticationToken(user)
+
+                    val userDetail = UserDetail().apply {
+                        userTable = user
+                    }
+                    authService.userService.autoFill(userDetail)
+
+                    result = ResponseAuthenticationToken(userDetail)
                 } else {
                     throw  UsernameNotFoundException("账号或密码不正确")
                 }
             } else if (grantType == GrantType.Code.value) {
                 //验证码登录成功
-                result = ResponseAuthenticationToken(user)
+
+                val userDetail = UserDetail().apply {
+                    userTable = user
+                }
+                authService.userService.autoFill(userDetail)
+
+                result = ResponseAuthenticationToken(userDetail)
             }
         }
 
