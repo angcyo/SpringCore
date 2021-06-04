@@ -7,8 +7,8 @@ import com.angcyo.spring.security.service.PermissionService
 import com.angcyo.spring.security.service.UserRoleService
 import com.angcyo.spring.security.table.AccountTable
 import com.angcyo.spring.security.table.PermissionTable
+import com.angcyo.spring.security.table.RoleTable
 import com.angcyo.spring.security.table.UserTable
-import javax.management.relation.RoleList
 
 /**
  * 用户详情
@@ -16,6 +16,7 @@ import javax.management.relation.RoleList
  * @author angcyo
  * @date 2021/06/04
  */
+
 class UserDetail : IAutoParam {
 
     /**用户表的数据*/
@@ -37,7 +38,7 @@ class UserDetail : IAutoParam {
         methodParamField = "userTable.id",
         targetField = ""
     )
-    var userRoleList: List<RoleList>? = null
+    var userRoleList: List<RoleTable>? = null
 
     /**用户对应的权限列表*/
     @AutoFill(

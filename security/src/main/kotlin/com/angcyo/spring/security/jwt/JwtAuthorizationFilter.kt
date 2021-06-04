@@ -77,10 +77,10 @@ class JwtAuthorizationFilter(
                 if (user == null) {
                     null
                 } else {
-                    val userDetail = UserDetail().apply {
+                    val userDetail = authService.getUserDetail(userId) ?: UserDetail().apply {
                         userTable = user
+                        authService.userService.autoFill(this)
                     }
-                    authService.userService.autoFill(userDetail)
                     ResponseAuthenticationToken(userDetail)
                 }
             } else {

@@ -1,6 +1,6 @@
 package com.angcyo.java.mail
 
-import com.angcyo.log.L
+import com.angcyo.spring.util.L
 import org.simplejavamail.api.email.Email
 import org.simplejavamail.api.mailer.Mailer
 import org.simplejavamail.api.mailer.config.TransportStrategy

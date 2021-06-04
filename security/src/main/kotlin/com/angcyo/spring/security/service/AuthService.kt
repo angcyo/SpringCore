@@ -40,6 +40,9 @@ class AuthService {
     @Autowired
     lateinit var applicationProperties: AppProperties
 
+    val userPrefix: String
+        get() = "${applicationProperties.name}.USER"
+
     val tokenPrefix: String
         get() = "${applicationProperties.name}.TOKEN"
 
@@ -188,6 +191,10 @@ class AuthService {
         }
     }
 
+    fun userKey(username: String): String {
+        return "${userPrefix}.$username"
+    }
+
     /**检查用户的token, 是否和redis里面的一样
      * [token] 支持包含/不包含前缀的token*/
     fun _checkTokenValid(username: String, token: String): Boolean {
@@ -203,16 +210,28 @@ class AuthService {
         }
     }
 
+    /**从redis中获取用户信息*/
+    fun getUserDetail(username: String): UserDetail? {
+        return redis[userKey(username)] as? UserDetail?
+    }
+
     /**[token] 不含前缀的token
      * [time] token过期时间, 秒, 默认1天*/
-    fun _loginEnd(username: String, token: String, time: Long = oneDaySec) {
+    fun _loginEnd(userDetail: UserDetail, token: String, time: Long = oneDaySec) {
+        val id = "${userDetail.userTable?.id}"
         //保存token, 一天超时
-        redis[userTokenKey(username), token] = time
+        redis[userTokenKey(id), token] = time
+
+        //将用户信息保存至redis
+        redis[userKey(id), userDetail] = time
     }
 
     /**退出登录*/
-    fun _logoutEnd(username: String) {
+    fun _logoutEnd(userDetail: UserDetail?) {
         SecurityContextHolder.clearContext()
-        redis.del(userTokenKey(username))
+        val id = "${userDetail?.userTable?.id}"
+
+        redis.del(userTokenKey(id))
+        redis.del(userKey(id))
     }
 }

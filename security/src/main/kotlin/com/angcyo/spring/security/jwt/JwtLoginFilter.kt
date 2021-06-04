@@ -14,6 +14,7 @@ import com.angcyo.spring.security.service.AuthService
 import org.springframework.security.authentication.AuthenticationManager
 import org.springframework.security.core.Authentication
 import org.springframework.security.core.AuthenticationException
+import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.security.web.authentication.AbstractAuthenticationProcessingFilter
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher
 import org.springframework.web.bind.annotation.RequestMethod
@@ -46,6 +47,8 @@ class JwtLoginFilter(
 
     /**颁发证书, 但是还没有设置证书应该有的权限*/
     override fun attemptAuthentication(request: HttpServletRequest, response: HttpServletResponse): Authentication? {
+        SecurityContextHolder.clearContext()
+
         val bean = request.fromJson(AuthReqBean::class.java)
 
         if (bean == null) {
@@ -85,7 +88,7 @@ class JwtLoginFilter(
             val token = JWT.generateToken(flag)
 
             //5 将token保存至redis
-            authService._loginEnd(flag, token)
+            authService._loginEnd(userDetail, token)
 
             val repBean = AuthRepBean()
             repBean.id = userDetail.userTable?.id

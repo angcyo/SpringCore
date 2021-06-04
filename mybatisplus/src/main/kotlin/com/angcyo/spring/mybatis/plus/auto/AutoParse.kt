@@ -69,7 +69,7 @@ class AutoParse<Table> {
         _handleOrder(queryWrapper, param)
 
         val targetSql = queryWrapper.targetSql
-        L.i("sql->$targetSql")
+        L.i("parseQuery sql->$targetSql")
         return queryWrapper
     }
 

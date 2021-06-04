@@ -1,4 +1,6 @@
 dependencies {
+    implementation(project(":SpringCore:util"))
+
     //http://www.simplejavamail.org/
     //https://jcenter.bintray.com/org/simplejavamail/simple-java-mail/
     api("org.simplejavamail:simple-java-mail:6.4.4")

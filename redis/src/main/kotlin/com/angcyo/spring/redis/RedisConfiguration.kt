@@ -1,14 +1,20 @@
 package com.angcyo.spring.redis
 
-import com.fasterxml.jackson.annotation.JsonAutoDetect
-import com.fasterxml.jackson.annotation.PropertyAccessor
+import com.alibaba.fastjson.support.spring.FastJsonRedisSerializer
+import com.fasterxml.jackson.annotation.JsonTypeInfo
 import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
+import com.fasterxml.jackson.module.kotlin.KotlinModule
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
+import org.springframework.data.redis.cache.RedisCacheConfiguration
+import org.springframework.data.redis.cache.RedisCacheManager
 import org.springframework.data.redis.connection.RedisConnectionFactory
 import org.springframework.data.redis.core.RedisTemplate
-import org.springframework.data.redis.serializer.Jackson2JsonRedisSerializer
+import org.springframework.data.redis.serializer.GenericJackson2JsonRedisSerializer
+import org.springframework.data.redis.serializer.RedisSerializationContext
 import org.springframework.data.redis.serializer.StringRedisSerializer
+import java.time.Duration
 
 
 /**
@@ -30,9 +36,10 @@ class RedisConfiguration {
     @Bean(name = ["redisTemplate"])
     fun redisTemplate(redisConnectionFactory: RedisConnectionFactory): RedisTemplate<String, Any?>? {
         val template = RedisTemplate<String, Any?>()
+        //template.setConnectionFactory(redisConnectionFactory)
         template.setConnectionFactory(redisConnectionFactory)
 
-        //使用Jackson2JsonRedisSerializer来序列化和反序列化redis的value值
+        /*//使用Jackson2JsonRedisSerializer来序列化和反序列化redis的value值
         val jackson2JsonRedisSerializer = Jackson2JsonRedisSerializer(Any::class.java)
         val mapper = ObjectMapper()
         mapper.setVisibility(PropertyAccessor.ALL, JsonAutoDetect.Visibility.ANY)
@@ -44,13 +51,37 @@ class RedisConfiguration {
         val stringRedisSerializer = StringRedisSerializer()
         //使用StringRedisSerializer来序列化和反序列化redis的key值
         template.keySerializer = stringRedisSerializer
-
         // hash的key也采用String的序列化方式
         template.hashKeySerializer = stringRedisSerializer
+
         // value序列化方式采用jackson
         template.valueSerializer = jackson2JsonRedisSerializer
         // hash的value序列化方式采用jackson
-        template.hashValueSerializer = jackson2JsonRedisSerializer
+        template.hashValueSerializer = jackson2JsonRedisSerializer*/
+
+        /*val om = ObjectMapper()
+        GenericJackson2JsonRedisSerializer.registerNullValueSerializer(om, null)
+        om.activateDefaultTyping(
+            om.polymorphicTypeValidator,
+            ObjectMapper.DefaultTyping.NON_FINAL,
+            JsonTypeInfo.As.PROPERTY
+        )
+        om.registerModule(CustomModule()) //注册自定义模块*/
+
+        val objectMapper = ObjectMapper()
+                .registerModule(KotlinModule())
+                .registerModule(JavaTimeModule())
+                .enableDefaultTyping(ObjectMapper.DefaultTyping.NON_FINAL, JsonTypeInfo.As.PROPERTY)
+
+        val serializer = GenericJackson2JsonRedisSerializer(objectMapper)
+
+        // 设置值（value）的序列化采用FastJsonRedisSerializer。
+        template.valueSerializer = serializer
+        template.hashValueSerializer = serializer
+
+        // 设置键（key）的序列化采用StringRedisSerializer。
+        template.keySerializer = StringRedisSerializer()
+        template.hashKeySerializer = StringRedisSerializer()
 
         template.afterPropertiesSet()
         return template
@@ -95,5 +126,17 @@ class RedisConfiguration {
          redisTemplate.afterPropertiesSet()
          return redisTemplate
      }*/
+
+    @Bean
+    fun cacheManager(redisConnectionFactory: RedisConnectionFactory): RedisCacheManager? {
+        val fastJsonRedisSerializer = FastJsonRedisSerializer(Any::class.java)
+        val config: RedisCacheConfiguration =
+            RedisCacheConfiguration.defaultCacheConfig().entryTtl(Duration.ofMinutes(5L))
+                .serializeKeysWith(RedisSerializationContext.SerializationPair.fromSerializer(StringRedisSerializer()))
+                .serializeValuesWith(RedisSerializationContext.SerializationPair.fromSerializer(fastJsonRedisSerializer))
+                .disableCachingNullValues()
+        return RedisCacheManager.builder(redisConnectionFactory).cacheDefaults(config).build()
+    }
+
 
 }

@@ -1,10 +1,9 @@
 package com.angcyo.spring.security.jwt
 
-import com.angcyo.spring.base.bean
+import com.angcyo.spring.base.beanOf
 import com.angcyo.spring.base.data.ok
 import com.angcyo.spring.base.json.toJackson
 import com.angcyo.spring.base.servlet.send
-import com.angcyo.spring.security.ktx.authPair
 import com.angcyo.spring.security.service.AuthService
 import org.springframework.security.core.Authentication
 import org.springframework.security.core.context.SecurityContextHolder
@@ -26,14 +25,19 @@ class JwtLogoutHandler : LogoutHandler {
         response: HttpServletResponse,
         authentication: Authentication?
     ) {
+        currentUser().let {
+            val authService = beanOf(AuthService::class.java)
+            authService._logoutEnd(it)
+        }
+
         //清除上下文
         SecurityContextHolder.clearContext()
 
-        //清除redis
+        /*//清除redis
         request.authPair()?.apply {
             val authService = AuthService::class.java.bean()
-            authService?._logoutEnd(first)
-        }
+            authService._logoutEnd(first)
+        }*/
 
         //发送给客户端
         if (!response.isCommitted) {

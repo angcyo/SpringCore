@@ -46,7 +46,7 @@ class PermissionManager {
             }
 
             if (have) {
-                L.i("$uri 通过权限验证: $p")
+                L.i("PermissionManager:$uri 通过权限验证: $p")
                 break
             }
         }
