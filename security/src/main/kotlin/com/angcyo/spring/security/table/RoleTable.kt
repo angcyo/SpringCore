@@ -26,5 +26,5 @@ class RoleTable : BaseAuditTable(), IAutoParam {
     var name: String? = null
 
     @Column(comment = "角色的描述")
-    var description: String? = null
+    var des: String? = null
 }

@@ -22,7 +22,7 @@ class UserTable : BaseAuditTable() {
     var password: String? = null
 
     @Column(comment = "用户的描述")
-    var description: String? = null
+    var des: String? = null
 
     @Column(comment = "用户的状态, >0表示用户可用, <0表示对应的不可用状态码")
     var state: Int? = null

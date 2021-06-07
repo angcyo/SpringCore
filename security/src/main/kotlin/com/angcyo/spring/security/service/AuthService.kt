@@ -171,7 +171,7 @@ class AuthService {
     /**临时用户对象*/
     fun tempUserTable() = UserTable().apply {
         nickname = "临时用户"
-        description = "临时用户"
+        des = "临时用户"
     }
 
     fun tempUserDetail() = UserDetail().apply {

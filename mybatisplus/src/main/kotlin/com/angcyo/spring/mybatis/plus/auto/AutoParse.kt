@@ -81,6 +81,13 @@ class AutoParse<Table> {
         return updateWrapper
     }
 
+    fun parseQueryByUpdate(queryWrapper: QueryWrapper<Table>, param: IAutoParam): QueryWrapper<Table> {
+        _handleQuery(queryWrapper, param) {
+            it.annotation<AutoUpdateBy>() == null
+        }
+        return queryWrapper
+    }
+
     /**自动解析并填充对象
      * [com.angcyo.spring.mybatis.plus.auto.annotation.AutoFill]
      * @return 是否解析成功, 没有出现错误*/
@@ -208,7 +215,8 @@ class AutoParse<Table> {
         queryWrapper.select(*columnList.toTypedArray())
     }
 
-    /**处理查询语句*/
+    /**处理查询语句
+     * [jumpField] 是否要跳过当前的字段*/
     fun <Wrapper : AbstractWrapper<Table, String, Wrapper>> _handleQuery(
         wrapper: AbstractWrapper<Table, String, Wrapper>,
         param: IAutoParam,

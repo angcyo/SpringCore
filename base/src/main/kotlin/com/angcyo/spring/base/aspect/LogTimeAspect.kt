@@ -31,7 +31,7 @@ class LogTimeAspect {
             val signature = point.signature
             if (signature is MethodSignature) {
                 val logMethodTime = signature.method.getAnnotation(LogMethodTime::class.java)
-                des = logMethodTime?.description
+                des = logMethodTime?.des
             }
 
             val method = signature.toString()

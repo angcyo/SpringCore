@@ -13,5 +13,5 @@ package com.angcyo.spring.base.aspect
 @MustBeDocumented
 annotation class LogMethodTime(
     /**描述信息*/
-    val description: String = ""
+    val des: String = ""
 )

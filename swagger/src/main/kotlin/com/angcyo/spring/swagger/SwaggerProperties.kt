@@ -26,7 +26,7 @@ class SwaggerProperties {
     var applicationVersion: String? = null
 
     /**项目描述信息*/
-    var applicationDescription: String? = null
+    var applicationDes: String? = null
 
     /**声明全局参数配置, 放在请求头中
      * [key] 表示key

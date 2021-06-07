@@ -162,16 +162,24 @@ interface IBaseAutoMybatisService<Table> : IBaseMybatisService<Table> {
                 }
             } else if (targetTable is IAutoParam && targetTable.haveAnnotation<AutoUpdateBy>(true)) {
                 //根据条件更新记录
-                if (update(targetTable, autoParse.parseUpdate(updateWrapper(), targetTable))) {
-                    updateSuccessList.add(targetTable)
-                } else {
-                    val autoQuery = targetTable.javaClass.annotation<AutoQuery>()
-                    if (config?.updateFailToSave == true || autoQuery?.updateFailToSave == true) {
-                        saveList.add(targetTable)
+                val count = count(autoParse.parseQueryByUpdate(queryWrapper(), targetTable))
+
+                 if (count > 0) {
+                    //存在数据
+                    if (update(targetTable, autoParse.parseUpdate(updateWrapper(), targetTable))) {
+                        updateSuccessList.add(targetTable)
                     } else {
-                        updateFailList.add(targetTable)
-                        apiError("查询更新失败:${targetTable.javaClass}")
+                        val autoQuery = targetTable.javaClass.annotation<AutoQuery>()
+                        if (config?.updateFailToSave == true || autoQuery?.updateFailToSave == true) {
+                            saveList.add(targetTable)
+                        } else {
+                            updateFailList.add(targetTable)
+                            apiError("[autoSaveOrUpdate]查询更新失败:${targetTable.javaClass}")
+                        }
                     }
+                } else {
+                    //不存在数据, 直接保存
+                    saveList.add(targetTable)
                 }
             } else {
                 //save

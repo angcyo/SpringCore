@@ -19,7 +19,7 @@ class AccountTable : BaseAuditTable() {
     var name: String? = null
 
     @Column(comment = "账号的描述")
-    var description: String? = null
+    var des: String? = null
 
     @Column(comment = "对应用户表的id")
     var userId: Long? = null

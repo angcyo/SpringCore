@@ -29,7 +29,7 @@ class PermissionTable : BaseAuditTable(), IAutoParam {
     var name: String? = null
 
     @Column(comment = "权限的描述")
-    var description: String? = null
+    var des: String? = null
 
     @Column(comment = "权限能访问的资源, 支持正则匹配. 如果为空则全部不允许访问")
     var permit: String? = null
