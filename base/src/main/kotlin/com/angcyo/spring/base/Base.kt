@@ -22,10 +22,6 @@ class Base : ApplicationContextAware {
 
     companion object {
 
-        const val DEFAULT_DATE_TIME_FORMATTER = "yyyy-MM-dd HH:mm:ss"
-        const val DEFAULT_DATE_FORMATTER = "yyyy-MM-dd"
-        const val DEFAULT_TIME_FORMATTER = "HH:mm:ss"
-
         /**保存应用程序上下文对象*/
         lateinit var applicationContext: ApplicationContext
 

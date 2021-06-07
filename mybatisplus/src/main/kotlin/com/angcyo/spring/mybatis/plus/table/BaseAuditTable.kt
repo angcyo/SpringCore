@@ -1,7 +1,6 @@
 package com.angcyo.spring.mybatis.plus.table
 
-import com.angcyo.spring.base.Base
-import com.angcyo.spring.base.json.toJackson
+import com.angcyo.spring.util.Constant
 import com.angcyo.spring.util.json.toJson
 import com.baomidou.mybatisplus.annotation.FieldFill
 import com.baomidou.mybatisplus.annotation.IdType
@@ -26,6 +25,10 @@ import java.time.LocalDateTime
  * https://www.cnblogs.com/niceyoo/p/10908647.html
  * 自动填充字段, 必须指定为null,否则不会自动填充
  * 使用Bean更新数据时, 字段为null, 则不会更新此字段
+ *
+ * [com.angcyo.spring.app.audit.UserAuditor]
+ * [com.angcyo.spring.mybatis.plus.base.MybatisTableMetaObjectHandler]
+ * [com.angcyo.spring.security.UserMybatisTableMetaObjectHandler]
  * */
 
 @ApiModel("基础表结构信息")
@@ -43,8 +46,8 @@ abstract class BaseAuditTable {
     @JsonDeserialize(using = LocalDateTimeDeserializer::class)
     @JsonSerialize(using = LocalDateTimeSerializer::class)
     @ApiModelProperty("创建时间", hidden = true)
-    @DateTimeFormat(pattern = Base.DEFAULT_DATE_TIME_FORMATTER)
-    @JsonFormat(pattern = Base.DEFAULT_DATE_TIME_FORMATTER, timezone = "GMT+8")
+    @DateTimeFormat(pattern = Constant.DEFAULT_DATE_TIME_FORMATTER)
+    @JsonFormat(pattern = Constant.DEFAULT_DATE_TIME_FORMATTER, timezone = "GMT+8")
     @TableField(fill = FieldFill.INSERT)
     @Column(comment = "记录创建时间")
     var createdAt: LocalDateTime? = null
@@ -52,8 +55,8 @@ abstract class BaseAuditTable {
     @JsonDeserialize(using = LocalDateTimeDeserializer::class)
     @JsonSerialize(using = LocalDateTimeSerializer::class)
     @ApiModelProperty("更新时间", hidden = true)
-    @DateTimeFormat(pattern = Base.DEFAULT_DATE_TIME_FORMATTER)
-    @JsonFormat(pattern = Base.DEFAULT_DATE_TIME_FORMATTER, timezone = "GMT+8")
+    @DateTimeFormat(pattern = Constant.DEFAULT_DATE_TIME_FORMATTER)
+    @JsonFormat(pattern = Constant.DEFAULT_DATE_TIME_FORMATTER, timezone = "GMT+8")
     @TableField(fill = FieldFill.INSERT_UPDATE)
     @Column(comment = "记录更新时间")
     var updatedAt: LocalDateTime? = null

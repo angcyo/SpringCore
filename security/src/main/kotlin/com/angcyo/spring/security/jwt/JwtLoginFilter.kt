@@ -93,7 +93,7 @@ class JwtLoginFilter(
             val repBean = AuthRepBean()
             repBean.id = userDetail.userTable?.id
             repBean.nickname = userDetail.userTable?.nickname
-            repBean.token = token
+            repBean.token = SecurityConstants.TOKEN_PREFIX + token
             response.send(repBean.ok<AuthRepBean>().toJackson())
 
             onDoSuccessfulAuthentication(eventPublisher, request, response, authentication)

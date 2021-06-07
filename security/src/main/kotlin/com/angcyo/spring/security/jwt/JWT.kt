@@ -92,9 +92,13 @@ object JWT {
 
 /**获取当前登录的用户信息*/
 fun currentUser(): UserDetail {
+    return currentUserOrNull() ?: apiError("请先登录")
+}
+
+fun currentUserOrNull(): UserDetail? {
     val authentication = SecurityContextHolder.getContext().authentication
     if (authentication is ResponseAuthenticationToken) {
         return authentication.userDetail
     }
-    apiError("请先登录")
+    return null
 }

@@ -12,6 +12,24 @@ import java.util.*
 
 fun threadName() = Thread.currentThread().name
 
+/**是有具有[Class]*/
+fun haveClass(name: String): Boolean {
+    return try {
+        Class.forName(name)
+        true
+    } catch (e: Exception) {
+        false
+    }
+}
+
+fun classOf(name: String): Class<*>? {
+    return try {
+        Class.forName(name)
+    } catch (e: Exception) {
+        null
+    }
+}
+
 /**
  * 根据Bean的名字, 扩展获取Bean对象
  * */

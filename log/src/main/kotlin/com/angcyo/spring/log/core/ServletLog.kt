@@ -53,6 +53,7 @@ object ServletLog {
             action(requestWrapper, responseWrapper, null, null)
         } catch (e: Exception) {
             L.db(e.stackTraceToString())
+            throw e
         } finally {
             responseBuilder.apply {
                 appendLine()
