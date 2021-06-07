@@ -2,6 +2,7 @@ package com.angcyo.spring.aliyun.oss
 
 import com.aliyun.oss.OSSClientBuilder
 import com.angcyo.spring.base.servlet.IOssService
+import com.angcyo.spring.util.connectUrl
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 import java.io.InputStream
@@ -44,6 +45,6 @@ class AliyunOssService : IOssService {
         // 关闭OSSClient。
         ossClient.shutdown()
 
-        return "${ossProperties.bucketUrl ?: ""}${key}"
+        return (ossProperties.bucketUrl ?: "").connectUrl(key)
     }
 }

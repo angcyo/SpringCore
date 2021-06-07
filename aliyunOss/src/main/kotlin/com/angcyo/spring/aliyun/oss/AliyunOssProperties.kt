@@ -27,13 +27,12 @@ class AliyunOssProperties {
     var endpoint: String? = null
 
     // 阿里云账号AccessKey拥有所有API的访问权限，风险很高。强烈建议您创建并使用RAM用户进行API访问或日常运维，请登录RAM控制台创建RAM用户。
-
     var accessKeyId: String? = null
 
     var accessKeySecret: String? = null
 
     var bucketName: String? = null
 
-    /**http地址, [/]结尾*/
+    /**http地址, [/]结尾, 也可以不*/
     var bucketUrl: String? = null
 }
