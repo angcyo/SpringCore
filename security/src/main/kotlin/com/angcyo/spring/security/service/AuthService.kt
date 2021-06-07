@@ -10,6 +10,7 @@ import com.angcyo.spring.security.jwt.event.RegisterAccountEvent
 import com.angcyo.spring.security.service.annotation.RegisterAccount
 import com.angcyo.spring.security.service.annotation.SaveAccount
 import com.angcyo.spring.security.table.AccountTable
+import com.angcyo.spring.security.table.UserRoleReTable
 import com.angcyo.spring.security.table.UserTable
 import com.angcyo.spring.util.ImageCode
 import com.angcyo.spring.util.oneDaySec
@@ -108,6 +109,9 @@ class AuthService {
     lateinit var userService: UserService
 
     @Autowired
+    lateinit var userRoleService: UserRoleService
+
+    @Autowired
     lateinit var applicationEventPublisher: ApplicationEventPublisher
 
     /**保存一个帐号*/
@@ -128,6 +132,18 @@ class AuthService {
         account.name = username
         account.userId = user.id //帐号关联用户
         accountService.save(account)
+
+        //分配角色, 如果有
+        if (!req.roleIdList.isNullOrEmpty()) {
+            val userRoleList = mutableListOf<UserRoleReTable>()
+            req.roleIdList?.forEach {
+                userRoleList.add(UserRoleReTable().apply {
+                    this.userId = user.id
+                    this.roleId = it
+                })
+            }
+            userRoleService.autoReset(userRoleList)
+        }
 
         return user
     }

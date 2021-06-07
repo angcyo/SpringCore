@@ -9,6 +9,7 @@ import com.angcyo.spring.mybatis.plus.keyName
 import com.angcyo.spring.mybatis.plus.service.IBaseMybatisService
 import com.angcyo.spring.mybatis.plus.table.BaseAuditTable
 import com.angcyo.spring.mybatis.plus.toLowerName
+import com.angcyo.spring.util.copyTo
 import com.angcyo.spring.util.size
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper
@@ -42,9 +43,10 @@ interface IBaseAutoMybatisService<Table> : IBaseMybatisService<Table> {
         return count(buildAutoParse().parseQuery(queryWrapper(), param))
     }
 
-    /**根据[map], 查询出所有数据*/
+    /**根据[map], 查询出所有数据
+     * [ignoreNull] 当value为null时, 跳过where*/
     @LogMethodTime
-    fun listOf(map: Map<String, Any>): List<Table> {
+    fun listOf(map: Map<String, Any?>, ignoreNull: Boolean = true): List<Table> {
         return list(queryWrapper().apply {
             map.forEach { entry ->
                 val column = entry.key.toLowerName()
@@ -52,7 +54,10 @@ interface IBaseAutoMybatisService<Table> : IBaseMybatisService<Table> {
                 if (value is List<*>) {
                     `in`(column, value)
                 } else {
-                    eq(column, value)
+                    if (ignoreNull && value == null) {
+                    } else {
+                        eq(column, value)
+                    }
                 }
             }
         })
@@ -164,7 +169,7 @@ interface IBaseAutoMybatisService<Table> : IBaseMybatisService<Table> {
                 //根据条件更新记录
                 val count = count(autoParse.parseQueryByUpdate(queryWrapper(), targetTable))
 
-                 if (count > 0) {
+                if (count > 0) {
                     //存在数据
                     if (update(targetTable, autoParse.parseUpdate(updateWrapper(), targetTable))) {
                         updateSuccessList.add(targetTable)
@@ -218,6 +223,7 @@ interface IBaseAutoMybatisService<Table> : IBaseMybatisService<Table> {
      *
      * [Table]
      * [com.angcyo.spring.mybatis.plus.auto.param.IAutoParam]
+     * [com.angcyo.spring.mybatis.plus.auto.annotation.AutoResetBy]
      * @return 操作是否全部成功
      * */
     @LogMethodTime
@@ -263,7 +269,7 @@ interface IBaseAutoMybatisService<Table> : IBaseMybatisService<Table> {
 
             //数据库中的记录
             val existTableList = list(queryWrapper().apply {
-                `in`(primaryKey, valueQueryMap[primaryKey])
+                `in`(primaryKey.toLowerName(), valueQueryMap[primaryKey])
             })
 
             //需要操作的记录
@@ -275,7 +281,8 @@ interface IBaseAutoMybatisService<Table> : IBaseMybatisService<Table> {
                     //新的表
                     val newTable = entityClass.newInstance()
                     //拷贝属性到新表
-                    BeanUtils.copyProperties(it, newTable as Any)
+                    //BeanUtils.copyProperties(it, newTable as Any)
+                    it.copyTo(newTable as Any)
                     targetTableList.add(newTable)
                 }
             }

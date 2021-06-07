@@ -12,6 +12,10 @@ import springfox.documentation.service.*
 import springfox.documentation.spi.DocumentationType
 import springfox.documentation.spi.service.contexts.SecurityContext
 import springfox.documentation.spring.web.plugins.Docket
+import java.time.LocalDate
+import java.time.LocalDateTime
+import java.time.LocalTime
+import java.time.ZonedDateTime
 
 /**
  * Email:angcyo@126.com
@@ -75,6 +79,10 @@ class Swagger3Configuration {
     @Bean
     fun createRestApi(): Docket {
         return Docket(DocumentationType.OAS_30)
+            .directModelSubstitute(LocalDateTime::class.java, String::class.java)
+            .directModelSubstitute(LocalDate::class.java, String::class.java)
+            .directModelSubstitute(LocalTime::class.java, String::class.java)
+            .directModelSubstitute(ZonedDateTime::class.java, String::class.java)
             .groupName("RestfulApi")
             .enable(swaggerProperties.enable)
             .apiInfo(apiInfo())

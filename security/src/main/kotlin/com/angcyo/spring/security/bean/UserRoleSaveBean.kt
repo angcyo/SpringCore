@@ -1,6 +1,7 @@
 package com.angcyo.spring.security.bean
 
 import com.angcyo.spring.mybatis.plus.auto.annotation.AutoFill
+import com.angcyo.spring.mybatis.plus.auto.annotation.AutoResetBy
 import com.angcyo.spring.mybatis.plus.auto.param.IAutoParam
 import com.angcyo.spring.security.service.RoleService
 
@@ -13,6 +14,7 @@ import com.angcyo.spring.security.service.RoleService
  */
 class UserRoleSaveBean : IAutoParam {
 
+    @AutoResetBy
     var userId: Long? = null
 
     @AutoFill(service = RoleService::class, queryColumn = "name", queryParamField = "roleName")

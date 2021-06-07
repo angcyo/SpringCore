@@ -7,6 +7,10 @@ package com.angcyo.spring.security.bean
  */
 class SaveAccountReqBean {
 
+    /**注册账号需要的一些基础数据*/
     var registerReqBean: RegisterReqBean? = null
+
+    /**需要分配的角色id*/
+    var roleIdList: List<Long>? = null
 
 }

@@ -20,6 +20,10 @@ class PermissionManager {
     @Autowired
     lateinit var permissionService: PermissionService
 
+    fun String?.haveWildcard() = this?.run {
+        contains("?") || contains("*") || contains("+")
+    } == true
+
     /**判断指定的用户, 是否具有指定uri的访问权限
      * [userId] 用户的id
      * [uri] 权限的uri地址*/
@@ -28,20 +32,37 @@ class PermissionManager {
         var have = false
 
         for (p in list) {
-            if (p.permit.isNullOrEmpty() && p.deny.isNullOrEmpty()) {
+            val permit = p.permit
+            val deny = p.deny
+            if (permit.isNullOrEmpty() && deny.isNullOrEmpty()) {
                 //允许和禁用 都没有配置
                 have = false
             }
 
-            if (!p.permit.isNullOrEmpty()) {
+            //通过权限声明是否有通配符, 有通配符声明的权限匹配优先级低
+            var permitWildcard = false
+            var denyWildcard = false
+
+            if (!permit.isNullOrEmpty()) {
                 //放行的uri
-                have = uri.have(p.permit, true)
+                have = uri.have(permit, true)
+                permitWildcard = permit.haveWildcard()
             }
 
-            if (!p.deny.isNullOrEmpty()) {
+            if (!deny.isNullOrEmpty()) {
                 //禁止的uri
-                if (uri.have(p.deny, true)) {
-                    have = false
+                if (uri.have(deny, true)) {
+                    denyWildcard = deny.haveWildcard()
+
+                    if (p.strict == true) {
+                        have = false
+                    } else {
+                        if (denyWildcard && !permitWildcard) {
+                            //如果禁止有通配符, 但是允许没有通配符, 则权限使用允许的条件判断
+                        } else {
+                            have = false
+                        }
+                    }
                 }
             }
 

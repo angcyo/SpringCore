@@ -36,4 +36,7 @@ class PermissionTable : BaseAuditTable(), IAutoParam {
 
     @Column(comment = "权限不能访问的资源, 支持正则匹配")
     var deny: String? = null
+
+    @Column(comment = "严格的权限校验规则, 只要[deny]不通过, 权限就不通过")
+    var strict: Boolean? = null
 }
