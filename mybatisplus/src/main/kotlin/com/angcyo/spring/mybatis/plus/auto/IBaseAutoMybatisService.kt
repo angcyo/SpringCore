@@ -5,7 +5,9 @@ import com.angcyo.spring.base.extension.apiError
 import com.angcyo.spring.mybatis.plus.auto.annotation.*
 import com.angcyo.spring.mybatis.plus.auto.param.BaseAutoPageParam
 import com.angcyo.spring.mybatis.plus.auto.param.IAutoParam
+import com.angcyo.spring.mybatis.plus.keyField
 import com.angcyo.spring.mybatis.plus.keyName
+import com.angcyo.spring.mybatis.plus.keyValue
 import com.angcyo.spring.mybatis.plus.service.IBaseMybatisService
 import com.angcyo.spring.mybatis.plus.table.BaseAuditTable
 import com.angcyo.spring.mybatis.plus.toLowerName
@@ -14,7 +16,6 @@ import com.angcyo.spring.util.size
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper
 import com.baomidou.mybatisplus.core.metadata.IPage
-import org.springframework.beans.BeanUtils
 import org.springframework.transaction.annotation.Transactional
 
 /**
@@ -26,16 +27,6 @@ interface IBaseAutoMybatisService<Table> : IBaseMybatisService<Table> {
 
     /**构建一个解析器*/
     fun buildAutoParse() = AutoParse<Table>()
-
-    /**获取一个[QueryWrapper]*/
-    fun queryWrapper(): QueryWrapper<Table> {
-        return QueryWrapper<Table>()
-    }
-
-    /**获取一个[UpdateWrapper]*/
-    fun updateWrapper(): UpdateWrapper<Table> {
-        return UpdateWrapper<Table>()
-    }
 
     /**获取数量*/
     @LogMethodTime
@@ -92,6 +83,8 @@ interface IBaseAutoMybatisService<Table> : IBaseMybatisService<Table> {
         return param
     }
 
+    /** 自动填充字段
+     * [com.angcyo.spring.mybatis.plus.auto.annotation.AutoFill]*/
     fun <T : IAutoParam> autoFill(param: T): T {
         val autoParse = buildAutoParse()
         autoParse.parseFill(param)
@@ -112,6 +105,7 @@ interface IBaseAutoMybatisService<Table> : IBaseMybatisService<Table> {
     }
 
     @LogMethodTime
+    @Transactional
     fun autoSaveOrUpdates(vararg tables: Any): Boolean {
         return autoSaveOrUpdate(tables.toList())
     }
@@ -119,12 +113,13 @@ interface IBaseAutoMybatisService<Table> : IBaseMybatisService<Table> {
     /**根据[tables], 自动保存或者根据条件更新数据
      * 每一条记录都会更具条件进行更新操作, 更新失败进行保存操作(可配置开关)
      *
+     * 支持的数据类型
      * [Table]
      * [com.angcyo.spring.mybatis.plus.auto.param.IAutoParam]
      * @return 操作是否全部成功*/
     @LogMethodTime
     @Transactional
-    fun autoSaveOrUpdate(tablesList: List<Any>, config: AutoQueryConfig? = null): Boolean {
+    fun autoSaveOrUpdate(tableList: List<Any>, config: AutoQueryConfig? = null): Boolean {
         val autoParse = buildAutoParse()
 
         //更新失败的列表
@@ -136,7 +131,7 @@ interface IBaseAutoMybatisService<Table> : IBaseMybatisService<Table> {
         //需要直接保存的记录
         val saveList = mutableListOf<Table>()
 
-        for (table in tablesList) {
+        for (table in tableList) {
             val isTable = table.javaClass.isAssignableFrom(entityClass)
             val isAutoParam = table is IAutoParam
 
@@ -153,7 +148,8 @@ interface IBaseAutoMybatisService<Table> : IBaseMybatisService<Table> {
                 //新的表
                 val newTable = entityClass.newInstance()
                 //拷贝属性到新表
-                BeanUtils.copyProperties(table, newTable as Any)
+                //BeanUtils.copyProperties(table, newTable as Any)
+                table.copyTo(newTable as Any)
                 newTable
             }
 
@@ -211,6 +207,7 @@ interface IBaseAutoMybatisService<Table> : IBaseMybatisService<Table> {
         return updateFailList.isEmpty()
     }
 
+    @Transactional
     fun autoResets(vararg tables: Any): Boolean {
         return autoReset(tables.toList())
     }
@@ -221,21 +218,23 @@ interface IBaseAutoMybatisService<Table> : IBaseMybatisService<Table> {
      * 2. 比对新的数据集合
      * 3. 进行删除/更新/新增操作
      *
+     * 支持的数据类型
      * [Table]
      * [com.angcyo.spring.mybatis.plus.auto.param.IAutoParam]
+     *
      * [com.angcyo.spring.mybatis.plus.auto.annotation.AutoResetBy]
      * @return 操作是否全部成功
      * */
     @LogMethodTime
     @Transactional
-    fun autoReset(tablesList: List<Any>): Boolean {
+    fun autoReset(tableList: List<Any>): Boolean {
         val tableMap = hashMapOf<String, MutableList<Any>>()
         val valueQueryMap = hashMapOf<String, MutableList<Any>>()
         val noAnnotationTableList = mutableListOf<Any>()
 
         val autoParse = buildAutoParse()
 
-        for (table in tablesList) {
+        for (table in tableList) {
 
             //自动填充数据
             if (table is IAutoParam) {
@@ -334,5 +333,72 @@ interface IBaseAutoMybatisService<Table> : IBaseMybatisService<Table> {
         }
 
         return true
+    }
+
+    @Transactional
+    fun autoUpdateByKey(vararg tables: Any): Boolean {
+        return autoUpdateByKey(tables.toList())
+    }
+
+    /**使用主键, 自动更新
+     * [com.angcyo.spring.mybatis.plus.MybatisExKt.keyField]
+     *
+     * 支持的数据类型
+     * [Table]
+     * [com.angcyo.spring.mybatis.plus.auto.param.IAutoParam]
+     * */
+    @Transactional
+    fun autoUpdateByKey(tableList: List<Any>): Boolean {
+        if (tableList.isEmpty()) {
+            return true
+        }
+
+        val updateTableList = mutableListOf<Table>()
+        var keyFieldName = "id"
+
+        tableList.forEach { table ->
+            val keyField = table.keyField()
+            if (keyField?.get(this) == null) {
+                apiError("未指定主键,无法更新")
+            }
+            keyFieldName = keyField.name.toLowerName()
+
+            val isTable = table.javaClass.isAssignableFrom(entityClass)
+            if (isTable) {
+                //已经是表
+                updateTableList.add(table as Table)
+            } else {
+                //新的表
+                val newTable = entityClass.newInstance()
+                //拷贝属性到新表
+                //BeanUtils.copyProperties(it, newTable as Any)
+                table.copyTo(newTable as Any)
+                updateTableList.add(newTable)
+            }
+        }
+
+        if (updateTableList.isEmpty()) {
+            return true
+        }
+
+        //判断需要更新的数据是否存在
+        val count = if (updateTableList.size() > 1) {
+            count(queryWrapper().apply {
+                `in`(keyFieldName, updateTableList.mapTo(mutableListOf()) {
+                    (it as Any).keyValue()
+                })
+            })
+        } else {
+            count(queryWrapper().apply {
+                eq(keyFieldName, (updateTableList.first() as Any).keyValue())
+            })
+        }
+
+        if (count <= 0) {
+            apiError("数据不存在, 无法更新")
+        }
+
+        //批量更新
+        return updateBatchById(updateTableList)
     }
 }

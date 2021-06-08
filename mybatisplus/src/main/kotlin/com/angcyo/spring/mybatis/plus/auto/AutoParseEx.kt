@@ -12,6 +12,12 @@ import java.lang.reflect.Method
  * @date 2021/05/29
  */
 
+inline fun Class<*>.eachField(each: (Field) -> Unit) {
+    for (field in ReflectionKit.getFieldList(this)) {
+        each(field)
+    }
+}
+
 /**快速获取注解类*/
 inline fun <reified Auto : Annotation> AnnotatedElement.annotation(dsl: Auto.() -> Unit = {}): Auto? {
     val auto = getDeclaredAnnotation(Auto::class.java)

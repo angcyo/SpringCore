@@ -83,3 +83,11 @@ fun KProperty<*>.columnName() = name.toLowerName()
 
 /**获取对象结构的主键属性名*/
 fun Any.keyName(def: String = "id") = FieldUtils.getKeyField(this)?.name?.toLowerName() ?: def
+
+/**获取对象结构的主键属性
+ * [com.gitee.sunchenbin.mybatis.actable.annotation.IsKey]
+ * [javax.persistence.Id]
+ * [com.baomidou.mybatisplus.annotation.TableId]
+ * */
+fun Any.keyField() = FieldUtils.getKeyField(this)
+fun Any.keyValue() = FieldUtils.getKeyField(this)?.get(this)

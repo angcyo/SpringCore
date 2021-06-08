@@ -119,8 +119,19 @@ fun <T> T?.elseNull(action: () -> Unit = {}): T? {
 }
 
 /**复制对象*/
-fun <T : Any> T.copyTo(obj: T): T {
-    BeanUtils.copyProperties(this, obj)
+fun <T : Any> T.copyTo(obj: T, ignoreNullField: Boolean = false): T {
+    if (ignoreNullField) {
+        val ignorePropertiesList = mutableListOf<String>()
+        val targetPds = BeanUtils.getPropertyDescriptors(this.javaClass)
+        for (targetPd in targetPds) {
+            if (targetPd.getValue(targetPd.name) == null) {
+                ignorePropertiesList.add(targetPd.name)
+            }
+        }
+        BeanUtils.copyProperties(this, obj, *ignorePropertiesList.toTypedArray())
+    } else {
+        BeanUtils.copyProperties(this, obj)
+    }
     return obj
 }
 

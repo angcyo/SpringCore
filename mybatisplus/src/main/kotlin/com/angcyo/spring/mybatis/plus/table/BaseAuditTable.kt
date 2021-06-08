@@ -14,7 +14,6 @@ import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateTimeDeserializer
 import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateTimeSerializer
 import com.gitee.sunchenbin.mybatis.actable.annotation.Column
 import com.gitee.sunchenbin.mybatis.actable.annotation.IsAutoIncrement
-import com.gitee.sunchenbin.mybatis.actable.annotation.IsKey
 import io.swagger.annotations.ApiModel
 import io.swagger.annotations.ApiModelProperty
 import org.springframework.cache.annotation.Cacheable
@@ -35,7 +34,6 @@ import java.time.LocalDateTime
 @Cacheable
 abstract class BaseAuditTable {
 
-    @IsKey
     @IsAutoIncrement
     @TableId(value = "id", type = IdType.AUTO)
     @ApiModelProperty("数据Id")

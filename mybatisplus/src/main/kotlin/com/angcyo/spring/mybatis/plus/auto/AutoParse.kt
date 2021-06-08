@@ -17,6 +17,8 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page
 import java.lang.reflect.Field
 
 /**
+ * [com.angcyo.spring.mybatis.plus.auto.IBaseAutoMybatisService]
+ *
  * Email:angcyo@126.com
  * @author angcyo
  * @date 2021/05/28
