@@ -1,7 +1,9 @@
 package com.angcyo.spring.mybatis.plus.auto
 
 import com.angcyo.spring.base.data.Result
+import com.angcyo.spring.base.data.ok
 import com.angcyo.spring.base.data.result
+import com.angcyo.spring.base.extension.apiError
 import com.angcyo.spring.mybatis.plus.auto.param.BaseAutoPageParam
 import com.angcyo.spring.mybatis.plus.auto.param.IAutoParam
 import com.angcyo.spring.util.copyTo
@@ -21,7 +23,7 @@ import org.springframework.web.bind.annotation.RequestBody
  * @author angcyo
  * @date 2021/06/08
  */
-abstract class BaseAutoController<AutoService : IBaseAutoMybatisService<Table>, Table, QueryParam : BaseAutoPageParam, Return> {
+abstract class BaseAutoController<AutoService : IBaseAutoMybatisService<Table>, Table, QueryParam : IAutoParam, Return> {
 
     @Autowired
     lateinit var autoService: AutoService
@@ -56,6 +58,20 @@ abstract class BaseAutoController<AutoService : IBaseAutoMybatisService<Table>, 
         return result
     }
 
+    @ApiOperation("查询单条数据")
+    @PostMapping("/query.auto")
+    open fun autoQuery(@RequestBody(required = true) param: QueryParam): Result<Return> {
+        if (param !is BaseAutoPageParam) {
+            apiError("参数类型不匹配")
+        }
+
+        param.pageIndex = 1
+        param.pageSize = 1
+        val page = autoService.autoPage(param)
+        val result = page.records.toReturnList()
+        return result.firstOrNull().ok()
+    }
+
     @ApiOperation("查询所有列表")
     @PostMapping("/list.auto")
     open fun autoList(@RequestBody(required = true) param: QueryParam): Result<List<Return>> {
@@ -66,6 +82,10 @@ abstract class BaseAutoController<AutoService : IBaseAutoMybatisService<Table>, 
     @ApiOperation("分页查询列表")
     @PostMapping("/page.auto")
     open fun autoPage(@RequestBody(required = true) param: QueryParam): Result<IPage<Return>> {
+        if (param !is BaseAutoPageParam) {
+            apiError("参数类型不匹配")
+        }
+
         val page = autoService.autoPage(param)
         val result = page.records.toReturnList()
 

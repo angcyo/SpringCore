@@ -13,8 +13,6 @@ import com.angcyo.spring.mybatis.plus.table.BaseAuditTable
 import com.angcyo.spring.mybatis.plus.toLowerName
 import com.angcyo.spring.util.copyTo
 import com.angcyo.spring.util.size
-import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper
-import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper
 import com.baomidou.mybatisplus.core.metadata.IPage
 import org.springframework.transaction.annotation.Transactional
 
@@ -358,7 +356,7 @@ interface IBaseAutoMybatisService<Table> : IBaseMybatisService<Table> {
 
         tableList.forEach { table ->
             val keyField = table.keyField()
-            if (keyField?.get(this) == null) {
+            if (keyField?.get(table) == null) {
                 apiError("未指定主键,无法更新")
             }
             keyFieldName = keyField.name.toLowerName()
