@@ -5,10 +5,9 @@ import com.angcyo.spring.base.servlet.request
 import com.angcyo.spring.security.SecurityConfiguration
 import com.angcyo.spring.security.SecurityConstants
 import com.angcyo.spring.security.controller.PermissionManager
-import com.angcyo.spring.security.jwt.token.ResponseAuthenticationToken
+import com.angcyo.spring.security.jwt.event.AuthenticationTokenEvent
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.ApplicationListener
-import org.springframework.security.authentication.event.InteractiveAuthenticationSuccessEvent
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher
 import org.springframework.security.web.util.matcher.OrRequestMatcher
 import org.springframework.security.web.util.matcher.RequestMatcher
@@ -26,7 +25,7 @@ import javax.annotation.PostConstruct
  */
 
 @Component
-class JwtPermissionListener : ApplicationListener<InteractiveAuthenticationSuccessEvent> {
+class JwtPermissionListener : ApplicationListener<AuthenticationTokenEvent> {
 
     @Autowired
     lateinit var appProperties: AppProperties
@@ -43,34 +42,31 @@ class JwtPermissionListener : ApplicationListener<InteractiveAuthenticationSucce
     @Autowired
     lateinit var permissionManager: PermissionManager
 
-    override fun onApplicationEvent(event: InteractiveAuthenticationSuccessEvent) {
+    override fun onApplicationEvent(event: AuthenticationTokenEvent) {
         if (appProperties.enablePermission) {
-            val authentication = event.authentication
-            if (authentication is ResponseAuthenticationToken) {
-                request()
-                val path = request()?.servletPath // "/xxx/xxx"
-                if (!path.isNullOrEmpty()) {
+            val token = event.token
+            val path = request()?.servletPath // "/xxx/xxx"
+            if (!path.isNullOrEmpty()) {
 
-                    //白名单检查
-                    if (whiteList.isNotEmpty()) {
-                        val matchersList = mutableListOf<RequestMatcher>()
-                        for (pattern in whiteList) {
-                            matchersList.add(AntPathRequestMatcher(pattern, null))
-                        }
-                        if (OrRequestMatcher(matchersList).matches(request())) {
-                            //白名单通过
-                            return
-                        }
+                //白名单检查
+                if (whiteList.isNotEmpty()) {
+                    val matchersList = mutableListOf<RequestMatcher>()
+                    for (pattern in whiteList) {
+                        matchersList.add(AntPathRequestMatcher(pattern, null))
                     }
+                    if (OrRequestMatcher(matchersList).matches(request())) {
+                        //白名单通过
+                        return
+                    }
+                }
 
-                    //权限验证
-                    authentication.userDetail.userTable?.id?.let { id ->
-                        if (permissionManager.havePermission(id, path)) {
-                            //有权限
-                        } else {
-                            //无权限
-                            permissionException("无权访问:$path")
-                        }
+                //权限验证
+                token.userDetail.userTable?.id?.let { id ->
+                    if (permissionManager.havePermission(id, path)) {
+                        //有权限
+                    } else {
+                        //无权限
+                        permissionException("无权访问:$path")
                     }
                 }
             }

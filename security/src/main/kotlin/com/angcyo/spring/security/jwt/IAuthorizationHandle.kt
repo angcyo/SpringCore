@@ -3,9 +3,9 @@ package com.angcyo.spring.security.jwt
 import com.angcyo.spring.base.data.resultError
 import com.angcyo.spring.base.json.toJackson
 import com.angcyo.spring.base.servlet.send
+import com.angcyo.spring.security.jwt.event.AuthenticationTokenEvent
 import com.angcyo.spring.security.jwt.token.ResponseAuthenticationToken
 import org.springframework.context.ApplicationEventPublisher
-import org.springframework.security.authentication.event.InteractiveAuthenticationSuccessEvent
 import org.springframework.security.core.Authentication
 import org.springframework.security.core.AuthenticationException
 import org.springframework.security.core.context.SecurityContextHolder
@@ -30,9 +30,7 @@ interface IAuthorizationHandle {
             SecurityContextHolder.getContext().authentication = authResult
 
             //3 Fire event
-            eventPublisher?.publishEvent(
-                InteractiveAuthenticationSuccessEvent(authResult, ResponseAuthenticationToken::class.java)
-            )
+            eventPublisher?.publishEvent(AuthenticationTokenEvent(authResult))
         }
     }
 
