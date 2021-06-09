@@ -67,24 +67,37 @@ class JwtAuthorizationFilter(
     private fun getAuthentication(request: HttpServletRequest): ResponseAuthenticationToken? {
         val token = request.getHeader(SecurityConstants.TOKEN_HEADER)
 
-        //1. token检查
-        var authentication: ResponseAuthenticationToken? = JWT.parseToken(token)?.run {
-            val userId = first
-            if (authService._checkTokenValid(userId, token)) {
-                val user = authService.userService.autoList(UserQueryParam().apply {
-                    id = userId.toLongOrNull()
-                }).firstOrNull()
-                if (user == null) {
-                    null
-                } else {
-                    val userDetail = authService.getUserDetail(userId) ?: UserDetail().apply {
-                        userTable = user
-                        authService.userService.autoFill(this)
-                    }
-                    ResponseAuthenticationToken(userDetail)
-                }
+        var authentication: ResponseAuthenticationToken? = null
+
+        if (token.isNullOrEmpty()) {
+            //no op
+        } else {
+            //1. token检查
+            val parseToken = JWT.parseToken(token)
+
+            if (parseToken == null) {
+                L.e("无法解析TOKEN:$token")
             } else {
-                null
+                authentication = parseToken.run {
+                    val userId = first
+                    if (authService._checkTokenValid(userId, token)) {
+                        val user = authService.userService.autoList(UserQueryParam().apply {
+                            id = userId.toLongOrNull()
+                        }).firstOrNull()
+                        if (user == null) {
+                            null
+                        } else {
+                            val userDetail = authService.getUserDetail(userId) ?: UserDetail().apply {
+                                userTable = user
+                                authService.userService.autoFill(this)
+                            }
+                            ResponseAuthenticationToken(userDetail)
+                        }
+                    } else {
+                        L.e("无效的TOKEN:$token")
+                        null
+                    }
+                }
             }
         }
 

@@ -11,6 +11,9 @@ import javax.servlet.http.HttpServletRequest
 import javax.servlet.http.HttpServletResponse
 
 /**
+ * 退出登录
+ * [com.angcyo.spring.security.jwt.JwtLogoutHandler]
+ * [com.angcyo.spring.security.jwt.JwtLogoutSuccessHandler]
  * Email:angcyo@126.com
  * @author angcyo
  * @date 2020/11/07

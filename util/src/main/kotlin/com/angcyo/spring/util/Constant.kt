@@ -1,6 +1,7 @@
 package com.angcyo.spring.util
 
 /**
+ * 常量
  * Email:angcyo@126.com
  * @author angcyo
  * @date 2021/05/25

@@ -4,6 +4,7 @@ import com.angcyo.spring.base.data.resultError
 import com.angcyo.spring.base.json.toJackson
 import com.angcyo.spring.base.servlet.send
 import com.angcyo.spring.security.jwt.event.AuthenticationTokenEvent
+import com.angcyo.spring.security.jwt.provider.authError
 import com.angcyo.spring.security.jwt.token.ResponseAuthenticationToken
 import org.springframework.context.ApplicationEventPublisher
 import org.springframework.security.core.Authentication
@@ -13,6 +14,10 @@ import javax.servlet.http.HttpServletRequest
 import javax.servlet.http.HttpServletResponse
 
 /**
+ *
+ * [com.angcyo.spring.security.jwt.JwtLoginFilter.successfulAuthentication]
+ * [com.angcyo.spring.security.jwt.JwtAuthorizationFilter.onSuccessfulAuthentication]
+ *
  * Email:angcyo@126.com
  * @author angcyo
  * @date 2021/05/30
@@ -30,7 +35,16 @@ interface IAuthorizationHandle {
             SecurityContextHolder.getContext().authentication = authResult
 
             //3 Fire event
-            eventPublisher?.publishEvent(AuthenticationTokenEvent(authResult))
+            try {
+                eventPublisher?.publishEvent(AuthenticationTokenEvent(authResult))
+            } catch (e: PermissionException) {
+                e.printStackTrace()
+                //authError(e.message ?: "授权异常失败")
+                throw e
+            } catch (e: Exception) {
+                e.printStackTrace()
+                authError(e.message ?: "授权异常失败")
+            }
         }
     }
 

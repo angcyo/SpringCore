@@ -19,6 +19,24 @@ inline fun Class<*>.eachField(each: (Field) -> Unit) {
 }
 
 /**快速获取注解类*/
+fun <Auto : Annotation> AnnotatedElement.annotation(
+    annotationClass: Class<Auto>,
+    dsl: Auto.() -> Unit = {}
+): Auto? {
+    val auto = getDeclaredAnnotation(annotationClass)
+    return if (auto != null) {
+        //isAccessible = true
+        if (this is Field) {
+            ReflectionUtils.makeAccessible(this)
+        }
+        auto.dsl()
+        auto
+    } else {
+        null
+    }
+}
+
+/**快速获取注解类*/
 inline fun <reified Auto : Annotation> AnnotatedElement.annotation(dsl: Auto.() -> Unit = {}): Auto? {
     val auto = getDeclaredAnnotation(Auto::class.java)
     return if (auto != null) {

@@ -1,5 +1,6 @@
 package com.angcyo.spring.base
 
+import com.angcyo.spring.util.L
 import org.springframework.aop.framework.AopContext
 import java.util.*
 
@@ -29,6 +30,13 @@ fun classOf(name: String): Class<*>? {
         null
     }
 }
+
+fun <T> Class<T>.logName() = if (L.isDebug) {
+    name
+} else {
+    simpleName
+}
+
 
 /**
  * 根据Bean的名字, 扩展获取Bean对象

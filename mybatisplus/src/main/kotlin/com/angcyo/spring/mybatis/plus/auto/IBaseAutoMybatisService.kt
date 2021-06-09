@@ -2,6 +2,7 @@ package com.angcyo.spring.mybatis.plus.auto
 
 import com.angcyo.spring.base.aspect.LogMethodTime
 import com.angcyo.spring.base.extension.apiError
+import com.angcyo.spring.base.logName
 import com.angcyo.spring.mybatis.plus.auto.annotation.*
 import com.angcyo.spring.mybatis.plus.auto.param.BaseAutoPageParam
 import com.angcyo.spring.mybatis.plus.auto.param.IAutoParam
@@ -15,6 +16,7 @@ import com.angcyo.spring.util.copyTo
 import com.angcyo.spring.util.size
 import com.baomidou.mybatisplus.core.metadata.IPage
 import org.springframework.transaction.annotation.Transactional
+import java.io.Serializable
 
 /**
  * Email:angcyo@126.com
@@ -22,6 +24,21 @@ import org.springframework.transaction.annotation.Transactional
  * @date 2021/05/28
  */
 interface IBaseAutoMybatisService<Table> : IBaseMybatisService<Table> {
+
+    fun Any.isTable() = javaClass.isAssignableFrom(entityClass)
+
+    fun Any.toTable(): Table {
+        return if (isTable()) {
+            this as Table
+        } else {
+            //新的表
+            val newTable = entityClass.newInstance()
+            //拷贝属性到新表
+            //BeanUtils.copyProperties(it, newTable as Any)
+            copyTo(newTable as Any)
+            newTable
+        }
+    }
 
     /**构建一个解析器*/
     fun buildAutoParse() = AutoParse<Table>()
@@ -102,6 +119,50 @@ interface IBaseAutoMybatisService<Table> : IBaseMybatisService<Table> {
         return page(autoParse.page(param), autoParse.parseQuery(queryWrapper(), param))
     }
 
+    /**根据[param], 自动保存数据*/
+    @LogMethodTime
+    @Transactional
+    fun autoSave(param: IAutoParam): Table {
+        val autoParse = buildAutoParse()
+        autoFill(param)
+
+        val keyValue = param.keyValue()
+        if (keyValue != null) {
+            //如果指定了主键, 则使用主键自动更新
+            autoUpdateByKey(param)
+            return getById(keyValue as Serializable)
+        }
+
+        //否则检查数据是否合法, 保存数据
+        val count = count(autoParse.parseSaveCheck(queryWrapper(), param))
+        if (count > 0) {
+            val errorBuilder = StringBuilder()
+            param.eachAnnotation<AutoSaveCheck> { field ->
+                val fieldValue = field.get(param)
+                if (fieldValue != null) {
+                    if (error.isNotEmpty()) {
+                        errorBuilder.append(error)
+                    } else {
+                        errorBuilder.append("[${fieldValue}]已存在")
+                    }
+                }
+            }
+            if (errorBuilder.isEmpty()) {
+                apiError("无法保存数据,数据已存在.")
+            } else {
+                apiError(errorBuilder)
+            }
+        }
+        val table = param.toTable()
+        if (save(table)) {
+            //no op
+        } else {
+            apiError("[${entityClass.logName()}]保存失败")
+        }
+
+        return table
+    }
+
     @LogMethodTime
     @Transactional
     fun autoSaveOrUpdates(vararg tables: Any): Boolean {
@@ -130,7 +191,7 @@ interface IBaseAutoMybatisService<Table> : IBaseMybatisService<Table> {
         val saveList = mutableListOf<Table>()
 
         for (table in tableList) {
-            val isTable = table.javaClass.isAssignableFrom(entityClass)
+            val isTable = table.isTable()
             val isAutoParam = table is IAutoParam
 
             var fillSuccess = true
@@ -140,16 +201,7 @@ interface IBaseAutoMybatisService<Table> : IBaseMybatisService<Table> {
             }
 
             //操作的表对象
-            val targetTable: Table = if (isTable) {
-                table as Table
-            } else {
-                //新的表
-                val newTable = entityClass.newInstance()
-                //拷贝属性到新表
-                //BeanUtils.copyProperties(table, newTable as Any)
-                table.copyTo(newTable as Any)
-                newTable
-            }
+            val targetTable: Table = table.toTable()
 
             if (targetTable is BaseAuditTable && targetTable.id ?: 0 > 0) {
                 //通过id更新记录
@@ -272,16 +324,7 @@ interface IBaseAutoMybatisService<Table> : IBaseMybatisService<Table> {
             //需要操作的记录
             val targetTableList = mutableListOf<Table>()
             handleTableList.forEach {
-                if (it.javaClass.isAssignableFrom(entityClass)) {
-                    targetTableList.add(it as Table)
-                } else {
-                    //新的表
-                    val newTable = entityClass.newInstance()
-                    //拷贝属性到新表
-                    //BeanUtils.copyProperties(it, newTable as Any)
-                    it.copyTo(newTable as Any)
-                    targetTableList.add(newTable)
-                }
+                targetTableList.add(it.toTable())
             }
 
             //需要移除的记录
@@ -360,19 +403,7 @@ interface IBaseAutoMybatisService<Table> : IBaseMybatisService<Table> {
                 apiError("未指定主键,无法更新")
             }
             keyFieldName = keyField.name.toLowerName()
-
-            val isTable = table.javaClass.isAssignableFrom(entityClass)
-            if (isTable) {
-                //已经是表
-                updateTableList.add(table as Table)
-            } else {
-                //新的表
-                val newTable = entityClass.newInstance()
-                //拷贝属性到新表
-                //BeanUtils.copyProperties(it, newTable as Any)
-                table.copyTo(newTable as Any)
-                updateTableList.add(newTable)
-            }
+            updateTableList.add(table.toTable())
         }
 
         if (updateTableList.isEmpty()) {

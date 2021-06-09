@@ -2,6 +2,7 @@ package com.angcyo.spring.mybatis.plus.auto
 
 import com.angcyo.spring.base.beanOf
 import com.angcyo.spring.base.extension.apiError
+import com.angcyo.spring.base.logName
 import com.angcyo.spring.mybatis.plus.auto.annotation.*
 import com.angcyo.spring.mybatis.plus.auto.param.BaseAutoPageParam
 import com.angcyo.spring.mybatis.plus.auto.param.BaseAutoQueryParam
@@ -35,7 +36,7 @@ class AutoParse<Table> {
      * */
     fun Any.getObjMember(key: String): Any? {
         if (key.isEmpty()) {
-            apiError("无效的属性")
+            apiError("[${javaClass.logName()}]无效的属性")
         }
         if (!key.contains(OBJ_DOT)) {
             return getMember(key)
@@ -65,7 +66,7 @@ class AutoParse<Table> {
         _handleSelector(queryWrapper, param)
 
         //查询
-        _handleQuery(queryWrapper, param)
+        _handleQuery(queryWrapper, param, AutoWhere::class.java)
 
         //排序
         _handleOrder(queryWrapper, param)
@@ -77,14 +78,14 @@ class AutoParse<Table> {
 
     /**根据[param]声明的约束, 自动赋值给[updateWrapper] */
     fun parseUpdate(updateWrapper: UpdateWrapper<Table>, param: IAutoParam): UpdateWrapper<Table> {
-        _handleQuery(updateWrapper, param) {
+        _handleQuery(updateWrapper, param, AutoWhere::class.java) {
             it.annotation<AutoUpdateBy>() == null
         }
         return updateWrapper
     }
 
     fun parseQueryByUpdate(queryWrapper: QueryWrapper<Table>, param: IAutoParam): QueryWrapper<Table> {
-        _handleQuery(queryWrapper, param) {
+        _handleQuery(queryWrapper, param, AutoWhere::class.java) {
             it.annotation<AutoUpdateBy>() == null
         }
         return queryWrapper
@@ -101,6 +102,19 @@ class AutoParse<Table> {
             }
         }
         return !haveError
+    }
+
+    /**
+     * 检查数据是否已存在
+     * [com.angcyo.spring.mybatis.plus.auto.annotation.AutoSaveCheck]*/
+    fun parseSaveCheck(queryWrapper: QueryWrapper<Table>, param: IAutoParam): QueryWrapper<Table> {
+        //查询
+        _handleQuery(queryWrapper, param, AutoSaveCheck::class.java)
+
+        val targetSql = queryWrapper.targetSql
+        L.i("parseSaveCheck sql->$targetSql")
+
+        return queryWrapper
     }
 
     fun _handleFill(fill: AutoFill, field: Field, obj: IAutoParam): Boolean {
@@ -131,7 +145,9 @@ class AutoParse<Table> {
                 val argList = fill.methodParamField.split("|")
                 val args = mutableListOf<Any?>()
                 argList.forEach { key ->
-                    args.add(obj.getObjMember(key))
+                    if (key.isNotEmpty()) {
+                        args.add(obj.getObjMember(key))
+                    }
                 }
                 //1.
                 val methodResult = if (args.isEmpty()) {
@@ -219,9 +235,10 @@ class AutoParse<Table> {
 
     /**处理查询语句
      * [jumpField] 是否要跳过当前的字段*/
-    fun <Wrapper : AbstractWrapper<Table, String, Wrapper>> _handleQuery(
+    fun <Wrapper : AbstractWrapper<Table, String, Wrapper>, Where : Annotation> _handleQuery(
         wrapper: AbstractWrapper<Table, String, Wrapper>,
         param: IAutoParam,
+        where: Class<Where>,
         jumpField: (field: Field) -> Boolean = { false }
     ) {
         val autoWhereFieldList = mutableListOf<Field>()
@@ -233,7 +250,7 @@ class AutoParse<Table> {
         var orList: List<Any?>? = null
 
         ReflectionKit.getFieldList(param.javaClass).forEach { field ->
-            field.annotation<AutoWhere> {
+            field.annotation(where) {
                 if (jumpField.invoke(field)) {
                     //jump
                 } else {
@@ -241,10 +258,25 @@ class AutoParse<Table> {
 
                     if (fieldValue == null) {
                         //空值处理
-                        if (value == WhereEnum.isNull ||
-                            value == WhereEnum.isNotNull
-                        ) {
-                            autoWhereFieldList.add(field)
+                        if (where.isAssignableFrom(AutoWhere::class.java)) {
+                            this as AutoWhere
+                            if (value == WhereEnum.isNull ||
+                                value == WhereEnum.isNotNull
+                            ) {
+                                autoWhereFieldList.add(field)
+                            }
+                        } else if (where.isAssignableFrom(AutoSaveCheck::class.java)) {
+                            this as AutoSaveCheck
+                            if (value == WhereEnum.isNull ||
+                                value == WhereEnum.isNotNull
+                            ) {
+                                autoWhereFieldList.add(field)
+                            }
+                            if (checkNull) {
+                                apiError("参数[${field.name}]未指定")
+                            }
+                        } else {
+                            apiError("参数[$where]类型有误")
                         }
                     } else {
                         if (field.name == "and") {
@@ -276,7 +308,7 @@ class AutoParse<Table> {
                 //默认所有字段 and 条件处理
                 wrapper.and { w ->
                     autoWhereFieldList.forEach { field ->
-                        _handleWhere(w, field, param)
+                        _handleWhere(w, field, param, where)
                     }
                 }
             }
@@ -285,7 +317,7 @@ class AutoParse<Table> {
         //and条件
         if (and != null && and is IAutoParam) {
             wrapper.and { w ->
-                _handleQuery(w, and as IAutoParam)
+                _handleQuery(w, and as IAutoParam, where, jumpField)
             }
         }
 
@@ -294,7 +326,7 @@ class AutoParse<Table> {
             andList?.forEach { _and ->
                 if (_and != null && _and is IAutoParam) {
                     wrapper.and { wrapper ->
-                        _handleQuery(wrapper, _and)
+                        _handleQuery(wrapper, _and, where, jumpField)
                     }
                 }
             }
@@ -303,7 +335,7 @@ class AutoParse<Table> {
         //or条件
         if (or != null && or is IAutoParam) {
             wrapper.or { w ->
-                _handleQuery(w, or as IAutoParam)
+                _handleQuery(w, or as IAutoParam, where, jumpField)
             }
         }
 
@@ -312,24 +344,41 @@ class AutoParse<Table> {
             orList?.forEach { _or ->
                 if (_or != null && _or is IAutoParam) {
                     wrapper.or { wrapper ->
-                        _handleQuery(wrapper, _or)
+                        _handleQuery(wrapper, _or, where, jumpField)
                     }
                 }
             }
         }
     }
 
-    fun <Wrapper : AbstractWrapper<Table, String, Wrapper>> _handleWhere(
+    fun <Wrapper : AbstractWrapper<Table, String, Wrapper>, Where : Annotation> _handleWhere(
         wrapper: AbstractWrapper<Table, String, Wrapper>,
         field: Field,
-        obj: Any
+        obj: Any,
+        where: Class<Where>
     ) {
-        field.annotation<AutoWhere> {
+        field.annotation(where) {
             //要查询的列
-            val column = this.column.ifEmpty { field.name }.toLowerName()
+            var column: String? = null
+            var whereEnum: WhereEnum? = null
             //对应的值
-            val fieldValue = field.get(obj)
-            _handleWhere(wrapper, column, value, fieldValue)
+            val fieldValue: Any? = field.get(obj)
+
+            if (where.isAssignableFrom(AutoWhere::class.java)) {
+                this as AutoWhere
+                //要查询的列
+                column = this.column.ifEmpty { field.name }.toLowerName()
+                whereEnum = this.value
+            } else if (where.isAssignableFrom(AutoSaveCheck::class.java)) {
+                this as AutoSaveCheck
+                //要查询的列
+                column = this.column.ifEmpty { field.name }.toLowerName()
+                whereEnum = this.value
+            }
+
+            if (column != null && whereEnum != null) {
+                _handleWhere(wrapper, column, whereEnum, fieldValue)
+            }
         }
     }
 

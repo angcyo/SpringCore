@@ -90,13 +90,14 @@ class JwtLoginFilter(
             //5 将token保存至redis
             authService._loginEnd(userDetail, token)
 
+            onDoSuccessfulAuthentication(eventPublisher, request, response, authentication)
+
+            //send response
             val repBean = AuthRepBean()
             repBean.id = userDetail.userTable?.id
             repBean.nickname = userDetail.userTable?.nickname
             repBean.token = SecurityConstants.TOKEN_PREFIX + token
             response.send(repBean.ok<AuthRepBean>().toJackson())
-
-            onDoSuccessfulAuthentication(eventPublisher, request, response, authentication)
         } else {
             //super会执行授权成功的重定向
             super.successfulAuthentication(request, response, filterChain, authentication)

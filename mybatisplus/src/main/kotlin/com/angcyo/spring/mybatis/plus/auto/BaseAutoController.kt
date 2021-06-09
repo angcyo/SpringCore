@@ -34,28 +34,38 @@ abstract class BaseAutoController<AutoService : IBaseAutoMybatisService<Table>, 
         BaseAutoController::class.java, 3
     ) as Class
 
+    fun Table.toReturn(): Return {
+        val any = this as Any
+        val returnClass = getReturnClass()
+
+        val newAny = if (returnClass.isAssignableFrom(any.javaClass)) {
+            any as Return
+        } else {
+            val newAny = returnClass.newInstance()
+            any.copyTo(newAny as Any)
+            newAny as Return
+        }
+
+        if (newAny is IAutoParam) {
+            autoService.autoFill(newAny)
+        }
+        return newAny
+    }
+
     /**数据结构转换*/
     fun List<Table>.toReturnList(): List<Return> {
         val result = mutableListOf<Return>()
         forEach {
-            val any = it as Any
-            val returnClass = getReturnClass()
-
-            val newAny = if (returnClass.isAssignableFrom(any.javaClass)) {
-                any as Return
-            } else {
-                val newAny = returnClass.newInstance()
-                any.copyTo(newAny as Any)
-                newAny as Return
-            }
-
-            if (newAny is IAutoParam) {
-                autoService.autoFill(newAny)
-            }
-
-            result.add(newAny)
+            result.add(it.toReturn())
         }
         return result
+    }
+
+    @ApiOperation("保存数据")
+    @PostMapping("/save.auto")
+    open fun autoSave(@RequestBody(required = true) param: QueryParam): Result<Return> {
+        val table = autoService.autoSave(param)
+        return table.toReturn().result()
     }
 
     @ApiOperation("查询单条数据")

@@ -35,5 +35,7 @@ abstract class BaseTokenAuthenticationProvider : AuthenticationProvider {
     abstract fun auth(authReqBean: AuthReqBean): Authentication?
 
     /**授权失败*/
-    fun error(msg: String = "授权失败"): Nothing = throw BadCredentialsException(msg)
+    fun error(msg: String = "授权失败"): Nothing = authError(msg)
 }
+
+inline fun authError(msg: String = "授权失败"): Nothing = throw BadCredentialsException(msg)
