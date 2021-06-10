@@ -167,6 +167,19 @@ class AutoParse<Table> {
         return queryWrapper
     }
 
+    /**
+     * 检查数据是否已存在
+     * [com.angcyo.spring.mybatis.plus.auto.annotation.AutoDeleteCheck]*/
+    fun parseDeleteCheck(queryWrapper: QueryWrapper<Table>, param: IAutoParam): QueryWrapper<Table> {
+        //查询
+        _handleQuery(queryWrapper, param, AutoDeleteCheck::class.java)
+
+        val targetSql = queryWrapper.targetSql
+        L.i("parseDeleteCheck sql->$targetSql")
+
+        return queryWrapper
+    }
+
     fun _handleFill(fill: AutoFill, field: Field, obj: IAutoParam): Boolean {
 
         //反射获取对应服务
@@ -284,7 +297,8 @@ class AutoParse<Table> {
     }
 
     /**处理查询语句
-     * [jumpField] 是否要跳过当前的字段*/
+     * [jumpField] 是否要跳过当前的字段
+     * [com.angcyo.spring.mybatis.plus.auto.AutoParse._handleWhere]*/
     fun <Wrapper : AbstractWrapper<Table, String, Wrapper>, Where : Annotation> _handleQuery(
         wrapper: AbstractWrapper<Table, String, Wrapper>,
         param: IAutoParam,
@@ -308,25 +322,34 @@ class AutoParse<Table> {
 
                     if (fieldValue == null) {
                         //空值处理
-                        if (where.isAssignableFrom(AutoWhere::class.java)) {
-                            this as AutoWhere
-                            if (value == WhereEnum.isNull ||
-                                value == WhereEnum.isNotNull
-                            ) {
-                                autoWhereFieldList.add(field)
+
+                        /** [com.angcyo.spring.mybatis.plus.auto.AutoParse._handleWhere]*/
+                        when {
+                            where.isAssignableFrom(AutoWhere::class.java) -> {
+                                this as AutoWhere
+                                if (value == WhereEnum.isNull || value == WhereEnum.isNotNull) {
+                                    autoWhereFieldList.add(field)
+                                }
                             }
-                        } else if (where.isAssignableFrom(AutoSaveCheck::class.java)) {
-                            this as AutoSaveCheck
-                            if (value == WhereEnum.isNull ||
-                                value == WhereEnum.isNotNull
-                            ) {
-                                autoWhereFieldList.add(field)
+                            where.isAssignableFrom(AutoSaveCheck::class.java) -> {
+                                this as AutoSaveCheck
+                                if (value == WhereEnum.isNull || value == WhereEnum.isNotNull) {
+                                    autoWhereFieldList.add(field)
+                                }
+                                if (checkNull) {
+                                    parseError("参数[${field.name}]未指定")
+                                }
                             }
-                            if (checkNull) {
-                                parseError("参数[${field.name}]未指定")
+                            where.isAssignableFrom(AutoDeleteCheck::class.java) -> {
+                                this as AutoDeleteCheck
+                                if (value == WhereEnum.isNull || value == WhereEnum.isNotNull) {
+                                    autoWhereFieldList.add(field)
+                                }
+                                if (checkNull) {
+                                    parseError("参数[${field.name}]未指定")
+                                }
                             }
-                        } else {
-                            parseError("参数[$where]类型有误")
+                            else -> parseError("参数[$where]类型有误")
                         }
                     } else {
                         if (field.name == "and") {
@@ -414,16 +437,25 @@ class AutoParse<Table> {
             //对应的值
             val fieldValue: Any? = field.get(obj)
 
-            if (where.isAssignableFrom(AutoWhere::class.java)) {
-                this as AutoWhere
-                //要查询的列
-                column = this.column.ifEmpty { field.name }.toLowerName()
-                whereEnum = this.value
-            } else if (where.isAssignableFrom(AutoSaveCheck::class.java)) {
-                this as AutoSaveCheck
-                //要查询的列
-                column = this.column.ifEmpty { field.name }.toLowerName()
-                whereEnum = this.value
+            when {
+                where.isAssignableFrom(AutoWhere::class.java) -> {
+                    this as AutoWhere
+                    //要查询的列
+                    column = this.column.ifEmpty { field.name }.toLowerName()
+                    whereEnum = this.value
+                }
+                where.isAssignableFrom(AutoSaveCheck::class.java) -> {
+                    this as AutoSaveCheck
+                    //要查询的列
+                    column = this.column.ifEmpty { field.name }.toLowerName()
+                    whereEnum = this.value
+                }
+                where.isAssignableFrom(AutoDeleteCheck::class.java) -> {
+                    this as AutoDeleteCheck
+                    //要查询的列
+                    column = this.column.ifEmpty { field.name }.toLowerName()
+                    whereEnum = this.value
+                }
             }
 
             if (column != null && whereEnum != null) {

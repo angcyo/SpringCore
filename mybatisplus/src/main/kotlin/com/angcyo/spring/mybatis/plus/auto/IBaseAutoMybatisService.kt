@@ -32,13 +32,15 @@ interface IBaseAutoMybatisService<Table> : IBaseMybatisService<Table> {
             this as Table
         } else {
             //新的表
-            val newTable = entityClass.newInstance()
+            val newTable = newTable()
             //拷贝属性到新表
             //BeanUtils.copyProperties(it, newTable as Any)
             copyTo(newTable as Any)
             newTable
         }
     }
+
+    fun newTable() = entityClass.newInstance()
 
     /**构建一个解析器*/
     fun buildAutoParse() = AutoParse<Table>()
@@ -165,12 +167,66 @@ interface IBaseAutoMybatisService<Table> : IBaseMybatisService<Table> {
         }
         val table = param.toTable()
         if (save(table)) {
-            //no op
+            onSaveTable(listOf(table))
         } else {
             apiError("[${entityClass.logName()}]保存失败")
         }
 
         return table
+    }
+
+    /**保存数据时的回调通知*/
+    fun onSaveTable(list: List<Table>) {
+
+    }
+
+    /**软删除, 必须指定主键*/
+    @LogMethodTime
+    @Transactional
+    fun autoDelete(param: IAutoParam): Boolean {
+        return autoRemove(param, false)
+    }
+
+    /**真删除, 必须指定主键*/
+    @LogMethodTime
+    @Transactional
+    fun autoRemove(param: IAutoParam, remove: Boolean = true): Boolean {
+        val autoParse = buildAutoParse()
+        autoFill(param)
+
+        val keyField = param.keyField() ?: apiError("未指定主键id")
+        val keyValue = keyField.get(param) ?: apiError("未指定主键${keyField.name}值")
+
+        //否则检查数据是否合法, 保存数据
+        val count = count(autoParse.parseDeleteCheck(queryWrapper(), param))
+        if (count > 0) {
+            return if (remove) {
+                removeById(keyValue as Serializable)
+            } else {
+                //开始软删除
+                updateById(newTable().apply {
+                    if (this is BaseAuditTable) {
+                        this.id = keyValue as Long
+                        deleteFlag = 1 //软删除
+                    } else {
+                        apiError("表结构有误,无法删除")
+                    }
+                })
+            }.apply {
+                if (this) {
+                    //删除成功
+                    onDeleteTable(keyValue as Serializable, remove)
+                }
+            }
+        } else {
+            apiError("数据[$keyValue]不存在无法删除")
+        }
+    }
+
+    /**删除数据时的回调通知
+     * [remove] 移除还是软删*/
+    fun onDeleteTable(id: Serializable, remove: Boolean) {
+
     }
 
     @LogMethodTime
@@ -201,7 +257,6 @@ interface IBaseAutoMybatisService<Table> : IBaseMybatisService<Table> {
         val saveList = mutableListOf<Table>()
 
         for (table in tableList) {
-            val isTable = table.isTable()
             val isAutoParam = table is IAutoParam
 
             var fillSuccess = true
@@ -256,7 +311,9 @@ interface IBaseAutoMybatisService<Table> : IBaseMybatisService<Table> {
             //需要直接保存的记录
             val saveResult = saveBatch(saveList)
 
-            if (!saveResult) {
+            if (saveResult) {
+                onSaveTable(saveList)
+            } else {
                 apiError("保存失败:${saveList.size()}")
             }
 

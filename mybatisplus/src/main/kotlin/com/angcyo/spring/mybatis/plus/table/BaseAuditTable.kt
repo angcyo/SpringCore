@@ -73,8 +73,8 @@ abstract class BaseAuditTable {
 
     //@TableLogic(value = "0", delval = "1")
     //@TableField(fill = FieldFill.INSERT) //,使用delete语句时自动生效
-    @ApiModelProperty("逻辑删除（0 未删除、1 删除）", hidden = true)
-    @Column(comment = "逻辑删除（0 未删除、1 删除）")
+    @ApiModelProperty("逻辑删除(0:未删除 1:删除)", hidden = true)
+    @Column(comment = "逻辑删除(0:未删除 1:删除)")
     @JsonIgnore
     var deleteFlag: Int? = 0
 

@@ -80,6 +80,18 @@ abstract class BaseAutoController<
         return table.toReturn().result()
     }
 
+    @ApiOperation("使用id软删除数据")
+    @PostMapping("/delete.auto")
+    open fun autoDelete(@RequestBody(required = true) param: SaveParam): Result<Boolean> {
+        return autoService.autoDelete(param).result()
+    }
+
+    @ApiOperation("使用id移除数据(真删除)")
+    @PostMapping("/remove.auto")
+    open fun autoRemove(@RequestBody(required = true) param: SaveParam): Result<Boolean> {
+        return autoService.autoRemove(param).result()
+    }
+
     @ApiOperation("使用id更新数据")
     @PostMapping("/update.auto")
     open fun autoUpdate(@RequestBody(required = true) param: SaveParam): Result<Boolean> {
