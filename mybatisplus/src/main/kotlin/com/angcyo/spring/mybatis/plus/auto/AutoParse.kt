@@ -1,7 +1,6 @@
 package com.angcyo.spring.mybatis.plus.auto
 
 import com.angcyo.spring.base.beanOf
-import com.angcyo.spring.base.extension.apiError
 import com.angcyo.spring.base.logName
 import com.angcyo.spring.mybatis.plus.auto.annotation.*
 import com.angcyo.spring.mybatis.plus.auto.param.BaseAutoPageParam
@@ -10,6 +9,7 @@ import com.angcyo.spring.mybatis.plus.auto.param.IAutoParam
 import com.angcyo.spring.mybatis.plus.toLowerName
 import com.angcyo.spring.mybatis.plus.toSafeSql
 import com.angcyo.spring.util.L
+import com.angcyo.spring.util.size
 import com.baomidou.mybatisplus.core.conditions.AbstractWrapper
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper
@@ -36,7 +36,7 @@ class AutoParse<Table> {
      * */
     fun Any.getObjMember(key: String): Any? {
         if (key.isEmpty()) {
-            apiError("[${javaClass.logName()}]无效的属性")
+            parseError("[${javaClass.logName()}]无效的属性")
         }
         if (!key.contains(OBJ_DOT)) {
             return getMember(key)
@@ -56,6 +56,56 @@ class AutoParse<Table> {
         val page = Page<Table>(param.pageIndex, param.pageSize)
         page.maxLimit = param.pageSize
         return page
+    }
+
+    /**自动验证数据的合法性*/
+    fun parseCheck(param: IAutoParam) {
+        param.eachAnnotation<AutoCheck> { field ->
+            val fieldValue = field.get(param)
+            val error = this.error
+
+            //
+            if (checkNull) {
+                if (fieldValue == null) {
+                    parseError(error.ifEmpty { "[${field.name}]不能为null" })
+                }
+            }
+
+            //
+            if (checkEmpty) {
+                if (field.isClass(String::class.java)) {
+                    if (fieldValue == null || (fieldValue as String).isEmpty()) {
+                        parseError(error.ifEmpty { "[${field.name}]不能为空" })
+                    }
+                } else if (field.isClass(List::class.java)) {
+                    if (fieldValue == null || (fieldValue as List<*>).isEmpty()) {
+                        parseError(error.ifEmpty { "[${field.name}]不能为空" })
+                    }
+                }
+            }
+
+            //
+            if (checkLength) {
+                if (field.isClass(String::class.java)) {
+                    if (fieldValue == null || ((fieldValue as String).length < min || fieldValue.length > max)) {
+                        parseError(error.ifEmpty { "[${field.name}]长度需要在[$min..$max]之间" })
+                    }
+                } else if (field.isClass(List::class.java)) {
+                    if (fieldValue == null || ((fieldValue as List<*>).size() < min || fieldValue.size() > max)) {
+                        parseError(error.ifEmpty { "[${field.name}]长度需要在[$min..$max]之间" })
+                    }
+                }
+            }
+
+            //
+            if (checkSize) {
+                if (field.isClass(Number::class.java)) {
+                    if (fieldValue == null || ((fieldValue as Number).toLong() < min || fieldValue.toLong() > max)) {
+                        parseError(error.ifEmpty { "[${field.name}]大小需要在[$min..$max]之间" })
+                    }
+                }
+            }
+        }
     }
 
     /**根据[param]声明的约束, 自动赋值给[queryWrapper]
@@ -139,7 +189,7 @@ class AutoParse<Table> {
 
             if (fill.serviceMethod.isNotEmpty()) {
                 if (serviceClass == null) {
-                    apiError("无效的填充服务")
+                    parseError("无效的填充服务")
                 }
                 //需要调用指定的方法
                 val argList = fill.methodParamField.split("|")
@@ -166,7 +216,7 @@ class AutoParse<Table> {
                 val queryParamKey = fill.queryParamField.ifEmpty {
                     "${field.name}Query"
                 }
-                val queryParam = obj.getObjMember(queryParamKey) ?: apiError("无效的查询参数")
+                val queryParam = obj.getObjMember(queryParamKey) ?: parseError("无效的查询参数")
 
                 //查询结果
                 result = if (queryColumn.isEmpty()) {
@@ -174,7 +224,7 @@ class AutoParse<Table> {
                     if (queryParam is IAutoParam) {
                         service.autoList(queryParam)
                     } else {
-                        apiError("无效的查询")
+                        parseError("无效的查询")
                     }
                 } else {
                     //指定了需要查询的列
@@ -273,10 +323,10 @@ class AutoParse<Table> {
                                 autoWhereFieldList.add(field)
                             }
                             if (checkNull) {
-                                apiError("参数[${field.name}]未指定")
+                                parseError("参数[${field.name}]未指定")
                             }
                         } else {
-                            apiError("参数[$where]类型有误")
+                            parseError("参数[$where]类型有误")
                         }
                     } else {
                         if (field.name == "and") {
@@ -425,7 +475,7 @@ class AutoParse<Table> {
                         )
                         WhereEnum.groupBy -> {
                             val stringList = valueList as List<String>
-                            wrapper.groupBy(stringList.first().toString().toSafeSql(), *stringList.toTypedArray())
+                            wrapper.groupBy(stringList.joinToString(",").toSafeSql())
                         }
                         WhereEnum.`in` -> wrapper.`in`(column, valueList)
                         WhereEnum.notIn -> wrapper.notIn(column, valueList)
@@ -447,15 +497,13 @@ class AutoParse<Table> {
             val desc = param.desc
             if (!desc.isNullOrEmpty()) {
                 //降序
-                val array = desc.split(BaseAutoQueryParam.SPLIT).map { it.toLowerName() }.toTypedArray()
-                queryWrapper.orderByDesc(array.first(), *array)
+                queryWrapper.orderByDesc(desc)
             }
 
             val asc = param.asc
             if (!asc.isNullOrEmpty()) {
                 //升序
-                val array = asc.split(BaseAutoQueryParam.SPLIT).map { it.toLowerName() }.toTypedArray()
-                queryWrapper.orderByAsc(array.first(), *array)
+                queryWrapper.orderByAsc(asc)
             }
         }
     }

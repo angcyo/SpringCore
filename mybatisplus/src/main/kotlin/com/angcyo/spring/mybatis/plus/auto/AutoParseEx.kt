@@ -1,5 +1,6 @@
 package com.angcyo.spring.mybatis.plus.auto
 
+import com.angcyo.spring.mybatis.plus.auto.extension.AutoParseException
 import com.baomidou.mybatisplus.core.toolkit.ReflectionKit
 import org.springframework.util.ReflectionUtils
 import java.lang.reflect.AnnotatedElement
@@ -140,8 +141,14 @@ fun Any.setMember(member: String, value: Any?): Boolean {
     }
 }
 
-fun Any.isList() = if (this is Field) {
-    type.isAssignableFrom(List::class.java)
+fun Any.isList() = isClass(List::class.java)
+
+fun <T> Any.isClass(cls: Class<T>) = if (this is Field) {
+    type.isAssignableFrom(cls)
 } else {
-    javaClass.isAssignableFrom(List::class.java)
+    javaClass.isAssignableFrom(cls)
 }
+
+inline fun parseError(message: Any, cause: Throwable? = null): Nothing =
+    throw AutoParseException(message.toString(), cause)
+

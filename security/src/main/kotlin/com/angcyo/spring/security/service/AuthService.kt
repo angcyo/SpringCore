@@ -13,7 +13,6 @@ import com.angcyo.spring.security.table.AccountTable
 import com.angcyo.spring.security.table.UserRoleReTable
 import com.angcyo.spring.security.table.UserTable
 import com.angcyo.spring.util.ImageCode
-import com.angcyo.spring.util.oneDaySec
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.ApplicationEventPublisher
 import org.springframework.security.core.context.SecurityContextHolder
@@ -39,21 +38,21 @@ class AuthService {
     lateinit var redis: Redis
 
     @Autowired
-    lateinit var applicationProperties: AppProperties
+    lateinit var appProperties: AppProperties
 
     val userPrefix: String
-        get() = "${applicationProperties.name}.USER"
+        get() = "${appProperties.name}.USER"
 
     val tokenPrefix: String
-        get() = "${applicationProperties.name}.TOKEN"
+        get() = "${appProperties.name}.TOKEN"
 
     val sendCodePrefix: String
-        get() = "${applicationProperties.name}.CODE.SEND"
+        get() = "${appProperties.name}.CODE.SEND"
 
     //<editor-fold desc="验证码相关">
 
     val imageCodePrefix: String
-        get() = "${applicationProperties.name}.CODE.IMAGE"
+        get() = "${appProperties.name}.CODE.IMAGE"
 
     fun imageCodeKey(uuid: String, type: Int): String {
         return "${imageCodePrefix}.${type}.${uuid}"
@@ -85,7 +84,7 @@ class AuthService {
      * [code] 需要发送的验证码
      * [type] 验证码类型
      * [time] 有效时长默认5分钟*/
-    fun sendCode(uuid: String, target: String, type: Int, time: Long = 5 * 60): Boolean {
+    fun sendCode(uuid: String, target: String, type: Int, time: Long = appProperties.codeTime): Boolean {
         //code: String
         //需要发送的验证码
         val code = ImageCode.generateCode(6)
@@ -233,7 +232,7 @@ class AuthService {
 
     /**[token] 不含前缀的token
      * [time] token过期时间, 秒, 默认1天*/
-    fun _loginEnd(userDetail: UserDetail, token: String, time: Long = oneDaySec) {
+    fun _loginEnd(userDetail: UserDetail, token: String, time: Long = appProperties.tokenTime) {
         val id = "${userDetail.userTable?.id}"
         //保存token, 一天超时
         redis[userTokenKey(id), token] = time

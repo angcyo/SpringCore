@@ -48,4 +48,10 @@ class AppProperties {
      * [com.angcyo.spring.security.jwt.JwtPermissionListener]
      * */
     var enablePermission: Boolean = false
+
+    /**默认token有效时长, 秒*/
+    var tokenTime: Long = 60 * 60 * 24L
+
+    /**默认验证码登录有效时长*/
+    var codeTime: Long = 5 * 60
 }

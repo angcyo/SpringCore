@@ -46,6 +46,7 @@ interface IBaseAutoMybatisService<Table> : IBaseMybatisService<Table> {
     /**获取数量*/
     @LogMethodTime
     fun autoCount(param: IAutoParam): Int {
+        autoFill(param)
         return count(buildAutoParse().parseQuery(queryWrapper(), param))
     }
 
@@ -106,9 +107,17 @@ interface IBaseAutoMybatisService<Table> : IBaseMybatisService<Table> {
         return param
     }
 
+    /**自动检查数据有效性*/
+    fun <T : IAutoParam> autoCheck(param: T): T {
+        val autoParse = buildAutoParse()
+        autoParse.parseCheck(param)
+        return param
+    }
+
     /**根据[param], 自动查询出所有数据*/
     @LogMethodTime
     fun autoList(param: IAutoParam): List<Table> {
+        autoFill(param)
         return list(buildAutoParse().parseQuery(queryWrapper(), param))
     }
 
@@ -116,6 +125,7 @@ interface IBaseAutoMybatisService<Table> : IBaseMybatisService<Table> {
     @LogMethodTime
     fun autoPage(param: BaseAutoPageParam): IPage<Table> {
         val autoParse = buildAutoParse()
+        autoFill(param)
         return page(autoParse.page(param), autoParse.parseQuery(queryWrapper(), param))
     }
 
@@ -282,13 +292,11 @@ interface IBaseAutoMybatisService<Table> : IBaseMybatisService<Table> {
         val valueQueryMap = hashMapOf<String, MutableList<Any>>()
         val noAnnotationTableList = mutableListOf<Any>()
 
-        val autoParse = buildAutoParse()
-
         for (table in tableList) {
 
             //自动填充数据
             if (table is IAutoParam) {
-                autoParse.parseFill(table)
+                autoFill(table)
             }
 
             val resetByField = table.annotations<AutoResetBy>(true).firstOrNull()
@@ -398,6 +406,10 @@ interface IBaseAutoMybatisService<Table> : IBaseMybatisService<Table> {
         var keyFieldName = "id"
 
         tableList.forEach { table ->
+            if (table is IAutoParam) {
+                autoFill(table)
+            }
+
             val keyField = table.keyField()
             if (keyField?.get(table) == null) {
                 apiError("未指定主键,无法更新")

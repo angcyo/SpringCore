@@ -29,6 +29,8 @@ open class UsernamePasswordAuthenticationProvider : BaseTokenAuthenticationProvi
         val authService = beanOf<AuthService>()
         val grantType = authReqBean.grantType?.lowercase()
 
+        //-------------------------帐号检查---------------------------
+
         if (grantType == GrantType.Password.value) {
             //密码登录方式
 
@@ -63,6 +65,8 @@ open class UsernamePasswordAuthenticationProvider : BaseTokenAuthenticationProvi
             })
         }
 
+        //------------------------用户判断------------------------------
+
         //帐号存在
         if (!accountList.isNullOrEmpty()) {
             if (accountList.isEmpty()) {
@@ -80,6 +84,8 @@ open class UsernamePasswordAuthenticationProvider : BaseTokenAuthenticationProvi
                 throw  UsernameNotFoundException("账号不可用[${user.state}]")
             }
 
+            var userDetail: UserDetail? = null
+
             //验证
             if (grantType == GrantType.Password.value) {
                 //密码匹配通过, 颁发Token
@@ -87,23 +93,25 @@ open class UsernamePasswordAuthenticationProvider : BaseTokenAuthenticationProvi
                 if (passwordEncoder.matches(authReqBean.password, user.password)) {
                     //密码对上了
 
-                    val userDetail = UserDetail().apply {
+                    userDetail = UserDetail().apply {
                         userTable = user
                     }
-                    authService.userService.autoFill(userDetail)
-
-                    result = ResponseAuthenticationToken(userDetail)
                 } else {
                     throw  UsernameNotFoundException("账号或密码不正确")
                 }
             } else if (grantType == GrantType.Code.value) {
                 //验证码登录成功
 
-                val userDetail = UserDetail().apply {
+                userDetail = UserDetail().apply {
                     userTable = user
                 }
-                authService.userService.autoFill(userDetail)
+            }
 
+            //返回
+            if (userDetail != null) {
+                //自动填充值
+                authService.userService.autoFill(userDetail)
+                //返回token
                 result = ResponseAuthenticationToken(userDetail)
             }
         }

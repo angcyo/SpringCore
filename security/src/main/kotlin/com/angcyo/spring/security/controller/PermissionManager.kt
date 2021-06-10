@@ -1,9 +1,9 @@
 package com.angcyo.spring.security.controller
 
-import com.angcyo.spring.security.service.PermissionService
+import com.angcyo.spring.security.jwt.currentUserOrNull
+import com.angcyo.spring.security.table.PermissionTable
 import com.angcyo.spring.util.L
 import com.angcyo.spring.util.have
-import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 
 /**
@@ -17,9 +17,7 @@ import org.springframework.stereotype.Service
 @Service
 class PermissionManager {
 
-    @Autowired
-    lateinit var permissionService: PermissionService
-
+    /**是否有通配符 ? * +*/
     fun String?.haveWildcard() = this?.run {
         contains("?") || contains("*") || contains("+")
     } == true
@@ -28,7 +26,8 @@ class PermissionManager {
      * [userId] 用户的id
      * [uri] 权限的uri地址*/
     fun havePermission(userId: Long, uri: String): Boolean {
-        val list = permissionService.getUserPermission(userId)
+        val list: List<PermissionTable> = currentUserOrNull()?.userPermissionList ?: emptyList()
+
         var have = false
 
         for (p in list) {
@@ -71,6 +70,7 @@ class PermissionManager {
                 break
             }
         }
+
         return have
     }
 }

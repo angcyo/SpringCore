@@ -23,7 +23,18 @@ import org.springframework.web.bind.annotation.RequestBody
  * @author angcyo
  * @date 2021/06/08
  */
-abstract class BaseAutoController<AutoService : IBaseAutoMybatisService<Table>, Table, QueryParam : IAutoParam, Return> {
+abstract class BaseAutoController<
+        /**自动服务的提供类*/
+        AutoService : IBaseAutoMybatisService<Table>,
+        /**对应的表*/
+        Table,
+        /**保存时的参数类型*/
+        SaveParam : IAutoParam,
+        /**查询时的参数类型*/
+        QueryParam : IAutoParam,
+        /**数据返回的类型*/
+        Return
+        > {
 
     @Autowired
     lateinit var autoService: AutoService
@@ -31,7 +42,7 @@ abstract class BaseAutoController<AutoService : IBaseAutoMybatisService<Table>, 
     /**获取返回值类型*/
     open fun getReturnClass(): Class<*> = ReflectionKit.getSuperClassGenericType(
         this.javaClass,
-        BaseAutoController::class.java, 3
+        BaseAutoController::class.java, 4
     ) as Class
 
     fun Table.toReturn(): Return {
@@ -63,9 +74,18 @@ abstract class BaseAutoController<AutoService : IBaseAutoMybatisService<Table>, 
 
     @ApiOperation("保存数据")
     @PostMapping("/save.auto")
-    open fun autoSave(@RequestBody(required = true) param: QueryParam): Result<Return> {
+    open fun autoSave(@RequestBody(required = true) param: SaveParam): Result<Return> {
+        autoService.autoCheck(param)
         val table = autoService.autoSave(param)
         return table.toReturn().result()
+    }
+
+    @ApiOperation("使用id更新数据")
+    @PostMapping("/update.auto")
+    open fun autoUpdate(@RequestBody(required = true) param: SaveParam): Result<Boolean> {
+        autoService.autoCheck(param)
+        val result = autoService.autoUpdateByKey(param)
+        return result.result()
     }
 
     @ApiOperation("查询单条数据")
@@ -107,12 +127,5 @@ abstract class BaseAutoController<AutoService : IBaseAutoMybatisService<Table>, 
         resultPage.pages = page.pages //总页数
 
         return resultPage.result()
-    }
-
-    @ApiOperation("使用id更新数据")
-    @PostMapping("/update.auto")
-    open fun autoUpdate(@RequestBody(required = true) param: QueryParam): Result<Boolean> {
-        val result = autoService.autoUpdateByKey(param)
-        return result.result()
     }
 }

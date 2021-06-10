@@ -14,7 +14,7 @@ package com.angcyo.spring.mybatis.plus.auto.annotation
 @MustBeDocumented
 annotation class AutoSaveCheck(
 
-    /**是否要检查数据是否为空, 为空报异常*/
+    /**[com.angcyo.spring.mybatis.plus.auto.annotation.AutoCheck.checkNull]*/
     val checkNull: Boolean = true,
 
     /**[com.angcyo.spring.mybatis.plus.auto.annotation.AutoWhere.value]*/
