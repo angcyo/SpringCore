@@ -95,7 +95,6 @@ abstract class BaseAutoController<
     @ApiOperation("使用id更新数据")
     @PostMapping("/update.auto")
     open fun autoUpdate(@RequestBody(required = true) param: SaveParam): Result<Boolean> {
-        autoService.autoCheck(param)
         val result = autoService.autoUpdateByKey(param)
         return result.result()
     }

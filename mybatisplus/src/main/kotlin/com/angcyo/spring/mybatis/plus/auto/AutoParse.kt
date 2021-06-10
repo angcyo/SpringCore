@@ -180,6 +180,19 @@ class AutoParse<Table> {
         return queryWrapper
     }
 
+    /**
+     * 更新检查数据是否已存在
+     * [com.angcyo.spring.mybatis.plus.auto.annotation.AutoUpdateCheck]*/
+    fun parseUpdateCheck(queryWrapper: QueryWrapper<Table>, param: IAutoParam): QueryWrapper<Table> {
+        //查询
+        _handleQuery(queryWrapper, param, AutoUpdateCheck::class.java)
+
+        val targetSql = queryWrapper.targetSql
+        L.i("parseUpdateCheck sql->$targetSql")
+
+        return queryWrapper
+    }
+
     fun _handleFill(fill: AutoFill, field: Field, obj: IAutoParam): Boolean {
 
         //反射获取对应服务
@@ -349,6 +362,15 @@ class AutoParse<Table> {
                                     parseError("参数[${field.name}]未指定")
                                 }
                             }
+                            where.isAssignableFrom(AutoUpdateCheck::class.java) -> {
+                                this as AutoUpdateCheck
+                                if (value == WhereEnum.isNull || value == WhereEnum.isNotNull) {
+                                    autoWhereFieldList.add(field)
+                                }
+                                if (checkNull) {
+                                    parseError("参数[${field.name}]未指定")
+                                }
+                            }
                             else -> parseError("参数[$where]类型有误")
                         }
                     } else {
@@ -452,6 +474,12 @@ class AutoParse<Table> {
                 }
                 where.isAssignableFrom(AutoDeleteCheck::class.java) -> {
                     this as AutoDeleteCheck
+                    //要查询的列
+                    column = this.column.ifEmpty { field.name }.toLowerName()
+                    whereEnum = this.value
+                }
+                where.isAssignableFrom(AutoUpdateCheck::class.java) -> {
+                    this as AutoUpdateCheck
                     //要查询的列
                     column = this.column.ifEmpty { field.name }.toLowerName()
                     whereEnum = this.value

@@ -1,8 +1,8 @@
 package com.angcyo.spring.mybatis.plus.auto.annotation
 
 /**
- * 删除数据时, 自动检查指定的数据是否已存在
- * 不存在不能删除, 并异常.
+ * 更新数据时, 自动检查指定的数据是否已存在
+ * 不存在不能更新, 并异常.
  *
  * Email:angcyo@126.com
  * @author angcyo
@@ -12,7 +12,7 @@ package com.angcyo.spring.mybatis.plus.auto.annotation
 @Target(AnnotationTarget.FIELD)
 @Retention(AnnotationRetention.RUNTIME)
 @MustBeDocumented
-annotation class AutoDeleteCheck(
+annotation class AutoUpdateCheck(
 
     /**[com.angcyo.spring.mybatis.plus.auto.annotation.AutoCheck.checkNull]*/
     val checkNull: Boolean = true,

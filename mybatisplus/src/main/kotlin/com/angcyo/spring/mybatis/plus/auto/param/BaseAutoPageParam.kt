@@ -11,6 +11,10 @@ import io.swagger.annotations.ApiModelProperty
  */
 abstract class BaseAutoPageParam : BaseAutoQueryParam() {
 
+    companion object {
+        const val PAGE_SIZE = 20L
+    }
+
     //<editor-fold desc="page">
 
     /**
@@ -23,7 +27,7 @@ abstract class BaseAutoPageParam : BaseAutoQueryParam() {
      * page方法, 才会生效
      * [com.angcyo.spring.mybatis.plus.auto.IBaseAutoMybatisService.autoPage]*/
     @ApiModelProperty("每页请求数据量")
-    var pageSize: Long = 20
+    var pageSize: Long = PAGE_SIZE
 
     //</editor-fold desc="page">
 }

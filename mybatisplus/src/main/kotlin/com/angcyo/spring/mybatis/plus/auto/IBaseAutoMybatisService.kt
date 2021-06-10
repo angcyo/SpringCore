@@ -425,6 +425,9 @@ interface IBaseAutoMybatisService<Table> : IBaseMybatisService<Table> {
                 })
             }
             if (updateList.isNotEmpty()) {
+                if (updateList.size() > BaseAutoPageParam.PAGE_SIZE) {
+                    apiError("更新的数据量太大")
+                }
                 updateBatchById(updateList)
             }
             if (saveList.isNotEmpty()) {
@@ -459,8 +462,10 @@ interface IBaseAutoMybatisService<Table> : IBaseMybatisService<Table> {
             return true
         }
 
+        val autoParse = buildAutoParse()
+
         val updateTableList = mutableListOf<Table>()
-        var keyFieldName = "id"
+        var keyFieldValue: Any? = null
 
         tableList.forEach { table ->
             if (table is IAutoParam) {
@@ -468,10 +473,19 @@ interface IBaseAutoMybatisService<Table> : IBaseMybatisService<Table> {
             }
 
             val keyField = table.keyField()
-            if (keyField?.get(table) == null) {
-                apiError("未指定主键,无法更新")
+            keyFieldValue = keyField?.get(table)
+            if (keyFieldValue == null) {
+                apiError("未指定主键值,无法更新")
             }
-            keyFieldName = keyField.name.toLowerName()
+
+            if (table is IAutoParam) {
+                //查询数据有效性
+                val count = count(autoParse.parseUpdateCheck(queryWrapper(), table))
+                if (count <= 0) {
+                    apiError("数据[$keyFieldValue]不存在, 无法更新")
+                }
+            }
+
             updateTableList.add(table.toTable())
         }
 
@@ -479,7 +493,7 @@ interface IBaseAutoMybatisService<Table> : IBaseMybatisService<Table> {
             return true
         }
 
-        //判断需要更新的数据是否存在
+        /*//判断需要更新的数据是否存在
         val count = if (updateTableList.size() > 1) {
             count(queryWrapper().apply {
                 `in`(keyFieldName, updateTableList.mapTo(mutableListOf()) {
@@ -493,7 +507,11 @@ interface IBaseAutoMybatisService<Table> : IBaseMybatisService<Table> {
         }
 
         if (count <= 0) {
-            apiError("数据不存在, 无法更新")
+            apiError("数据[$keyFieldValue]不存在, 无法更新")
+        }
+*/
+        if (updateTableList.size() > BaseAutoPageParam.PAGE_SIZE) {
+            apiError("更新的数据量太大")
         }
 
         //批量更新
