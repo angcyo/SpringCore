@@ -116,7 +116,7 @@ class AutoParse<Table> {
         _handleSelector(queryWrapper, param)
 
         //查询
-        _handleQuery(queryWrapper, param, AutoWhere::class.java)
+        _handleQuery(queryWrapper, param, AutoQuery::class.java)
 
         //排序
         _handleOrder(queryWrapper, param)
@@ -128,14 +128,14 @@ class AutoParse<Table> {
 
     /**根据[param]声明的约束, 自动赋值给[updateWrapper] */
     fun parseUpdate(updateWrapper: UpdateWrapper<Table>, param: IAutoParam): UpdateWrapper<Table> {
-        _handleQuery(updateWrapper, param, AutoWhere::class.java) {
+        _handleQuery(updateWrapper, param, AutoQuery::class.java) {
             it.annotation<AutoUpdateBy>() == null
         }
         return updateWrapper
     }
 
     fun parseQueryByUpdate(queryWrapper: QueryWrapper<Table>, param: IAutoParam): QueryWrapper<Table> {
-        _handleQuery(queryWrapper, param, AutoWhere::class.java) {
+        _handleQuery(queryWrapper, param, AutoQuery::class.java) {
             it.annotation<AutoUpdateBy>() == null
         }
         return queryWrapper
@@ -156,10 +156,10 @@ class AutoParse<Table> {
 
     /**
      * 检查数据是否已存在
-     * [com.angcyo.spring.mybatis.plus.auto.annotation.AutoSaveCheck]*/
+     * [com.angcyo.spring.mybatis.plus.auto.annotation.AutoSave]*/
     fun parseSaveCheck(queryWrapper: QueryWrapper<Table>, param: IAutoParam): QueryWrapper<Table> {
         //查询
-        _handleQuery(queryWrapper, param, AutoSaveCheck::class.java)
+        _handleQuery(queryWrapper, param, AutoSave::class.java)
 
         val targetSql = queryWrapper.targetSql
         L.i("parseSaveCheck sql->$targetSql")
@@ -169,10 +169,10 @@ class AutoParse<Table> {
 
     /**
      * 检查数据是否已存在
-     * [com.angcyo.spring.mybatis.plus.auto.annotation.AutoDeleteCheck]*/
+     * [com.angcyo.spring.mybatis.plus.auto.annotation.AutoDelete]*/
     fun parseDeleteCheck(queryWrapper: QueryWrapper<Table>, param: IAutoParam): QueryWrapper<Table> {
         //查询
-        _handleQuery(queryWrapper, param, AutoDeleteCheck::class.java)
+        _handleQuery(queryWrapper, param, AutoDelete::class.java)
 
         val targetSql = queryWrapper.targetSql
         L.i("parseDeleteCheck sql->$targetSql")
@@ -182,10 +182,10 @@ class AutoParse<Table> {
 
     /**
      * 更新检查数据是否已存在
-     * [com.angcyo.spring.mybatis.plus.auto.annotation.AutoUpdateCheck]*/
+     * [com.angcyo.spring.mybatis.plus.auto.annotation.AutoUpdate]*/
     fun parseUpdateCheck(queryWrapper: QueryWrapper<Table>, param: IAutoParam): QueryWrapper<Table> {
         //查询
-        _handleQuery(queryWrapper, param, AutoUpdateCheck::class.java)
+        _handleQuery(queryWrapper, param, AutoUpdate::class.java)
 
         val targetSql = queryWrapper.targetSql
         L.i("parseUpdateCheck sql->$targetSql")
@@ -338,37 +338,40 @@ class AutoParse<Table> {
 
                         /** [com.angcyo.spring.mybatis.plus.auto.AutoParse._handleWhere]*/
                         when {
-                            where.isAssignableFrom(AutoWhere::class.java) -> {
-                                this as AutoWhere
-                                if (value == WhereEnum.isNull || value == WhereEnum.isNotNull) {
-                                    autoWhereFieldList.add(field)
-                                }
-                            }
-                            where.isAssignableFrom(AutoSaveCheck::class.java) -> {
-                                this as AutoSaveCheck
+                            where.isAssignableFrom(AutoQuery::class.java) -> {
+                                this as AutoQuery
                                 if (value == WhereEnum.isNull || value == WhereEnum.isNotNull) {
                                     autoWhereFieldList.add(field)
                                 }
                                 if (checkNull) {
-                                    parseError("参数[${field.name}]未指定")
+                                    parseError(nullError.ifEmpty { "参数[${field.name}]未指定" })
                                 }
                             }
-                            where.isAssignableFrom(AutoDeleteCheck::class.java) -> {
-                                this as AutoDeleteCheck
+                            where.isAssignableFrom(AutoSave::class.java) -> {
+                                this as AutoSave
                                 if (value == WhereEnum.isNull || value == WhereEnum.isNotNull) {
                                     autoWhereFieldList.add(field)
                                 }
                                 if (checkNull) {
-                                    parseError("参数[${field.name}]未指定")
+                                    parseError(nullError.ifEmpty { "参数[${field.name}]未指定" })
                                 }
                             }
-                            where.isAssignableFrom(AutoUpdateCheck::class.java) -> {
-                                this as AutoUpdateCheck
+                            where.isAssignableFrom(AutoDelete::class.java) -> {
+                                this as AutoDelete
                                 if (value == WhereEnum.isNull || value == WhereEnum.isNotNull) {
                                     autoWhereFieldList.add(field)
                                 }
                                 if (checkNull) {
-                                    parseError("参数[${field.name}]未指定")
+                                    parseError(nullError.ifEmpty { "参数[${field.name}]未指定" })
+                                }
+                            }
+                            where.isAssignableFrom(AutoUpdate::class.java) -> {
+                                this as AutoUpdate
+                                if (value == WhereEnum.isNull || value == WhereEnum.isNotNull) {
+                                    autoWhereFieldList.add(field)
+                                }
+                                if (checkNull) {
+                                    parseError(nullError.ifEmpty { "参数[${field.name}]未指定" })
                                 }
                             }
                             else -> parseError("参数[$where]类型有误")
@@ -398,7 +401,7 @@ class AutoParse<Table> {
 
         //默认字段的 条件处理
         if (autoWhereFieldList.isNotEmpty()) {
-            val autoWhere = param.javaClass.annotation<AutoWhere>()
+            val autoWhere = param.javaClass.annotation<AutoQuery>()
             if (autoWhere == null || autoWhere.value == WhereEnum.and) {
                 //默认所有字段 and 条件处理
                 wrapper.and { w ->
@@ -460,26 +463,26 @@ class AutoParse<Table> {
             val fieldValue: Any? = field.get(obj)
 
             when {
-                where.isAssignableFrom(AutoWhere::class.java) -> {
-                    this as AutoWhere
+                where.isAssignableFrom(AutoQuery::class.java) -> {
+                    this as AutoQuery
                     //要查询的列
                     column = this.column.ifEmpty { field.name }.toLowerName()
                     whereEnum = this.value
                 }
-                where.isAssignableFrom(AutoSaveCheck::class.java) -> {
-                    this as AutoSaveCheck
+                where.isAssignableFrom(AutoSave::class.java) -> {
+                    this as AutoSave
                     //要查询的列
                     column = this.column.ifEmpty { field.name }.toLowerName()
                     whereEnum = this.value
                 }
-                where.isAssignableFrom(AutoDeleteCheck::class.java) -> {
-                    this as AutoDeleteCheck
+                where.isAssignableFrom(AutoDelete::class.java) -> {
+                    this as AutoDelete
                     //要查询的列
                     column = this.column.ifEmpty { field.name }.toLowerName()
                     whereEnum = this.value
                 }
-                where.isAssignableFrom(AutoUpdateCheck::class.java) -> {
-                    this as AutoUpdateCheck
+                where.isAssignableFrom(AutoUpdate::class.java) -> {
+                    this as AutoUpdate
                     //要查询的列
                     column = this.column.ifEmpty { field.name }.toLowerName()
                     whereEnum = this.value

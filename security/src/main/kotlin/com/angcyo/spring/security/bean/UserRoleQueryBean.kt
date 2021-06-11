@@ -1,7 +1,7 @@
 package com.angcyo.spring.security.bean
 
 import com.angcyo.spring.mybatis.plus.auto.annotation.AutoFill
-import com.angcyo.spring.mybatis.plus.auto.annotation.AutoWhere
+import com.angcyo.spring.mybatis.plus.auto.annotation.AutoQuery
 import com.angcyo.spring.mybatis.plus.auto.param.BaseAutoPageParam
 import com.angcyo.spring.security.service.RoleService
 import com.angcyo.spring.security.service.UserRoleService
@@ -18,7 +18,7 @@ import io.swagger.annotations.ApiModelProperty
 @ApiModel("用户角色查询参数")
 class UserRoleQueryBean : BaseAutoPageParam() {
 
-    @AutoWhere(column = "id")
+    @AutoQuery(column = "id")
     @ApiModelProperty("需要查询的用户id")
     var userId: Long? = null
 

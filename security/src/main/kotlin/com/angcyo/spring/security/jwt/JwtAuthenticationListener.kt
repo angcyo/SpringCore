@@ -15,7 +15,7 @@ import org.springframework.stereotype.Component
  */
 
 @Component
-class AuthenticationListener : ApplicationListener<AuthenticationTokenEvent> {
+class JwtAuthenticationListener : ApplicationListener<AuthenticationTokenEvent> {
 
     @Autowired
     lateinit var authService: AuthService

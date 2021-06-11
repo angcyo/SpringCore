@@ -2,7 +2,7 @@ package com.angcyo.spring.mybatis.plus.auto.annotation
 
 /**
  * 标识当前属性将当做自动更新时的条件
- *  需要配合[com.angcyo.spring.mybatis.plus.auto.annotation.AutoWhere]使用.
+ *  需要配合[com.angcyo.spring.mybatis.plus.auto.annotation.AutoQuery]使用.
  *
  * Email:angcyo@126.com
  * @author angcyo

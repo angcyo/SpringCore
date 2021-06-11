@@ -1,6 +1,6 @@
 package com.angcyo.spring.security.bean
 
-import com.angcyo.spring.mybatis.plus.auto.annotation.AutoWhere
+import com.angcyo.spring.mybatis.plus.auto.annotation.AutoQuery
 import com.angcyo.spring.mybatis.plus.auto.param.BaseAutoPageParam
 
 /**
@@ -13,6 +13,6 @@ import com.angcyo.spring.mybatis.plus.auto.param.BaseAutoPageParam
  * [com.angcyo.spring.security.table.AccountTable]*/
 class AccountQueryParam : BaseAutoPageParam() {
 
-    @AutoWhere
+    @AutoQuery
     var name: String? = null
 }

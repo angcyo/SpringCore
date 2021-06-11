@@ -1,6 +1,6 @@
 package com.angcyo.spring.security.bean
 
-import com.angcyo.spring.mybatis.plus.auto.annotation.AutoWhere
+import com.angcyo.spring.mybatis.plus.auto.annotation.AutoQuery
 import com.angcyo.spring.mybatis.plus.auto.param.BaseAutoPageParam
 
 /**
@@ -12,6 +12,6 @@ import com.angcyo.spring.mybatis.plus.auto.param.BaseAutoPageParam
 /**用户表的查询参数
  * [com.angcyo.spring.security.table.UserTable]*/
 class UserQueryParam : BaseAutoPageParam() {
-    @AutoWhere
+    @AutoQuery
     var nickname: String? = null
 }

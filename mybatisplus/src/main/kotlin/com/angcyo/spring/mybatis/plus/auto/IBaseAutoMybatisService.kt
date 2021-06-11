@@ -74,7 +74,7 @@ interface IBaseAutoMybatisService<Table> : IBaseMybatisService<Table> {
 
     /**
      * 通过[IAutoParam]对象查询出来的数据库记录,
-     * 重新赋值给[IAutoParam]对象中用[com.angcyo.spring.mybatis.plus.auto.annotation.AutoWhere]声明的属性
+     * 重新赋值给[IAutoParam]对象中用[com.angcyo.spring.mybatis.plus.auto.annotation.AutoQuery]声明的属性
      * */
     fun fillWhereField(list: List<Table>, param: IAutoParam) {
         if (list.isEmpty()) {
@@ -82,7 +82,7 @@ interface IBaseAutoMybatisService<Table> : IBaseMybatisService<Table> {
         }
         if (list.size() == 1) {
             val first = list.first()
-            param.eachAnnotation<AutoWhere> { field ->
+            param.eachAnnotation<AutoQuery> { field ->
                 val key = column.ifEmpty { field.name }
                 //赋值属性值
                 field.set(param, first.getMember(key))
@@ -149,11 +149,11 @@ interface IBaseAutoMybatisService<Table> : IBaseMybatisService<Table> {
         val count = count(autoParse.parseSaveCheck(queryWrapper(), param))
         if (count > 0) {
             val errorBuilder = StringBuilder()
-            param.eachAnnotation<AutoSaveCheck> { field ->
+            param.eachAnnotation<AutoSave> { field ->
                 val fieldValue = field.get(param)
                 if (fieldValue != null) {
-                    if (error.isNotEmpty()) {
-                        errorBuilder.append(error)
+                    if (nullError.isNotEmpty()) {
+                        errorBuilder.append(nullError)
                     } else {
                         errorBuilder.append("[${fieldValue}]已存在")
                     }
@@ -285,7 +285,7 @@ interface IBaseAutoMybatisService<Table> : IBaseMybatisService<Table> {
                     if (update(targetTable, autoParse.parseUpdate(updateWrapper(), targetTable))) {
                         updateSuccessList.add(targetTable)
                     } else {
-                        val autoQuery = targetTable.javaClass.annotation<AutoQuery>()
+                        val autoQuery = targetTable.javaClass.annotation<com.angcyo.spring.mybatis.plus.auto.annotation.AutoQueryConfig>()
                         if (config?.updateFailToSave == true || autoQuery?.updateFailToSave == true) {
                             saveList.add(targetTable)
                         } else {
