@@ -8,6 +8,8 @@ import com.angcyo.spring.base.servlet.sendError
 import com.angcyo.spring.security.SecurityConstants
 import com.angcyo.spring.security.bean.AuthRepBean
 import com.angcyo.spring.security.bean.AuthReqBean
+import com.angcyo.spring.security.jwt.event.LoginEvent
+import com.angcyo.spring.security.jwt.provider.authError
 import com.angcyo.spring.security.jwt.token.RequestAuthenticationToken
 import com.angcyo.spring.security.jwt.token.ResponseAuthenticationToken
 import com.angcyo.spring.security.service.AuthService
@@ -90,7 +92,17 @@ class JwtLoginFilter(
             //5 将token保存至redis
             authService._loginEnd(userDetail, token)
 
-            onDoSuccessfulAuthentication(eventPublisher, request, response, authentication)
+            try {
+                eventPublisher?.publishEvent(LoginEvent(userDetail))
+                onDoSuccessfulAuthentication(eventPublisher, request, response, authentication)
+            } catch (e: PermissionException) {
+                e.printStackTrace()
+                //authError(e.message ?: "授权异常失败")
+                throw e
+            } catch (e: Exception) {
+                e.printStackTrace()
+                authError(e.message ?: "授权异常失败")
+            }
 
             //send response
             val repBean = AuthRepBean()
@@ -98,6 +110,8 @@ class JwtLoginFilter(
             repBean.nickname = userDetail.userTable?.nickname
             repBean.token = SecurityConstants.TOKEN_PREFIX + token
             response.send(repBean.ok<AuthRepBean>().toJackson())
+
+
         } else {
             //super会执行授权成功的重定向
             super.successfulAuthentication(request, response, filterChain, authentication)
