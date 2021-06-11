@@ -42,7 +42,8 @@ abstract class BaseAutoController<
     /**获取返回值类型*/
     open fun getReturnClass(): Class<*> = ReflectionKit.getSuperClassGenericType(
         this.javaClass,
-        BaseAutoController::class.java, 4
+        BaseAutoController::class.java,
+        4
     ) as Class
 
     fun Table.toReturn(): Return {
