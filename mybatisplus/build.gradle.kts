@@ -18,6 +18,10 @@ dependencies {
     //https://mvnrepository.com/artifact/com.gitee.sunchenbin.mybatis.actable/mybatis-enhance-actable
     //https://www.yuque.com/sunchenbin/actable/lcbps5
     api("com.gitee.sunchenbin.mybatis.actable:mybatis-enhance-actable:1.4.9.RELEASE")
+
+    //java.lang.NoClassDefFoundError: net/sf/cglib/beans/BeanMap
+    //https://github.com/cglib/cglib
+    api("cglib:cglib-nodep:3.3.0")
 }
 
 tasks.getByName<org.springframework.boot.gradle.tasks.bundling.BootJar>("bootJar") {
