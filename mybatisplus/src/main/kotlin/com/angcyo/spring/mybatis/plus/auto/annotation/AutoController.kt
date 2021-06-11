@@ -15,6 +15,7 @@ import kotlin.reflect.KClass
 @Target(AnnotationTarget.CLASS)
 @Retention(AnnotationRetention.RUNTIME)
 @MustBeDocumented
+@Deprecated("test")
 annotation class AutoController(
 
     /**列表返回值的数据类型, 默认为表结构*/
