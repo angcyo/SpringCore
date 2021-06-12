@@ -12,10 +12,6 @@ import springfox.documentation.service.*
 import springfox.documentation.spi.DocumentationType
 import springfox.documentation.spi.service.contexts.SecurityContext
 import springfox.documentation.spring.web.plugins.Docket
-import java.time.LocalDate
-import java.time.LocalDateTime
-import java.time.LocalTime
-import java.time.ZonedDateTime
 
 /**
  * Email:angcyo@126.com
@@ -38,12 +34,12 @@ class Swagger3Configuration {
 
     companion object {
         //api接口包扫描路径
-        val SWAGGER_SCAN_BASE_PACKAGE = "com.angcyo"
-        val VERSION = "1.0.0"
+        var SWAGGER_SCAN_BASE_PACKAGE = "com.angcyo.spring"
+        var VERSION = "1.0.0"
 
         var SWAGGER_TITLE = "欢迎访问接口文档"
-        var SWAGGER_DES = "Swagger2 接口文档"
-        var SWAGGER_LICENSES = "http://www.baidu.com"
+        var SWAGGER_DES = "Swagger3 接口文档"
+        var SWAGGER_LICENSES = "https://www.github.com/angcyo"
     }
 
     @Autowired
@@ -79,17 +75,17 @@ class Swagger3Configuration {
     @Bean
     fun createRestApi(): Docket {
         return Docket(DocumentationType.OAS_30)
-            .directModelSubstitute(LocalDateTime::class.java, String::class.java)
-            .directModelSubstitute(LocalDate::class.java, String::class.java)
-            .directModelSubstitute(LocalTime::class.java, String::class.java)
-            .directModelSubstitute(ZonedDateTime::class.java, String::class.java)
+            //.directModelSubstitute(LocalDateTime::class.java, String::class.java)
+            //.directModelSubstitute(LocalDate::class.java, String::class.java)
+            //.directModelSubstitute(LocalTime::class.java, String::class.java)
+            //.directModelSubstitute(ZonedDateTime::class.java, String::class.java)
             .groupName("RestfulApi")
             .enable(swaggerProperties.enable)
             .apiInfo(apiInfo())
             .select()
             //.apis(RequestHandlerSelectors.withMethodAnnotation(ApiOperation::class.java))
             // 包扫描范围（对指定的包下进行扫描，如果标注有相关swagger注解，则生成相应文档）
-            .apis(RequestHandlerSelectors.basePackage("com.angcyo.spring"))
+            .apis(RequestHandlerSelectors.basePackage(SWAGGER_SCAN_BASE_PACKAGE))
             //.paths(PathSelectors.regex("/public.*"))
             // 过滤掉哪些path不用生成swagger
             .paths(PathSelectors.any()) // 可以根据url路径设置哪些请求加入文档，忽略哪些请求
@@ -106,11 +102,13 @@ class Swagger3Configuration {
 
     private fun apiInfo(): ApiInfo {
         return ApiInfoBuilder()
-            .title(swaggerProperties.applicationName ?: SWAGGER_TITLE) //设置文档的标题
-            .description(swaggerProperties.applicationDes ?: "" + SWAGGER_DES) // 设置文档的描述
-            .version(swaggerProperties.applicationVersion ?: VERSION) // 设置文档的版本信息-> 1.0.0 Version information
+            .title(swaggerProperties.title ?: SWAGGER_TITLE) //设置文档的标题
+            .description(swaggerProperties.des ?: SWAGGER_DES) // 设置文档的描述
+            .version(swaggerProperties.version ?: VERSION) // 设置文档的版本信息-> 1.0.0 Version information
             .contact(Contact("angcyo", "https://www.angcyo.com", "angcyo@126.com"))
-            .termsOfServiceUrl(SWAGGER_LICENSES) // 设置文档的License信息->1.3 License information
+            //.license()
+            //.licenseUrl()
+            .termsOfServiceUrl(swaggerProperties.url ?: SWAGGER_LICENSES) // 设置文档的License信息->1.3 License information
             .build()
     }
 

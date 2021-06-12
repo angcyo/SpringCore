@@ -20,13 +20,16 @@ class SwaggerProperties {
     var enable: Boolean = true
 
     /**项目应用名*/
-    var applicationName: String? = null
+    var title: String? = null
 
     /**项目版本信息*/
-    var applicationVersion: String? = null
+    var version: String? = null
 
     /**项目描述信息*/
-    var applicationDes: String? = null
+    var des: String? = null
+
+    /**团队主页*/
+    var url: String? = null
 
     /**声明全局参数配置, 放在请求头中
      * [key] 表示key

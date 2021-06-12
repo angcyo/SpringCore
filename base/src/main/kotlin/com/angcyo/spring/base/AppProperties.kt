@@ -1,8 +1,11 @@
 package com.angcyo.spring.base
 
+import com.angcyo.spring.swagger.SwaggerProperties
 import com.angcyo.spring.util.nowTimeString
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.context.properties.ConfigurationProperties
 import org.springframework.stereotype.Component
+import javax.annotation.PostConstruct
 
 /**
  * 应用程序配置
@@ -54,4 +57,16 @@ class AppProperties {
 
     /**默认验证码登录有效时长*/
     var codeTime: Long = 5 * 60
+
+    //------------------------swagger-------------------
+
+    @Autowired
+    lateinit var swaggerProperties: SwaggerProperties
+
+    @PostConstruct
+    fun init() {
+        name?.let {
+            swaggerProperties.title = "欢迎访问%s接口文档".format(it)
+        }
+    }
 }
