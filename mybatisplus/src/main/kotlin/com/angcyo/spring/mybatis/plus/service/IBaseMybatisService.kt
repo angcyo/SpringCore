@@ -103,4 +103,14 @@ interface IBaseMybatisService<Table> : IService<Table> {
             _getAllForm(subFrom, result)
         }
     }
+
+    /**Dsl Query*/
+    fun listQuery(dsl: QueryWrapper<Table>.() -> Unit): List<Table> {
+        return list(queryWrapper().apply(dsl))
+    }
+
+    /**Dsl Count*/
+    fun countQuery(dsl: QueryWrapper<Table>.() -> Unit): Int {
+        return count(queryWrapper().apply(dsl))
+    }
 }

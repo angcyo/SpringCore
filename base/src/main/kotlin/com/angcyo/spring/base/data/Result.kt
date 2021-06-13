@@ -2,6 +2,7 @@ package com.angcyo.spring.base.data
 
 import com.angcyo.spring.base.data.Result.Companion.ERROR_CODE
 import com.angcyo.spring.base.data.Result.Companion.SUCCESS_CODE
+import com.angcyo.spring.base.extension.apiError
 import com.angcyo.spring.util.str
 import org.springframework.validation.BindingResult
 import org.springframework.validation.FieldError
@@ -123,6 +124,11 @@ inline fun <T> BindingResult.result(checkNull: Boolean = true, responseEntity: (
 
 /**[validator]验证数据是否正确
  * [propertyName] 单独指定需要验证的字段, 不指定表示bean的所以字段
+ * [javax.validation.constraints.Size]
+ * [javax.validation.constraints.Min]
+ * [javax.validation.constraints.Max]
+ * [javax.validation.constraints.NotNull]
+ * [javax.validation.constraints.NotEmpty]
  * @return 返回空集合, 表示全部正确. 否则表示错误信息.
  * */
 fun Any.validate(vararg propertyName: String): Set<ConstraintViolation<Any>> {
@@ -144,4 +150,11 @@ fun Any.validate(vararg propertyName: String): Set<ConstraintViolation<Any>> {
 /**拿不到数据不正确提示的消息错误返回结构体*/
 fun <T> Set<ConstraintViolation<T>?>.result(): Result<T> {
     return joinToString { it?.message.str() }.error()
+}
+
+inline fun Any.validateResult(vararg propertyName: String) {
+    val validate = validate(*propertyName)
+    if (validate.isNotEmpty()) {
+        apiError(validate.joinToString { it.message.str() })
+    }
 }

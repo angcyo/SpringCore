@@ -83,7 +83,7 @@ object ServletLog {
                 appendLine()
                 append(request.method)
                 append(" ")
-                append(request.requestURL.toString())
+                append(request.requestURL.toString().decode())
                 append(" ")
                 append(IPUtil.getIpAddress(request))
                 append(" ${request.localAddr}/${request.remoteAddr}")

@@ -42,7 +42,11 @@ class PermissionManager {
             var permitWildcard = false
             var denyWildcard = false
 
-            if (!permit.isNullOrEmpty()) {
+            if (permit == null) {
+                have = false
+            } else if (permit.isEmpty() || permit == "*") {
+                have = true
+            } else if (!permit.isNullOrEmpty()) {
                 //放行的uri
                 have = uri.have(permit, true)
                 permitWildcard = permit.haveWildcard()

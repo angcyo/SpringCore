@@ -3,6 +3,7 @@ package com.angcyo.spring.security.jwt
 import com.angcyo.spring.base.data.resultError
 import com.angcyo.spring.base.servlet.send
 import com.angcyo.spring.util.L
+import com.angcyo.spring.util.decode
 import com.angcyo.spring.util.json.toJson
 import org.springframework.security.core.AuthenticationException
 import org.springframework.security.web.AuthenticationEntryPoint
@@ -28,7 +29,9 @@ class JwtAuthenticationEntryPoint : AuthenticationEntryPoint {
         response: HttpServletResponse,
         authException: AuthenticationException
     ) {
-        L.e("[JwtAuthenticationEntryPoint] 未授权: ${request.requestURL} ${authException.message}")
+        L.e("[JwtAuthenticationEntryPoint] 未授权: ${request.requestURL.toString().decode()} ${authException.message}")
+        authException.printStackTrace()
+
         val status = response.status
         if (status == 401) {
             //授权失败. response body需要手动设置

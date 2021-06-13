@@ -1,6 +1,7 @@
 package com.angcyo.spring.base
 
 import com.angcyo.spring.util.L
+import com.angcyo.spring.util.copyTo
 import org.springframework.aop.framework.AopContext
 import java.util.*
 
@@ -20,6 +21,20 @@ fun haveClass(name: String): Boolean {
         true
     } catch (e: Exception) {
         false
+    }
+}
+
+/**将当前对象转换成新对象[T]*/
+inline fun <reified T> Any.toObj(): T {
+    val any = this
+    val returnClass = T::class.java
+
+    return if (returnClass.isAssignableFrom(any.javaClass)) {
+        any as T
+    } else {
+        val newAny = returnClass.newInstance()
+        any.copyTo(newAny as Any)
+        newAny
     }
 }
 

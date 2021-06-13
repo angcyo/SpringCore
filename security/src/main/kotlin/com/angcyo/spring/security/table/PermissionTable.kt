@@ -1,8 +1,9 @@
 package com.angcyo.spring.security.table
 
-import com.angcyo.spring.mybatis.plus.auto.annotation.AutoQueryConfig
-import com.angcyo.spring.mybatis.plus.auto.annotation.AutoUpdateBy
 import com.angcyo.spring.mybatis.plus.auto.annotation.AutoQuery
+import com.angcyo.spring.mybatis.plus.auto.annotation.AutoQueryConfig
+import com.angcyo.spring.mybatis.plus.auto.annotation.AutoUpdate
+import com.angcyo.spring.mybatis.plus.auto.annotation.AutoUpdateBy
 import com.angcyo.spring.mybatis.plus.auto.param.IAutoParam
 import com.angcyo.spring.mybatis.plus.table.BaseAuditTable
 import com.baomidou.mybatisplus.annotation.TableName
@@ -25,6 +26,7 @@ class PermissionTable : BaseAuditTable(), IAutoParam {
 
     @Column(comment = "权限的名称")
     @AutoQuery
+    @AutoUpdate
     @AutoUpdateBy
     var name: String? = null
 

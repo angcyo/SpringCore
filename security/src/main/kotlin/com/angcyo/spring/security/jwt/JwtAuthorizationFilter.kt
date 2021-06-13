@@ -101,14 +101,14 @@ class JwtAuthorizationFilter(
             }
         }
 
-        //未传递token
+        /*//未传递token
         val accept = request.getHeader(HttpHeaders.ACCEPT)
         accept?.let {
             if (it.startsWith("image") || it.startsWith("video")) {
                 //访问媒体, 给一个临时的token
                 authentication = ResponseAuthenticationToken(authService.tempUserDetail())
             }
-        }
+        }*/
 
         if (L.isDebug) {
             if (request.param("dev") == "truthy") {
