@@ -17,6 +17,9 @@ import javax.servlet.http.HttpServletResponse
 
 object ServletLog {
 
+    /**100ms 很慢的请求*/
+    var REQUEST_LONG_TIME = 100
+
     /**包装一下, 请求 返回日志输出*/
     fun wrap(
         requestId: Long,
@@ -55,12 +58,14 @@ object ServletLog {
             L.db(e.stackTraceToString())
             throw e
         } finally {
+            val nowTime = System.currentTimeMillis()
+            val duration = nowTime - startTime
             responseBuilder.apply {
                 appendLine()
                 append("<--$uuid")
                 append(" ")
                 append(responseWrapper?.status)
-                append(" ${System.currentTimeMillis() - startTime}ms")
+                append(" ${duration}ms")
             }
 
             requestWrapper.log(requestBuilder, true)
@@ -68,6 +73,11 @@ object ServletLog {
 
             //打印
             action(requestWrapper, responseWrapper, requestBuilder, responseBuilder)
+
+            if (duration > REQUEST_LONG_TIME) {
+                //慢请求
+                L.db("${duration}ms:${request.servletPath}")
+            }
         }
     }
 
