@@ -158,3 +158,9 @@ inline fun Any.validateResult(vararg propertyName: String) {
         apiError(validate.joinToString { it.message.str() })
     }
 }
+
+inline fun Any?.ifError(error: String) {
+    if (this == null || this == false) {
+        apiError(error)
+    }
+}

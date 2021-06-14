@@ -104,6 +104,25 @@ interface IBaseMybatisService<Table> : IService<Table> {
         }
     }
 
+    /**Dsl Remove
+     * [error] 返回false时, 异常提示*/
+    fun removeQuery(error: String? = null, dsl: QueryWrapper<Table>.() -> Unit): Boolean {
+        return remove(queryWrapper().apply(dsl)).apply {
+            if (!this && error != null) {
+                apiError(error)
+            }
+        }
+    }
+
+    /**Dsl Update*/
+    fun updateQuery(entity: Table, error: String? = null, dsl: UpdateWrapper<Table>.() -> Unit): Boolean {
+        return update(entity, updateWrapper().apply(dsl)).apply {
+            if (!this && error != null) {
+                apiError(error)
+            }
+        }
+    }
+
     /**Dsl Query*/
     fun listQuery(dsl: QueryWrapper<Table>.() -> Unit): List<Table> {
         return list(queryWrapper().apply(dsl))
@@ -113,4 +132,5 @@ interface IBaseMybatisService<Table> : IService<Table> {
     fun countQuery(dsl: QueryWrapper<Table>.() -> Unit): Int {
         return count(queryWrapper().apply(dsl))
     }
+
 }

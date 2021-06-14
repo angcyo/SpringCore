@@ -25,7 +25,7 @@ fun haveClass(name: String): Boolean {
 }
 
 /**将当前对象转换成新对象[T]*/
-inline fun <reified T> Any.toObj(): T {
+inline fun <reified T> Any.toObj(dsl: T.() -> Unit = {}): T {
     val any = this
     val returnClass = T::class.java
 
@@ -35,7 +35,7 @@ inline fun <reified T> Any.toObj(): T {
         val newAny = returnClass.newInstance()
         any.copyTo(newAny as Any)
         newAny
-    }
+    }.apply(dsl)
 }
 
 fun classOf(name: String): Class<*>? {
