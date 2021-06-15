@@ -96,8 +96,7 @@ interface IBaseAutoMybatisService<Table> : IBaseMybatisService<Table> {
     fun <T : IAutoParam> autoQueryFill(param: T): T {
         val list = autoList(param)
         fillWhereField(list, param)
-        val autoParse = buildAutoParse()
-        autoParse.parseFill(param)
+        autoFill(param)
         return param
     }
 
@@ -285,7 +284,8 @@ interface IBaseAutoMybatisService<Table> : IBaseMybatisService<Table> {
                     if (update(targetTable, autoParse.parseUpdate(updateWrapper(), targetTable))) {
                         updateSuccessList.add(targetTable)
                     } else {
-                        val autoQuery = targetTable.javaClass.annotation<com.angcyo.spring.mybatis.plus.auto.annotation.AutoQueryConfig>()
+                        val autoQuery =
+                            targetTable.javaClass.annotation<com.angcyo.spring.mybatis.plus.auto.annotation.AutoQueryConfig>()
                         if (config?.updateFailToSave == true || autoQuery?.updateFailToSave == true) {
                             saveList.add(targetTable)
                         } else {

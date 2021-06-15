@@ -159,8 +159,15 @@ inline fun Any.validateResult(vararg propertyName: String) {
     }
 }
 
-inline fun Any?.ifError(error: String) {
-    if (this == null || this == false) {
+inline fun <T> T?.ifError(
+    /**异常的提示*/
+    error: String,
+    /**什么情况下是异常*/
+    judge: T?.() -> Boolean = {
+        this == null || this == false
+    }
+) {
+    if (judge()) {
         apiError(error)
     }
 }

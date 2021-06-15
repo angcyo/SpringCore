@@ -36,6 +36,8 @@ abstract class BaseAutoController<
         Return
         > {
 
+    //<editor-fold desc="core">
+
     @Autowired
     lateinit var autoService: AutoService
 
@@ -73,62 +75,184 @@ abstract class BaseAutoController<
         return result
     }
 
+    //</editor-fold desc="core">
+
+    //<editor-fold desc="save">
+
+    /**@return true 拦截后面的操作*/
+    open fun autoSaveBefore(param: SaveParam): Boolean {
+        return false
+    }
+
+    open fun autoSaveAfter(param: SaveParam, table: Table) {
+    }
+
     @ApiOperation("保存数据")
     @PostMapping("/save.auto")
     open fun autoSave(@RequestBody(required = true) param: SaveParam): Result<Return> {
+        autoService.autoFill(param)
+        if (autoSaveBefore(param)) {
+            return Result.ok()
+        }
         autoService.autoCheck(param)
         val table = autoService.autoSave(param)
+        autoSaveAfter(param, table)
         return table.toReturn().result()
+    }
+
+    //</editor-fold desc="save">
+
+    //<editor-fold desc="delete">
+
+    /**@return true 拦截后面的操作*/
+    open fun autoDeleteBefore(param: SaveParam): Boolean {
+        return false
+    }
+
+    open fun autoDeleteAfter(param: SaveParam, delete: Boolean) {
     }
 
     @ApiOperation("使用id软删除数据")
     @PostMapping("/delete.auto")
     open fun autoDelete(@RequestBody(required = true) param: SaveParam): Result<Boolean> {
-        return autoService.autoDelete(param).result()
+        autoService.autoFill(param)
+        if (autoDeleteBefore(param)) {
+            return Result.ok()
+        }
+        val delete = autoService.autoDelete(param)
+        autoDeleteAfter(param, delete)
+        return delete.result()
+    }
+
+    //</editor-fold desc="delete">
+
+    //<editor-fold desc="remove">
+
+    /**@return true 拦截后面的操作*/
+    open fun autoRemoveBefore(param: SaveParam): Boolean {
+        return false
+    }
+
+    open fun autoRemoveAfter(param: SaveParam, remove: Boolean) {
     }
 
     @ApiOperation("使用id移除数据(真删除)")
     @PostMapping("/remove.auto")
     open fun autoRemove(@RequestBody(required = true) param: SaveParam): Result<Boolean> {
-        return autoService.autoRemove(param).result()
+        autoService.autoFill(param)
+        if (autoRemoveBefore(param)) {
+            return Result.ok()
+        }
+        val remove = autoService.autoRemove(param)
+        autoRemoveAfter(param, remove)
+        return remove.result()
+    }
+
+    //</editor-fold desc="remove">
+
+    //<editor-fold desc="update">
+
+    /**@return true 拦截后面的操作*/
+    open fun autoUpdateBefore(param: SaveParam): Boolean {
+        return false
+    }
+
+    open fun autoUpdateAfter(param: SaveParam, update: Boolean) {
     }
 
     @ApiOperation("使用id更新数据")
     @PostMapping("/update.auto")
     open fun autoUpdate(@RequestBody(required = true) param: SaveParam): Result<Boolean> {
+        autoService.autoFill(param)
+        if (autoUpdateBefore(param)) {
+            return Result.ok()
+        }
         val result = autoService.autoUpdateByKey(param)
+        autoUpdateAfter(param, result)
         return result.result()
+    }
+
+    //</editor-fold desc="update">
+
+    //<editor-fold desc="query">
+
+    /**@return true 拦截后面的操作*/
+    open fun autoQueryBefore(param: QueryParam): Boolean {
+        return false
+    }
+
+    open fun autoQueryAfter(param: QueryParam, query: IPage<Table>) {
     }
 
     @ApiOperation("查询单条数据")
     @PostMapping("/query.auto")
     open fun autoQuery(@RequestBody(required = true) param: QueryParam): Result<Return> {
+        autoService.autoFill(param)
+        if (autoQueryBefore(param)) {
+            return Result.ok()
+        }
         if (param !is BaseAutoPageParam) {
             apiError("参数类型不匹配")
         }
-
         param.pageIndex = 1
         param.pageSize = 1
         val page = autoService.autoPage(param)
+        autoQueryAfter(param, page)
         val result = page.records.toReturnList()
         return result.firstOrNull().ok()
+    }
+
+    //</editor-fold desc="query">
+
+    //<editor-fold desc="list">
+
+    /**@return true 拦截后面的操作*/
+    open fun autoListBefore(param: QueryParam): Boolean {
+        return false
+    }
+
+    open fun autoListAfter(param: QueryParam, list: List<Table>) {
     }
 
     @ApiOperation("查询所有列表")
     @PostMapping("/list.auto")
     open fun autoList(@RequestBody(required = true) param: QueryParam): Result<List<Return>> {
+        autoService.autoFill(param)
+        if (autoListBefore(param)) {
+            return Result.ok()
+        }
         val list = autoService.autoList(param)
+        autoListAfter(param, list)
         return list.toReturnList().result()
+    }
+
+    //</editor-fold desc="list">
+
+    //<editor-fold desc="page">
+
+    /**@return true 拦截后面的操作*/
+    open fun autoPageBefore(param: QueryParam): Boolean {
+        return false
+    }
+
+    open fun autoPageAfter(param: QueryParam, query: IPage<Table>) {
     }
 
     @ApiOperation("分页查询列表")
     @PostMapping("/page.auto")
     open fun autoPage(@RequestBody(required = true) param: QueryParam): Result<IPage<Return>> {
+        autoService.autoFill(param)
+        if (autoPageBefore(param)) {
+            return Result.ok()
+        }
+
         if (param !is BaseAutoPageParam) {
             apiError("参数类型不匹配")
         }
 
         val page = autoService.autoPage(param)
+        autoPageAfter(param, page)
+
         val result = page.records.toReturnList()
 
         val resultPage = Page<Return>()
@@ -140,4 +264,6 @@ abstract class BaseAutoController<
 
         return resultPage.result()
     }
+
+    //</editor-fold desc="page">
 }

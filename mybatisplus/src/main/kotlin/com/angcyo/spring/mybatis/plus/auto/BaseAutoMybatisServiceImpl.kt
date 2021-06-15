@@ -1,5 +1,6 @@
 package com.angcyo.spring.mybatis.plus.auto
 
+import com.angcyo.spring.mybatis.plus.auto.param.IAutoParam
 import com.angcyo.spring.mybatis.plus.service.BaseMybatisServiceImpl
 import com.angcyo.spring.mybatis.plus.toLowerCamel
 import com.baomidou.mybatisplus.core.toolkit.BeanUtils
@@ -12,6 +13,17 @@ import com.baomidou.mybatisplus.core.toolkit.BeanUtils
  */
 open class BaseAutoMybatisServiceImpl<Mapper : IBaseAutoMapper<Table>, Table> :
     BaseMybatisServiceImpl<Mapper, Table>(), IBaseAutoMybatisService<Table> {
+
+    /**同一对象, 只填充一次*/
+    var _fillHashCode: Int? = null
+
+    override fun <T : IAutoParam> autoFill(param: T): T {
+        val hashCode = param.hashCode()
+        if (_fillHashCode == hashCode) {
+            return param
+        }
+        return super.autoFill(param)
+    }
 
     /**[com.angcyo.spring.mybatis.plus.auto.IBaseAutoMapper.sqlMaps]*/
     fun sqlMaps(sql: String): List<Map<String, Any>> {
