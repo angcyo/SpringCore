@@ -1,9 +1,12 @@
 package com.angcyo.spring.security.jwt.provider
 
 import com.angcyo.spring.base.beanOf
+import com.angcyo.spring.base.servlet.request
+import com.angcyo.spring.redis.Redis
 import com.angcyo.spring.security.bean.*
 import com.angcyo.spring.security.jwt.token.ResponseAuthenticationToken
 import com.angcyo.spring.security.service.AuthService
+import com.angcyo.spring.security.service.codeKey
 import com.angcyo.spring.security.service.currentClientUuid
 import com.angcyo.spring.security.table.AccountTable
 import org.springframework.security.core.Authentication
@@ -27,7 +30,22 @@ open class UsernamePasswordAuthenticationProvider : BaseTokenAuthenticationProvi
         var accountList: List<AccountTable>? = null
         var result: Authentication? = null
         val authService = beanOf<AuthService>()
+        val redis = beanOf<Redis>()
         val grantType = authReqBean.grantType?.lowercase()
+
+        //-------------------------验证码检查---------------------------
+
+        request()?.let {
+            val codeKey = it.codeKey()
+            if (redis.hasKey(authService.imageCodeKey(codeKey, CodeType.Login.value))) {
+                //如果发送了登录验证码, 则需要验证验证码是否正确
+                if (authReqBean.code == null ||
+                    authReqBean.code != authService.getImageCode(codeKey, CodeType.Login.value)
+                ) {
+                    error("验证码不正确")
+                }
+            }
+        }
 
         //-------------------------帐号检查---------------------------
 

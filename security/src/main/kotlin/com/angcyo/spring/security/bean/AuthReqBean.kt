@@ -18,7 +18,7 @@ class AuthReqBean {
     @ApiModelProperty("如果是账号登录, 则账号密码放这里")
     var password: String? = null
 
-    @ApiModelProperty("如果是验证码登录, 则验证码放这里")
+    @ApiModelProperty("登录的验证码或验证码登录")
     var code: String? = null
 
     @ApiModelProperty("客户端类型,默认是web. android/ios/web/等. 请在请求头中指定.")
