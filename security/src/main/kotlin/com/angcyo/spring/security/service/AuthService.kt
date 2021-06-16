@@ -117,13 +117,17 @@ class AuthService {
     @SaveAccount
     @Transactional
     fun saveAccount(req: SaveAccountReqBean): UserTable {
-        val username = req.registerReqBean?.account
+        val registerBean = req.registerReqBean
+        val username = registerBean?.account
 
         //用户
         val user = UserTable()
-        user.state = 1
-        user.nickname = username
-        user.password = passwordEncoder.encode(req.registerReqBean?.password ?: username)
+        user.state = 1//用户状态
+        user.nickname = registerBean?.nickname ?: username
+        user.phone = registerBean?.phone
+        user.email = registerBean?.email
+        user.sex = registerBean?.sex
+        user.password = passwordEncoder.encode(registerBean?.password ?: username)
         userService.save(user)
 
         //创建帐号,用户登录用户

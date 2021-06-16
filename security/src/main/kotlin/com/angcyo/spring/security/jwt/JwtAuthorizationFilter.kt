@@ -1,5 +1,6 @@
 package com.angcyo.spring.security.jwt
 
+import com.angcyo.spring.base.data.ifError
 import com.angcyo.spring.base.servlet.param
 import com.angcyo.spring.security.SecurityConstants
 import com.angcyo.spring.security.bean.UserDetail
@@ -9,7 +10,6 @@ import com.angcyo.spring.security.service.AuthService
 import com.angcyo.spring.util.L
 import org.springframework.context.ApplicationEventPublisher
 import org.springframework.context.ApplicationEventPublisherAware
-import org.springframework.http.HttpHeaders
 import org.springframework.security.authentication.AuthenticationManager
 import org.springframework.security.core.Authentication
 import org.springframework.security.core.AuthenticationException
@@ -81,18 +81,15 @@ class JwtAuthorizationFilter(
                 authentication = parseToken.run {
                     val userId = first
                     if (authService._checkTokenValid(userId, token)) {
-                        val user = authService.userService.autoList(UserQueryParam().apply {
-                            id = userId.toLongOrNull()
-                        }).firstOrNull()
-                        if (user == null) {
-                            null
-                        } else {
-                            val userDetail = authService.getUserDetail(userId) ?: UserDetail().apply {
-                                userTable = user
-                                authService.userService.autoFill(this)
-                            }
-                            ResponseAuthenticationToken(userDetail)
+                        val userDetail = authService.getUserDetail(userId) ?: UserDetail().apply {
+                            //无缓存, 从新获取数据
+                            val user = authService.userService.autoList(UserQueryParam().apply {
+                                id = userId.toLongOrNull()
+                            }).firstOrNull().ifError("无效的用户")
+                            userTable = user
+                            authService.userService.autoFill(this)
                         }
+                        ResponseAuthenticationToken(userDetail)
                     } else {
                         L.e("无效的TOKEN:$token")
                         null

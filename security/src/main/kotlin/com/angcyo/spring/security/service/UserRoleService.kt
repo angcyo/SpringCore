@@ -2,12 +2,12 @@ package com.angcyo.spring.security.service
 
 import com.angcyo.spring.base.aspect.LogMethodTime
 import com.angcyo.spring.mybatis.plus.auto.BaseAutoMybatisServiceImpl
+import com.angcyo.spring.mybatis.plus.columnName
 import com.angcyo.spring.security.bean.UserRoleQueryBean
 import com.angcyo.spring.security.bean.UserRoleSaveBean
 import com.angcyo.spring.security.mapper.IUserRoleMapper
 import com.angcyo.spring.security.table.RoleTable
 import com.angcyo.spring.security.table.UserRoleReTable
-import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
@@ -20,14 +20,23 @@ import org.springframework.transaction.annotation.Transactional
 @Service
 class UserRoleService : BaseAutoMybatisServiceImpl<IUserRoleMapper, UserRoleReTable>() {
 
-    @Autowired
-    lateinit var roleService: RoleService
-
     /**充值用户对应的角色*/
     @LogMethodTime
     @Transactional
     fun resetUserRole(list: List<UserRoleSaveBean>) {
         autoReset(list)
+    }
+
+    @Transactional
+    fun resetUserRole(userId: Long, roleIdList: List<Long>) {
+        val roleList = mutableListOf<UserRoleReTable>()
+        roleIdList.forEach {
+            roleList.add(UserRoleReTable().apply {
+                this.userId = userId
+                this.roleId = it
+            })
+        }
+        resetFrom(roleList, UserRoleReTable::userId.columnName(), userId, UserRoleReTable::roleId.name)
     }
 
     /**用户是否有指定的角色名*/

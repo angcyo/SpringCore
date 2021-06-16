@@ -144,11 +144,19 @@ fun Any.setMember(member: String, value: Any?): Boolean {
 fun Any.isList() = isClass(List::class.java)
 
 fun <T> Any.isClass(cls: Class<T>) = if (this is Field) {
-    type.isAssignableFrom(cls)
+    cls.isAssignableFrom(type)
 } else {
-    javaClass.isAssignableFrom(cls)
+    cls.isAssignableFrom(javaClass)
 }
 
 inline fun parseError(message: Any, cause: Throwable? = null): Nothing =
     throw AutoParseException(message.toString(), cause)
 
+/**将对象集合, 转换成对象某一个属性[property]的集合*/
+fun <T> List<Any>.toProList(property: String): List<T> {
+    val result = mutableListOf<T>()
+    forEach {
+        result.add(it.getMember(property) as T)
+    }
+    return result
+}

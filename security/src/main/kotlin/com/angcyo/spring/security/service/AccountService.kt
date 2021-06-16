@@ -3,6 +3,7 @@ package com.angcyo.spring.security.service
 import com.angcyo.spring.base.beanOf
 import com.angcyo.spring.base.extension.apiError
 import com.angcyo.spring.mybatis.plus.auto.BaseAutoMybatisServiceImpl
+import com.angcyo.spring.mybatis.plus.columnName
 import com.angcyo.spring.security.bean.AccountQueryParam
 import com.angcyo.spring.security.bean.RegisterReqBean
 import com.angcyo.spring.security.bean.SaveAccountReqBean
@@ -22,6 +23,9 @@ class AccountService : BaseAutoMybatisServiceImpl<IAccountMapper, AccountTable>(
 
     /**判断帐号是否存在*/
     fun isAccountExist(account: String?): Boolean {
+        if (account.isNullOrBlank()) {
+            apiError("帐号不允许为空")
+        }
         return autoCount(AccountQueryParam().apply {
             name = account
         }) > 0
@@ -42,5 +46,22 @@ class AccountService : BaseAutoMybatisServiceImpl<IAccountMapper, AccountTable>(
             this.roleIdList = roleIdList
         })
         return userTable
+    }
+
+    /**添加一个账号*/
+    fun saveAccount(bean: SaveAccountReqBean): UserTable {
+        if (isAccountExist(bean.registerReqBean?.account)) {
+            apiError("帐号已存在")
+        }
+        val authService = beanOf(AuthService::class.java)
+        val userTable = authService.saveAccount(bean)
+        return userTable
+    }
+
+    /**获取用户对应的所有帐号信息*/
+    fun getUserAccount(userId: Long): List<AccountTable> {
+        return listQuery {
+            eq(AccountTable::userId.columnName(), userId)
+        }
     }
 }

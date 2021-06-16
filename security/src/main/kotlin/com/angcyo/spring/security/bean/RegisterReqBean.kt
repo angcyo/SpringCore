@@ -34,4 +34,16 @@ class RegisterReqBean {
 
     @ApiModelProperty("安全校验码")
     var securityCode: String? = null
+
+    @ApiModelProperty("昵称", required = false)
+    var nickname: String? = null
+
+    @ApiModelProperty("电话")
+    var phone: String? = null
+
+    @ApiModelProperty("邮箱")
+    var email: String? = null
+
+    @ApiModelProperty("性别: 1:男 2:女")
+    var sex: Int? = null
 }

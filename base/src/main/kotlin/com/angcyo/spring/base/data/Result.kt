@@ -166,8 +166,9 @@ inline fun <T> T?.ifError(
     judge: T?.() -> Boolean = {
         this == null || this == false
     }
-) {
+): T? {
     if (judge()) {
         apiError(error)
     }
+    return this
 }

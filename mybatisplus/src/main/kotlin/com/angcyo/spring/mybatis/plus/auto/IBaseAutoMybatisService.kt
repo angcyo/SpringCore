@@ -1,6 +1,7 @@
 package com.angcyo.spring.mybatis.plus.auto
 
 import com.angcyo.spring.base.aspect.LogMethodTime
+import com.angcyo.spring.base.data.ifError
 import com.angcyo.spring.base.extension.apiError
 import com.angcyo.spring.base.logName
 import com.angcyo.spring.mybatis.plus.auto.annotation.*
@@ -256,6 +257,10 @@ interface IBaseAutoMybatisService<Table> : IBaseMybatisService<Table> {
         val saveList = mutableListOf<Table>()
 
         for (table in tableList) {
+            if (table.isList()) {
+                apiError("数据类型异常[List]")
+            }
+
             val isAutoParam = table is IAutoParam
 
             var fillSuccess = true
@@ -410,6 +415,7 @@ interface IBaseAutoMybatisService<Table> : IBaseMybatisService<Table> {
                     //已经存在的记录, 在新的记录中没有找到, 则需要删除
                     removeList.add(existTable)
                 } else {
+                    //复制主键的值
                     val idName = find.keyName()
                     find.setMember(idName, existTable.getMember(idName))
                     updateList.add(find)
@@ -421,24 +427,24 @@ interface IBaseAutoMybatisService<Table> : IBaseMybatisService<Table> {
             //开始操作
             if (removeList.isNotEmpty()) {
                 removeByIds(removeList.mapTo(mutableListOf()) {
-                    it.getMember(it!!.keyName()) as Long
-                })
+                    it.getMember(it!!.keyName()) as Serializable
+                }).ifError("移除数据失败[${removeList}]")
             }
             if (updateList.isNotEmpty()) {
                 if (updateList.size() > BaseAutoPageParam.PAGE_SIZE) {
                     apiError("更新的数据量太大")
                 }
-                updateBatchById(updateList)
+                updateBatchById(updateList).ifError("更新数据失败[${updateList}]")
             }
             if (saveList.isNotEmpty()) {
-                saveBatch(saveList)
+                saveBatch(saveList).ifError("保存数据失败[${saveList}]")
             }
         }
 
         if (noAnnotationTableList.isNotEmpty()) {
             autoSaveOrUpdate(noAnnotationTableList, AutoQueryConfig().apply {
                 updateFailToSave = true
-            })
+            }).ifError("自动更新数据失败[${noAnnotationTableList}]")
         }
 
         return true

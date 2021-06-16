@@ -24,10 +24,13 @@ import com.gitee.sunchenbin.mybatis.actable.annotation.TableComment
 @AutoQueryConfig(updateFailToSave = true)
 class PermissionTable : BaseAuditTable(), IAutoParam {
 
-    @Column(comment = "权限的名称")
     @AutoQuery
     @AutoUpdate
     @AutoUpdateBy
+    @Column(comment = "权限的代码")
+    var code: String? = null
+
+    @Column(comment = "权限的名称")
     var name: String? = null
 
     @Column(comment = "权限的描述")
