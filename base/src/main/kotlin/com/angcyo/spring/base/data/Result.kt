@@ -161,7 +161,7 @@ inline fun Any.validateResult(vararg propertyName: String) {
 
 inline fun <T> T?.ifError(
     /**异常的提示*/
-    error: String,
+    error: String = "操作失败",
     /**什么情况下是异常*/
     judge: T?.() -> Boolean = {
         this == null || this == false
@@ -171,4 +171,20 @@ inline fun <T> T?.ifError(
         apiError(error)
     }
     return this
+}
+
+inline fun Int?.ifExist(
+    error: String = "数据已存在"
+): Int? {
+    return ifError(error) {
+        this ?: 0 > 0
+    }
+}
+
+inline fun Int?.ifNotExist(
+    error: String = "数据不存在"
+): Int? {
+    return ifError(error) {
+        this ?: 0 <= 0
+    }
 }

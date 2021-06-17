@@ -1,15 +1,21 @@
 package com.angcyo.spring.mybatis.plus.service
 
 import com.angcyo.spring.base.data.ifError
+import com.angcyo.spring.base.data.ifNotExist
 import com.angcyo.spring.base.extension.apiError
+import com.angcyo.spring.mybatis.plus.*
 import com.angcyo.spring.mybatis.plus.auto.eachField
 import com.angcyo.spring.mybatis.plus.auto.getMember
+import com.angcyo.spring.mybatis.plus.auto.param.BaseAutoPageParam
 import com.angcyo.spring.mybatis.plus.auto.setMember
-import com.angcyo.spring.mybatis.plus.keyName
-import com.angcyo.spring.mybatis.plus.toLowerName
+import com.angcyo.spring.mybatis.plus.tree.IBaseTree
+import com.angcyo.spring.mybatis.plus.tree.ITree
+import com.angcyo.spring.mybatis.plus.tree.isTopId
 import com.angcyo.spring.util.L
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper
+import com.baomidou.mybatisplus.core.metadata.IPage
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page
 import com.baomidou.mybatisplus.extension.service.IService
 import com.gitee.sunchenbin.mybatis.actable.utils.ColumnUtils
 import org.springframework.transaction.annotation.Transactional
@@ -22,6 +28,8 @@ import java.io.Serializable
  */
 interface IBaseMybatisService<Table> : IService<Table> {
 
+    //<editor-fold desc="Base">
+
     /**获取一个[QueryWrapper]*/
     fun queryWrapper(): QueryWrapper<Table> {
         return QueryWrapper<Table>()
@@ -31,6 +39,10 @@ interface IBaseMybatisService<Table> : IService<Table> {
     fun updateWrapper(): UpdateWrapper<Table> {
         return UpdateWrapper<Table>()
     }
+
+    //</editor-fold desc="Base">
+
+    //<editor-fold desc="From">
 
     /**通过其他关联表快速查询本表的列表数据
      * 首先, 最终返回的数据是本表的数据.
@@ -176,6 +188,10 @@ interface IBaseMybatisService<Table> : IService<Table> {
         })
     }
 
+    //</editor-fold desc="From">
+
+    //<editor-fold desc="Dsl">
+
     /**Dsl Remove
      * [error] 返回false时, 异常提示*/
     fun removeQuery(error: String? = null, dsl: QueryWrapper<Table>.() -> Unit): Boolean {
@@ -195,13 +211,175 @@ interface IBaseMybatisService<Table> : IService<Table> {
         }
     }
 
+    /**Dsl Update*/
+    fun updateQuery(error: String? = null, dsl: UpdateWrapper<Table>.() -> Unit): Boolean {
+        return update(updateWrapper().apply(dsl)).apply {
+            if (!this && error != null) {
+                apiError(error)
+            }
+        }
+    }
+
     /**Dsl Query*/
     fun listQuery(dsl: QueryWrapper<Table>.() -> Unit): List<Table> {
         return list(queryWrapper().apply(dsl))
+    }
+
+    /**Dsl Page*/
+    fun pageQuery(
+        pageIndex: Long = 1,
+        pageSize: Long = BaseAutoPageParam.PAGE_SIZE,
+        dsl: QueryWrapper<Table>.() -> Unit
+    ): IPage<Table> {
+        val page = Page<Table>(pageIndex, pageSize)
+        page.maxLimit = pageSize
+        return page(page, queryWrapper().apply(dsl))
     }
 
     /**Dsl Count*/
     fun countQuery(dsl: QueryWrapper<Table>.() -> Unit): Int {
         return count(queryWrapper().apply(dsl))
     }
+
+    //</editor-fold desc="Dsl">
+
+    //<editor-fold desc="Tree">
+
+    /**保存一个[IBaseTree]*/
+    @Transactional
+    fun saveTree(entity: Table) {
+        //检查
+        if (entity is IBaseTree) {
+            if (entity.parentId.isTopId()) {
+                //顶级
+            } else {
+                countQuery {
+                    eq(entity.keyName(), entity.parentId)
+                }.ifNotExist("指定的parentId[${entity.parentId}]不存在")
+            }
+        }
+        //保存
+        save(entity).ifError("保存失败")
+        //更新
+        if (entity is IBaseTree) {
+            val p = if (entity.parentId.isTopId()) {
+                //顶级
+                IBaseTree.PARENT_SPLIT
+            } else {
+                val parentIds = (getById(entity.parentId) as IBaseTree).parentIds
+                parentIds
+            }
+            entity.parentIds = "${p}${entity.keyValue()}${IBaseTree.PARENT_SPLIT}"
+            updateById(entity).ifError("更新失败")
+        }
+    }
+
+    @Transactional
+    fun updateTreeParentId(entityId: Long, newParentId: Long) {
+        updateTreeParentId(getById(entityId).ifError("数据[$entityId]不存在")!!, newParentId)
+    }
+
+    /**修改当前树节点的[parentId]
+     * 并将节点下的子节点统一更新*/
+    @Transactional
+    fun updateTreeParentId(entity: Table, newParentId: Long) {
+        val tree = entity as IBaseTree
+        if (tree.parentId == newParentId) {
+            return
+        }
+
+        tree.parentId = newParentId
+
+        val oldParentIds = tree.parentIds
+
+        //顶
+        val p = if (newParentId.isTopId()) {
+            IBaseTree.PARENT_SPLIT
+        } else {
+            countQuery {
+                eq(entity.keyName(), entity.parentId)
+            }.ifNotExist("指定的parentId[${entity.parentId}]不存在")
+
+            val newTree = getById(newParentId) as IBaseTree
+            newTree.parentIds
+        }
+
+        tree.apply {
+            parentIds = "${p}${entity.keyValue()}${IBaseTree.PARENT_SPLIT}"
+        }
+
+        updateById(entity).ifError("更新失败")
+
+        val newParentIds = tree.parentIds
+        updateQuery("更新失败") {
+            val column = IBaseTree::parentIds.columnName()
+            setSql("$column = REPLACE($column,'$oldParentIds','$newParentIds')")
+
+            likeRight(column, oldParentIds)
+        }
+    }
+
+    /**查询某一个节点下的所有子节点*/
+    fun listClazz(parentId: Long): List<Table> {
+        return if (parentId.isTopId()) {
+            listQuery {
+                eq(IBaseTree::parentId.columnName(), parentId)
+            }
+        } else {
+            val parent = getById(parentId).ifError("parentId[$parentId]不存在") as IBaseTree
+            listQuery {
+                likeRight(IBaseTree::parentIds.columnName(), parent.parentIds)
+            }.dropWhile {
+                (it as Any).keyValue() == parentId
+            }
+        }
+    }
+
+    /**将集合打包成树结构*/
+    fun <T : ITree<T>> buildTree(list: List<T>): List<T> {
+        //顶点节点
+        val topList = mutableListOf<T>()
+        //根据key, 存储节点
+        val parentMap = hashMapOf<String, T>()
+        //根据key, 存储子节点
+        val childListMap = hashMapOf<String, MutableList<T>>()
+
+        list.forEach { node ->
+            val key = node.parentIds
+            if (!key.isNullOrBlank()) {
+                //根据key 存储节点
+                val currentNode = parentMap[key] ?: node
+                parentMap[key] = currentNode
+
+                //初始化子节点存储容器
+                val childKey = key
+                val childList = childListMap[childKey] ?: mutableListOf()
+                childListMap[childKey] = childList
+
+                //非顶点
+                if (!node.parentId.isTopId()) {
+                    //子节点
+                    val parentKey = childKey.substring(0, childKey.length - "${node.keyValue()},".length)
+
+                    val parentNode = parentMap[parentKey] ?: node
+                    parentMap[parentKey] = parentNode
+
+                    val parentChildList = childListMap[parentKey] ?: mutableListOf()
+                    childListMap[parentKey] = parentChildList
+
+                    //节点属于那个parent
+                    parentChildList.add(node)
+                    parentNode.childList = parentChildList
+                }
+            }
+
+            if (node.parentId.isTopId()) {
+                topList.add(node)
+            }
+        }
+
+        return topList
+    }
+
+    //</editor-fold desc="Tree">
 }

@@ -38,6 +38,18 @@ inline fun <reified T> Any.toObj(dsl: T.() -> Unit = {}): T {
     }.apply(dsl)
 }
 
+inline fun <reified T> List<*>.toObjList(dsl: T.(index: Int) -> Unit = {}): List<T> {
+    val result = mutableListOf<T>()
+    forEachIndexed { index, any ->
+        any?.toObj<T> {
+            this.dsl(index)
+        }?.apply {
+            result.add(this)
+        }
+    }
+    return result
+}
+
 fun classOf(name: String): Class<*>? {
     return try {
         Class.forName(name)
