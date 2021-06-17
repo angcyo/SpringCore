@@ -32,6 +32,10 @@ class UserTable : BaseAuditTable() {
     @ApiModelProperty("姓名")
     var name: String? = null
 
+    @Column(comment = "头像url地址")
+    @ApiModelProperty("头像url地址")
+    var avatar: String? = null
+
     @Column(comment = "电话")
     @ApiModelProperty("电话")
     var phone: String? = null

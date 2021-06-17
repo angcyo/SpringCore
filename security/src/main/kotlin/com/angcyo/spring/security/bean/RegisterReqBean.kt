@@ -1,5 +1,6 @@
 package com.angcyo.spring.security.bean
 
+import com.gitee.sunchenbin.mybatis.actable.annotation.Column
 import io.swagger.annotations.ApiModel
 import io.swagger.annotations.ApiModelProperty
 import javax.validation.constraints.NotBlank
@@ -37,6 +38,9 @@ class RegisterReqBean {
 
     @ApiModelProperty("昵称", required = false)
     var nickname: String? = null
+
+    @ApiModelProperty("头像url地址")
+    var avatar: String? = null
 
     @ApiModelProperty("电话")
     var phone: String? = null

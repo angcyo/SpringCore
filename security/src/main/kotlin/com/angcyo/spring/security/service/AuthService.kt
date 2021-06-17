@@ -124,6 +124,7 @@ class AuthService {
         val user = UserTable()
         user.state = 1//用户状态
         user.nickname = registerBean?.nickname ?: username
+        user.avatar = registerBean?.avatar
         user.phone = registerBean?.phone
         user.email = registerBean?.email
         user.sex = registerBean?.sex
