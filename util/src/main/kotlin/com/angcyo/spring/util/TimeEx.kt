@@ -26,12 +26,12 @@ fun nowDate() = java.sql.Date(nowTime())
 /**当前的时间13位毫秒数*/
 fun nowTime() = System.currentTimeMillis()
 
-/**返回毫秒对应的天数*/
+/**返回毫秒对应多少天数*/
 fun Long.toDay(): Int {
     return ceil((this * 1.0 / DAY_MILLIS)).toInt()
 }
 
-/**返回毫秒对应的年数*/
+/**返回毫秒对应多少年数*/
 fun Long.toYear(): Int {
     return ceil(toDay() * 1.0 / 365).toInt()
 }
@@ -89,10 +89,15 @@ fun String.toMillis(pattern: String = "yyyyMMdd"): Long {
     return time
 }
 
-/**获取当前时间对应的 y m d h s*/
-fun Long.spiltTime(): IntArray {
+fun Long.toCalendar(): Calendar {
     val cal = Calendar.getInstance()
     cal.timeInMillis = this
+    return cal
+}
+
+/**从13位时间戳中,获取当前时间对应的 y m d h s*/
+fun Long.spiltTime(): IntArray {
+    val cal = toCalendar()
 
     val year = cal[Calendar.YEAR] //2018
     val month = cal[Calendar.MONTH] + 1 //1-12月
@@ -129,6 +134,36 @@ fun Long.spiltTime(): IntArray {
         sss /*6*/,
         week /*7*/
     )
+}
+
+fun Long.year() = spiltTime()[0]
+fun Long.month() = spiltTime()[1]
+fun Long.day() = spiltTime()[2]
+fun Long.hour() = spiltTime()[3]
+fun Long.minute() = spiltTime()[4]
+fun Long.second() = spiltTime()[5]
+fun Long.millisecond() = spiltTime()[6]
+fun Long.week() = spiltTime()[7]
+
+fun Calendar.year() = this[Calendar.YEAR]//2018
+fun Calendar.month() = this[Calendar.MONTH] + 1//1-12月
+fun Calendar.day() = this[Calendar.DAY_OF_MONTH]//1-31天
+fun Calendar.hour() = this[Calendar.HOUR_OF_DAY]//24小时制
+fun Calendar.minute() = this[Calendar.MINUTE]//0-59分
+fun Calendar.second() = this[Calendar.SECOND]//0-59秒
+fun Calendar.millisecond() = this[Calendar.MILLISECOND]//0-999毫秒
+fun Calendar.week(): Int {//1-7 周几
+    val dayOfWeek = firstDayOfWeek
+    val weekDay = this[Calendar.DAY_OF_WEEK] //1-7 周几
+
+    var week = weekDay
+    if (dayOfWeek == Calendar.SUNDAY) {
+        week = weekDay - 1
+        if (week <= 0) {
+            week = 7
+        }
+    }
+    return week
 }
 
 fun String.parseTime(pattern: String = "yyyy-MM-dd"): Long {
@@ -174,28 +209,64 @@ fun Long.toTimes(): LongArray {
  *  toElapsedTime( pattern = intArrayOf(-1, 1, 1), units = arrayOf("", "", ":", ":", ":") )
  *</pre>
  *
- *  pattern :0智能判断 1强制 -1忽略
+ * [-1] 强制不需要
+ * [1] 强制需要
+ * [其他值] 智能判断
+ * pattern :0智能判断 1强制 -1忽略
  *
  * @param pattern 默认为智能判断值<=0时, 不返回. 如果需要强制返回, 设置1, 强制不返回设置-1
- * @param h24 24小时制
+ * @param refill 24小时制, 前面补齐0
  * */
 fun Long.toElapsedTime(
     pattern: IntArray = intArrayOf(-1, 1, 1),
-    h24: BooleanArray = booleanArrayOf(true, true, true, true, true),
-    units: Array<String> = arrayOf("毫秒", "秒", "分", "时", "天")
+    refill: BooleanArray = booleanArrayOf(true, true, true, true, true),
+    units: Array<String> = arrayOf("毫秒", "秒", "分", "时", "天") /*最大5个计量*/
 ): String {
-    val times = toTimes()
-    val builder = StringBuilder()
 
     fun toH24(h24: Boolean, value: Long): String {
         return if (!h24 || value >= 10) "$value" else "0${value}"
     }
 
+    val builder = StringBuilder()
+
+    if (this <= 0) {
+        for (i in pattern.indices) {
+            val need = pattern.getOrNull(i) ?: 0
+            val h24 = refill.getOrNull(i) ?: false
+            val unit = units.getOrNull(i) ?: ":"
+
+            if (need == 1) {
+                builder.append(toH24(h24, 0))
+                if (unit.isNotBlank()) {
+                    builder.append(unit)
+                }
+                return builder.toString()
+            }
+        }
+        for (i in pattern.indices) {
+            val need = pattern.getOrNull(i) ?: 0
+            val h24 = refill.getOrNull(i) ?: false
+            val unit = units.getOrNull(i) ?: ":"
+
+            if (need != -1) {
+                builder.append(toH24(h24, 0))
+                if (unit.isNotBlank()) {
+                    builder.append(unit)
+                }
+                return builder.toString()
+            }
+        }
+        return "$this"
+    }
+
+    val times = toTimes()
+
     for (i in times.lastIndex downTo 0) {
         val value = times[i]
-        val h24 = h24.getOrNull(i) ?: false
+        val h24 = refill.getOrNull(i) ?: false
         val unit = units.getOrNull(i) ?: ":"
         val need = pattern.getOrNull(i) ?: 0
+
         when {
             need == -1 -> {
                 //强制不要
@@ -252,3 +323,5 @@ fun String.toTime(pattern: String = "yyyy-MM-dd HH:mm:ss"): Long {
     }
     return time
 }
+
+
