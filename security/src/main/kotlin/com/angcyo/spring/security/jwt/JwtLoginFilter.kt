@@ -5,6 +5,7 @@ import com.angcyo.spring.base.json.toJackson
 import com.angcyo.spring.base.servlet.fromJson
 import com.angcyo.spring.base.servlet.send
 import com.angcyo.spring.base.servlet.sendError
+import com.angcyo.spring.base.toObj
 import com.angcyo.spring.security.SecurityConstants
 import com.angcyo.spring.security.bean.AuthRepBean
 import com.angcyo.spring.security.bean.AuthReqBean
@@ -105,13 +106,10 @@ class JwtLoginFilter(
             }
 
             //send response
-            val repBean = AuthRepBean()
-            repBean.id = userDetail.userTable?.id
-            repBean.nickname = userDetail.userTable?.nickname
-            repBean.token = SecurityConstants.TOKEN_PREFIX + token
+            val repBean = userDetail.userTable!!.toObj<AuthRepBean> {
+                this.token = SecurityConstants.TOKEN_PREFIX + token
+            }
             response.send(repBean.ok<AuthRepBean>().toJackson())
-
-
         } else {
             //super会执行授权成功的重定向
             super.successfulAuthentication(request, response, filterChain, authentication)

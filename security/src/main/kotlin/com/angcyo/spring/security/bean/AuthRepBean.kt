@@ -1,5 +1,6 @@
 package com.angcyo.spring.security.bean
 
+import com.angcyo.spring.security.table.UserTable
 import io.swagger.annotations.ApiModel
 import io.swagger.annotations.ApiModelProperty
 
@@ -10,13 +11,7 @@ import io.swagger.annotations.ApiModelProperty
  */
 
 @ApiModel("登录返回的数据")
-class AuthRepBean {
-
-    @ApiModelProperty("用户的id")
-    var id: Long? = null
-
-    @ApiModelProperty("用户的昵称")
-    var nickname: String? = null
+class AuthRepBean : UserTable() {
 
     @ApiModelProperty("授权成功,返回的token")
     var token: String? = null
