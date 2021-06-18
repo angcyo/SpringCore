@@ -87,7 +87,7 @@ abstract class BaseAutoController<
     open fun autoSaveAfter(param: SaveParam, table: Table) {
     }
 
-    @ApiOperation("保存数据")
+    @ApiOperation("保存数据Auto")
     @PostMapping("/save.auto")
     open fun autoSave(@RequestBody(required = true) param: SaveParam): Result<Return> {
         autoService.autoFill(param)
@@ -112,7 +112,7 @@ abstract class BaseAutoController<
     open fun autoDeleteAfter(param: SaveParam, delete: Boolean) {
     }
 
-    @ApiOperation("使用id软删除数据")
+    @ApiOperation("使用id软删除数据Auto")
     @PostMapping("/delete.auto")
     open fun autoDelete(@RequestBody(required = true) param: SaveParam): Result<Boolean> {
         autoService.autoFill(param)
@@ -136,7 +136,7 @@ abstract class BaseAutoController<
     open fun autoRemoveAfter(param: SaveParam, remove: Boolean) {
     }
 
-    @ApiOperation("使用id移除数据(真删除)")
+    @ApiOperation("使用id移除数据(真删除)Auto")
     @PostMapping("/remove.auto")
     open fun autoRemove(@RequestBody(required = true) param: SaveParam): Result<Boolean> {
         autoService.autoFill(param)
@@ -160,7 +160,7 @@ abstract class BaseAutoController<
     open fun autoUpdateAfter(param: SaveParam, update: Boolean) {
     }
 
-    @ApiOperation("使用id更新数据")
+    @ApiOperation("使用id更新数据Auto")
     @PostMapping("/update.auto")
     open fun autoUpdate(@RequestBody(required = true) param: SaveParam): Result<Boolean> {
         autoService.autoFill(param)
@@ -184,7 +184,7 @@ abstract class BaseAutoController<
     open fun autoQueryAfter(param: QueryParam, query: IPage<Table>) {
     }
 
-    @ApiOperation("查询单条数据")
+    @ApiOperation("查询单条数据Auto")
     @PostMapping("/query.auto")
     open fun autoQuery(@RequestBody(required = true) param: QueryParam): Result<Return> {
         autoService.autoFill(param)
@@ -214,7 +214,7 @@ abstract class BaseAutoController<
     open fun autoListAfter(param: QueryParam, list: List<Table>) {
     }
 
-    @ApiOperation("查询所有列表")
+    @ApiOperation("查询所有列表Auto")
     @PostMapping("/list.auto")
     open fun autoList(@RequestBody(required = true) param: QueryParam): Result<List<Return>> {
         autoService.autoFill(param)
@@ -238,7 +238,7 @@ abstract class BaseAutoController<
     open fun autoPageAfter(param: QueryParam, query: IPage<Table>) {
     }
 
-    @ApiOperation("分页查询列表")
+    @ApiOperation("分页查询列表Auto")
     @PostMapping("/page.auto")
     open fun autoPage(@RequestBody(required = true) param: QueryParam): Result<IPage<Return>> {
         autoService.autoFill(param)
