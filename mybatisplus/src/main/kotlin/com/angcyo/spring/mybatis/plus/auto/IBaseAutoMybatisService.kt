@@ -13,7 +13,6 @@ import com.angcyo.spring.mybatis.plus.keyValue
 import com.angcyo.spring.mybatis.plus.service.IBaseMybatisService
 import com.angcyo.spring.mybatis.plus.table.BaseAuditTable
 import com.angcyo.spring.mybatis.plus.toLowerName
-import com.angcyo.spring.util.copyTo
 import com.angcyo.spring.util.size
 import com.baomidou.mybatisplus.core.metadata.IPage
 import org.springframework.transaction.annotation.Transactional
@@ -25,23 +24,6 @@ import java.io.Serializable
  * @date 2021/05/28
  */
 interface IBaseAutoMybatisService<Table> : IBaseMybatisService<Table> {
-
-    fun Any.isTable() = javaClass.isAssignableFrom(entityClass)
-
-    fun Any.toTable(): Table {
-        return if (isTable()) {
-            this as Table
-        } else {
-            //新的表
-            val newTable = newTable()
-            //拷贝属性到新表
-            //BeanUtils.copyProperties(it, newTable as Any)
-            copyTo(newTable as Any)
-            newTable
-        }
-    }
-
-    fun newTable() = entityClass.newInstance()
 
     /**构建一个解析器*/
     fun buildAutoParse() = AutoParse<Table>()
@@ -349,7 +331,7 @@ interface IBaseAutoMybatisService<Table> : IBaseMybatisService<Table> {
      * */
     @LogMethodTime
     @Transactional
-    fun autoReset(tableList: List<Any>): Boolean {
+    fun autoReset(tableList: List<Any>, fill: Boolean = true): Boolean {
         val tableMap = hashMapOf<String, MutableList<Any>>()
         val valueQueryMap = hashMapOf<String, MutableList<Any>>()
         val noAnnotationTableList = mutableListOf<Any>()
@@ -357,7 +339,7 @@ interface IBaseAutoMybatisService<Table> : IBaseMybatisService<Table> {
         for (table in tableList) {
 
             //自动填充数据
-            if (table is IAutoParam) {
+            if (fill && table is IAutoParam) {
                 autoFill(table)
             }
 

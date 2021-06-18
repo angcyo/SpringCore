@@ -8,10 +8,12 @@ import com.angcyo.spring.mybatis.plus.auto.eachField
 import com.angcyo.spring.mybatis.plus.auto.getMember
 import com.angcyo.spring.mybatis.plus.auto.param.BaseAutoPageParam
 import com.angcyo.spring.mybatis.plus.auto.setMember
+import com.angcyo.spring.mybatis.plus.table.BaseAuditTable
 import com.angcyo.spring.mybatis.plus.tree.IBaseTree
 import com.angcyo.spring.mybatis.plus.tree.ITree
 import com.angcyo.spring.mybatis.plus.tree.isTopId
 import com.angcyo.spring.util.L
+import com.angcyo.spring.util.copyTo
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper
 import com.baomidou.mybatisplus.core.metadata.IPage
@@ -30,6 +32,25 @@ interface IBaseMybatisService<Table> : IService<Table> {
 
     //<editor-fold desc="Base">
 
+    fun tableClass() = entityClass
+
+    fun Any.isTable() = javaClass.isAssignableFrom(tableClass())
+
+    fun Any.toTable(): Table {
+        return if (isTable()) {
+            this as Table
+        } else {
+            //新的表
+            val newTable = newTable()
+            //拷贝属性到新表
+            //BeanUtils.copyProperties(it, newTable as Any)
+            copyTo(newTable as Any)
+            newTable
+        }
+    }
+
+    fun newTable() = tableClass().newInstance()
+
     /**获取一个[QueryWrapper]*/
     fun queryWrapper(): QueryWrapper<Table> {
         return QueryWrapper<Table>()
@@ -38,6 +59,14 @@ interface IBaseMybatisService<Table> : IService<Table> {
     /**获取一个[UpdateWrapper]*/
     fun updateWrapper(): UpdateWrapper<Table> {
         return UpdateWrapper<Table>()
+    }
+
+    /**未删除的数据*/
+    fun QueryWrapper<Table>.noDelete(): QueryWrapper<Table> {
+        if (BaseAuditTable::class.java.isAssignableFrom(tableClass())) {
+            eq(BaseAuditTable::deleteFlag.columnName(), 0)
+        }
+        return this
     }
 
     //</editor-fold desc="Base">
@@ -324,10 +353,12 @@ interface IBaseMybatisService<Table> : IService<Table> {
         return if (parentId.isTopId()) {
             listQuery {
                 eq(IBaseTree::parentId.columnName(), parentId)
+                noDelete()
             }
         } else {
             val parent = getById(parentId).ifError("parentId[$parentId]不存在") as IBaseTree
             listQuery {
+                noDelete()
                 likeRight(IBaseTree::parentIds.columnName(), parent.parentIds)
             }.dropWhile {
                 (it as Any).keyValue() == parentId
@@ -343,6 +374,9 @@ interface IBaseMybatisService<Table> : IService<Table> {
         val parentMap = hashMapOf<String, T>()
         //根据key, 存储子节点
         val childListMap = hashMapOf<String, MutableList<T>>()
+
+        //具有parent的子节点map的key值列表. 剩下的key, 对应的数据就是无头的child list
+        val haveParentChildKeyList = mutableListOf<String>()
 
         list.forEach { node ->
             val key = node.parentIds
@@ -370,6 +404,7 @@ interface IBaseMybatisService<Table> : IService<Table> {
                     //节点属于那个parent
                     parentChildList.add(node)
                     parentNode.childList = parentChildList
+                    haveParentChildKeyList.add(parentKey)
                 }
             }
 
