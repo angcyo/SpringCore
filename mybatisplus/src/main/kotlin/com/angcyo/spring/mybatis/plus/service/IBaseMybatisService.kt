@@ -61,6 +61,10 @@ interface IBaseMybatisService<Table> : IService<Table> {
         return UpdateWrapper<Table>()
     }
 
+    fun noDelete2(wrapper: QueryWrapper<Table>): QueryWrapper<Table> {
+        return wrapper.noDelete()
+    }
+
     /**未删除的数据*/
     fun QueryWrapper<Table>.noDelete(): QueryWrapper<Table> {
         if (BaseAuditTable::class.java.isAssignableFrom(tableClass())) {
@@ -215,6 +219,12 @@ interface IBaseMybatisService<Table> : IService<Table> {
         }, { existTable, table ->
             existTable.getMember(equalField) == table.getMember(equalField)
         })
+    }
+
+    fun resetFrom(list: List<Table>, equalField: String, queryList: QueryWrapper<Table>.() -> Unit) {
+        resetFrom(list, queryList) { existTable, table ->
+            existTable.getMember(equalField) == table.getMember(equalField)
+        }
     }
 
     //</editor-fold desc="From">

@@ -1,5 +1,7 @@
 package com.angcyo.spring.mybatis.plus
 
+import com.angcyo.spring.base.toObj
+import com.angcyo.spring.mybatis.plus.table.BaseAuditTable
 import com.baomidou.mybatisplus.core.conditions.AbstractWrapper
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper
@@ -95,3 +97,17 @@ fun Any.keyName(def: String = "id") = FieldUtils.getKeyField(this)?.name?.toLowe
  * */
 fun Any.keyField() = FieldUtils.getKeyField(this)
 fun Any.keyValue() = FieldUtils.getKeyField(this)?.get(this)
+
+inline fun <reified T : BaseAuditTable> Any.toTable(newTable: Boolean = false, dsl: T.() -> Unit = {}): T {
+    return this.toObj {
+        if (newTable) {
+            id = null
+            createdAt = null
+            updatedAt = null
+            createdBy = null
+            updatedBy = null
+            deleteFlag = BaseAuditTable.NO_DELETE
+        }
+        dsl()
+    }
+}

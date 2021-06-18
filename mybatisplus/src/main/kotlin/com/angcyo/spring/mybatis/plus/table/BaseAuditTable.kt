@@ -34,6 +34,11 @@ import java.time.LocalDateTime
 @Cacheable
 abstract class BaseAuditTable {
 
+    companion object {
+        const val DELETE = 1
+        const val NO_DELETE = 0
+    }
+
     @IsAutoIncrement
     @TableId(value = "id", type = IdType.AUTO)
     @ApiModelProperty("数据Id")
@@ -76,7 +81,7 @@ abstract class BaseAuditTable {
     @ApiModelProperty("逻辑删除(0:未删除 1:删除)", hidden = true)
     @Column(comment = "逻辑删除(0:未删除 1:删除)")
     @JsonIgnore
-    var deleteFlag: Int? = 0
+    var deleteFlag: Int? = NO_DELETE
 
     override fun toString(): String {
         return toJson() ?: super.toString()

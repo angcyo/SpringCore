@@ -189,7 +189,7 @@ interface IBaseAutoMybatisService<Table> : IBaseMybatisService<Table> {
                 updateById(newTable().apply {
                     if (this is BaseAuditTable) {
                         this.id = keyValue as Long
-                        deleteFlag = 1 //软删除
+                        deleteFlag = BaseAuditTable.DELETE //软删除
                     } else {
                         apiError("表结构有误,无法删除")
                     }

@@ -8,6 +8,7 @@ package com.angcyo.spring.util
  */
 object Constant {
     const val DEFAULT_DATE_TIME_FORMATTER = "yyyy-MM-dd HH:mm:ss"
+    const val DEFAULT_DATE_TIME_FORMATTER2 = "yyyy-MM-dd HH:mm"
     const val DEFAULT_DATE_FORMATTER = "yyyy-MM-dd"
     const val DEFAULT_TIME_FORMATTER = "HH:mm:ss"
 }
