@@ -1,6 +1,7 @@
 package com.angcyo.spring.mybatis.plus.service
 
 import com.angcyo.spring.mybatis.plus.auto.param.BaseAutoPageParam
+import com.angcyo.spring.mybatis.plus.auto.sort
 import com.baomidou.mybatisplus.core.metadata.IPage
 
 /**
@@ -71,7 +72,7 @@ interface IControllerService<
         param: QueryParam
     ): IPage<Table> {
         return pageQuery(pageIndex, pageSize) {
-            sort(param as Any)
+            sort(param)
             noDelete()
         }
     }

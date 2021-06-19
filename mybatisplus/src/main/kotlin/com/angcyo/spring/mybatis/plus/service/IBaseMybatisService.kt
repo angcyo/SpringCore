@@ -4,11 +4,8 @@ import com.angcyo.spring.base.data.ifError
 import com.angcyo.spring.base.data.ifNotExist
 import com.angcyo.spring.base.extension.apiError
 import com.angcyo.spring.mybatis.plus.*
-import com.angcyo.spring.mybatis.plus.auto.eachField
-import com.angcyo.spring.mybatis.plus.auto.getMember
+import com.angcyo.spring.mybatis.plus.auto.*
 import com.angcyo.spring.mybatis.plus.auto.param.BaseAutoPageParam
-import com.angcyo.spring.mybatis.plus.auto.param.BaseAutoQueryParam
-import com.angcyo.spring.mybatis.plus.auto.setMember
 import com.angcyo.spring.mybatis.plus.table.BaseAuditTable
 import com.angcyo.spring.mybatis.plus.tree.IBaseTree
 import com.angcyo.spring.mybatis.plus.tree.ITree
@@ -63,36 +60,20 @@ interface IBaseMybatisService<Table> : IService<Table> {
     }
 
     fun noDelete2(wrapper: QueryWrapper<Table>): QueryWrapper<Table> {
-        return wrapper.noDelete()
+        return wrapper.noDelete(tableClass())
+    }
+
+    fun QueryWrapper<Table>.noDelete(): QueryWrapper<Table> {
+        return noDelete(tableClass())
     }
 
     fun isBaseAuditTable() = BaseAuditTable::class.java.isAssignableFrom(tableClass())
 
-    /**未删除的数据*/
-    fun QueryWrapper<Table>.noDelete(): QueryWrapper<Table> {
-        if (isBaseAuditTable()) {
-            eq(BaseAuditTable::deleteFlag.columnName(), 0)
-        }
-        return this
-    }
-
     /**处理排序字段
      * [com.angcyo.spring.mybatis.plus.auto.AutoParse._handleOrder]*/
-    fun QueryWrapper<Table>.sort(param: Any): QueryWrapper<Table> {
-        if (param is BaseAutoQueryParam) {
-            val desc = param.desc
-            if (!desc.isNullOrEmpty()) {
-                //降序
-                orderByDesc(desc)
-            }
-
-            val asc = param.asc
-            if (!asc.isNullOrEmpty()) {
-                //升序
-                orderByAsc(asc)
-            }
-        }
-        return this
+    fun sort(wrapper: QueryWrapper<Table>, param: Any): QueryWrapper<Table> {
+        wrapper.sort(param)
+        return wrapper
     }
 
     //</editor-fold desc="Base">

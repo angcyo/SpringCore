@@ -1,6 +1,10 @@
 package com.angcyo.spring.mybatis.plus.auto
 
 import com.angcyo.spring.mybatis.plus.auto.extension.AutoParseException
+import com.angcyo.spring.mybatis.plus.auto.param.BaseAutoQueryParam
+import com.angcyo.spring.mybatis.plus.columnName
+import com.angcyo.spring.mybatis.plus.table.BaseAuditTable
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper
 import com.baomidou.mybatisplus.core.toolkit.ReflectionKit
 import org.springframework.util.ReflectionUtils
 import java.lang.reflect.AnnotatedElement
@@ -159,4 +163,31 @@ fun <T> List<Any>.toProList(property: String): List<T> {
         result.add(it.getMember(property) as T)
     }
     return result
+}
+
+/**未删除的数据*/
+fun <Table> QueryWrapper<Table>.noDelete(table: Class<Table>): QueryWrapper<Table> {
+    if (BaseAuditTable::class.java.isAssignableFrom(table)) {
+        eq(BaseAuditTable::deleteFlag.columnName(), 0)
+    }
+    return this
+}
+
+/**处理排序字段
+ * [com.angcyo.spring.mybatis.plus.auto.AutoParse._handleOrder]*/
+fun <Table> QueryWrapper<Table>.sort(param: Any?): QueryWrapper<Table> {
+    if (param != null && param is BaseAutoQueryParam) {
+        val desc = param.desc
+        if (!desc.isNullOrEmpty()) {
+            //降序
+            orderByDesc(desc)
+        }
+
+        val asc = param.asc
+        if (!asc.isNullOrEmpty()) {
+            //升序
+            orderByAsc(asc)
+        }
+    }
+    return this
 }
