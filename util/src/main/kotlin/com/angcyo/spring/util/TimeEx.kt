@@ -2,6 +2,7 @@ package com.angcyo.spring.util
 
 import java.text.ParseException
 import java.text.SimpleDateFormat
+import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import java.util.*
@@ -60,6 +61,8 @@ fun nowTimeString(pattern: String = "yyyy-MM-dd HH:mm:ss.SSS"): String {
 }
 
 fun nowLocalDateTime() = LocalDateTime.now()
+
+fun nowLocalDate() = LocalDate.now()
 
 fun String?.toLocalDateTime(pattern: String = Constant.DEFAULT_DATE_TIME_FORMATTER): LocalDateTime? {
     if (this.isNullOrEmpty()) {
