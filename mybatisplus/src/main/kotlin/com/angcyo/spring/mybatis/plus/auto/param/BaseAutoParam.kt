@@ -18,9 +18,9 @@ abstract class BaseAutoParam : IAutoParam {
     @AutoQuery
     @AutoUpdateBy
     @IsKey
-    @ApiModelProperty("通过id查询/更新/删除记录")
     @AutoDelete
     @AutoUpdate
+    @ApiModelProperty("通过id查询/更新/删除记录")
     var id: Long? = null
 
     @AutoQuery
