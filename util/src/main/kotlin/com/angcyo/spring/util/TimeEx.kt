@@ -67,7 +67,12 @@ fun nowLocalDateTime() = LocalDateTime.now()
 
 fun nowLocalDate() = LocalDate.now()
 
-fun LocalDate.toLocalDateTime() = LocalDateTime.of(this, LocalTime.of(0, 0, 0, 0))
+fun Temporal.toLocalDateTime() = when (this) {
+    is LocalDateTime -> this
+    is LocalDate -> LocalDateTime.of(this, LocalTime.of(0, 0, 0, 0))
+    is LocalTime -> LocalDateTime.of(LocalDate.now(), this)
+    else -> LocalDateTime.from(this)
+}
 
 fun Temporal.duration(end: Temporal): Duration {
     if (this is LocalDate) {
