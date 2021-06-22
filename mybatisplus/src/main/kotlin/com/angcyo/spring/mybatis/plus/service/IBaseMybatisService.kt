@@ -279,6 +279,13 @@ interface IBaseMybatisService<Table> : IService<Table> {
         return list(queryWrapper().apply(dsl))
     }
 
+    fun listQueryIn(coll: Collection<*>, dsl: QueryWrapper<Table>.() -> Unit): List<Table> {
+        if (coll.isEmpty()) {
+            return emptyList()
+        }
+        return list(queryWrapper().apply(dsl))
+    }
+
     /**Dsl Page*/
     fun pageQuery(
         pageIndex: Long = 1,
