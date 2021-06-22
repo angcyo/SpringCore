@@ -8,7 +8,6 @@ import com.angcyo.spring.mybatis.plus.auto.*
 import com.angcyo.spring.mybatis.plus.auto.param.BaseAutoPageParam
 import com.angcyo.spring.mybatis.plus.table.BaseAuditTable
 import com.angcyo.spring.mybatis.plus.tree.IBaseTree
-import com.angcyo.spring.mybatis.plus.tree.ITree
 import com.angcyo.spring.mybatis.plus.tree.isTopId
 import com.angcyo.spring.util.L
 import com.angcyo.spring.util.copyTo
@@ -235,6 +234,12 @@ interface IBaseMybatisService<Table> : IService<Table> {
     //<editor-fold desc="Dsl">
 
     /**Dsl Remove
+     * ```
+     * removeQuery {
+     *   eq(EnrollItemsReTable::enrollId.columnName(), id)
+     * }
+     * ```
+     *
      * [error] 返回false时, 异常提示*/
     fun removeQuery(error: String? = null, dsl: QueryWrapper<Table>.() -> Unit): Boolean {
         return remove(queryWrapper().apply(dsl)).apply {
@@ -253,7 +258,14 @@ interface IBaseMybatisService<Table> : IService<Table> {
         }
     }
 
-    /**Dsl Update*/
+    /**Dsl Update
+     * ```
+     *  updateQuery {
+     *    setSql("${BaseAuditTable::deleteFlag.columnName()} = ${BaseAuditTable.DELETE}")
+     *    eq(EnrollTable::id.columnName(), id)
+     *  }
+     * ```
+     * */
     fun updateQuery(error: String? = null, dsl: UpdateWrapper<Table>.() -> Unit): Boolean {
         return update(updateWrapper().apply(dsl)).apply {
             if (!this && error != null) {
@@ -361,8 +373,9 @@ interface IBaseMybatisService<Table> : IService<Table> {
         }
     }
 
-    /**查询某一个节点下的所有子节点*/
-    fun listClazz(parentId: Long): List<Table> {
+    /**查询某一个节点下的所有子节点
+     * [parentId] 父节点id, 顶层使用-1*/
+    fun listTreeNode(parentId: Long): List<Table> {
         return if (parentId.isTopId()) {
             listQuery {
                 eq(IBaseTree::parentId.columnName(), parentId)
@@ -379,54 +392,22 @@ interface IBaseMybatisService<Table> : IService<Table> {
         }
     }
 
-    /**将集合打包成树结构*/
-    fun <T : ITree<T>> buildTree(list: List<T>): List<T> {
-        //顶点节点
-        val topList = mutableListOf<T>()
-        //根据key, 存储节点
-        val parentMap = hashMapOf<String, T>()
-        //根据key, 存储子节点
-        val childListMap = hashMapOf<String, MutableList<T>>()
-
-        //具有parent的子节点map的key值列表. 剩下的key, 对应的数据就是无头的child list
-        val haveParentChildKeyList = mutableListOf<String>()
-
-        list.forEach { node ->
-            val key = node.parentIds
-            if (!key.isNullOrBlank()) {
-                //根据key 存储节点
-                val currentNode = parentMap[key] ?: node
-                parentMap[key] = currentNode
-
-                //初始化子节点存储容器
-                val childKey = key
-                val childList = childListMap[childKey] ?: mutableListOf()
-                childListMap[childKey] = childList
-
-                //非顶点
-                if (!node.parentId.isTopId()) {
-                    //子节点
-                    val parentKey = childKey.substring(0, childKey.length - "${node.keyValue()},".length)
-
-                    val parentNode = parentMap[parentKey] ?: node
-                    parentMap[parentKey] = parentNode
-
-                    val parentChildList = childListMap[parentKey] ?: mutableListOf()
-                    childListMap[parentKey] = parentChildList
-
-                    //节点属于那个parent
-                    parentChildList.add(node)
-                    parentNode.childList = parentChildList
-                    haveParentChildKeyList.add(parentKey)
-                }
+    /**查询当前节点, 以及所有parent节点的集合*/
+    fun listTreeParentNode(id: Long): List<Table> {
+        val table = getById(id)
+        if (table is IBaseTree) {
+            val parentIds = table.parentIds
+            if (parentIds.isNullOrEmpty()) {
+                return emptyList()
             }
-
-            if (node.parentId.isTopId()) {
-                topList.add(node)
+            val idList = parentIds.split(IBaseTree.PARENT_SPLIT).filter { it.isNotBlank() }
+            return listQuery {
+                noDelete()
+                `in`(table.keyName(), idList)
             }
+        } else {
+            apiError("非树结构类型")
         }
-
-        return topList
     }
 
     //</editor-fold desc="Tree">
