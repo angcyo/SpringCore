@@ -69,4 +69,9 @@ class AppProperties {
             swaggerProperties.title = "欢迎访问%s接口文档".format(it)
         }
     }
+
+    /**分配一个缓存key*/
+    fun key(key: String): String {
+        return "${name ?: "Default"}.${key}"
+    }
 }

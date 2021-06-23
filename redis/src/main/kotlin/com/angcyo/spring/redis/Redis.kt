@@ -545,4 +545,52 @@ class Redis {
             0
         }
     }
+
+    //<editor-fold desc="cache">
+
+    /**
+     *  Supported glob-style patterns:
+     *
+     * - h?llo matches hello, hallo and hxllo
+     * - h*llo matches hllo and heeeello
+     * - h[ae]llo matches hello and hallo, but not hillo
+     * - h[^e]llo matches hallo, hbllo, ... but not hello
+     * - h[a-b]llo matches hallo and hbllo
+     * Use \ to escape special characters if you want to match them verbatim.
+     * https://redis.io/commands/keys
+     * */
+    fun keyList(pattern: String) = redisTemplate.keys(pattern).toList()
+
+    /**移除匹配到key对应的缓存*/
+    fun removeCache(pattern: String) {
+        val keyList = keyList("*${pattern}*")
+        redisTemplate.delete(keyList)
+    }
+
+    /**
+     * 快速设置 读取缓存
+     * [key] 缓存的key
+     * [time] 时间(秒) time要大于0 如果time小于等于0 将设置无限期
+     * [update] 总是更新缓存, 否则值不一样时才更新
+     * [refresh] 强制不使用缓存,并且更新缓存
+     * [doValue] 缓存已有的值, 返回缓存数据
+     * @return true成功 false 失败
+     */
+    fun <T> cache(
+        key: String,
+        time: Long = 1 * 60 * 60 /*1小时*/,
+        update: Boolean = false,
+        refresh: Boolean = false,
+        doValue: T?.() -> T
+    ): T {
+        val value: T? = if (refresh) null else get(key) as? T?
+        val result = value.doValue()
+        if (update || refresh || value == null || value != result) {
+            set(key, result, time)
+        }
+        return result
+    }
+
+    //</editor-fold desc="cache">
+
 }
