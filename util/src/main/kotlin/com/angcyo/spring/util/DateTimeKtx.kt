@@ -1,8 +1,13 @@
 package com.angcyo.spring.util
 
 import com.angcyo.spring.util.Constant.DEFAULT_DATE_TIME_FORMATTER
+import java.time.LocalDate
 import java.time.LocalDateTime
+import java.time.LocalTime
 import java.time.ZoneOffset
+import java.time.format.DateTimeFormatter
+import java.time.temporal.Temporal
+import java.time.temporal.TemporalAccessor
 import java.util.*
 
 /**
@@ -26,3 +31,24 @@ fun LocalDateTime.toDate(): Date = Date.from(toInstant(ZoneOffset.of("+8")))
 fun Long.toLocalDateTime(): LocalDateTime = Date(this).toInstant().atOffset(ZoneOffset.of("+8")).toLocalDateTime()
 
 fun LocalDateTime.toPattern(pattern: String = DEFAULT_DATE_TIME_FORMATTER) = toTime(pattern)
+
+/**2020-11-05 15:07:16.265363*/
+fun LocalDateTime.toTime(pattern: String = "yyyy-MM-dd HH:mm"): String {
+    return format(pattern.toDateTimeFormatter())
+}
+
+fun String.toDateTimeFormatter() = DateTimeFormatter.ofPattern(this, Locale.CHINA)
+
+fun String.parse(pattern: String): TemporalAccessor = pattern.toDateTimeFormatter().parse(this)
+
+fun String.toLocalDateTime(pattern: String = DEFAULT_DATE_TIME_FORMATTER): LocalDateTime {
+    val format: DateTimeFormatter = pattern.toDateTimeFormatter()
+    return LocalDateTime.parse(this, format)
+}
+
+fun Temporal.toLocalDateTime() = when (this) {
+    is LocalDateTime -> this
+    is LocalDate -> LocalDateTime.of(this, LocalTime.of(0, 0, 0, 0))
+    is LocalTime -> LocalDateTime.of(LocalDate.now(), this)
+    else -> LocalDateTime.from(this)
+}

@@ -279,6 +279,13 @@ interface IBaseMybatisService<Table> : IService<Table> {
         return list(queryWrapper().apply(dsl))
     }
 
+    fun listQueryOne(limit: Long = 1, dsl: QueryWrapper<Table>.() -> Unit): Table? {
+        return list(queryWrapper().apply {
+            last("LIMIT $limit")
+            dsl()
+        }).firstOrNull()
+    }
+
     fun listQueryIn(coll: Collection<*>, dsl: QueryWrapper<Table>.() -> Unit): List<Table> {
         if (coll.isEmpty()) {
             return emptyList()

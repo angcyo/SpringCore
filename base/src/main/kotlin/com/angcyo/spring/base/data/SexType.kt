@@ -1,5 +1,7 @@
 package com.angcyo.spring.base.data
 
+import com.angcyo.spring.util.getSexByIdCard
+
 /**
  * Email:angcyo@126.com
  * @author angcyo
@@ -27,4 +29,11 @@ fun SexType.toStr() = when (this) {
     SexType.Male -> "男"
     SexType.Female -> "女"
     SexType.Unknown -> "未知"
+}
+
+/**[com.angcyo.spring.base.data.SexType]*/
+fun String.getSexTypeByIdCard() = when (getSexByIdCard()) {
+    1 -> SexType.Male.value
+    0 -> SexType.Female.value
+    else -> SexType.Unknown.value
 }

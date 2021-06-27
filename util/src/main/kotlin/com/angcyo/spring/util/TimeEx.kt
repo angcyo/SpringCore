@@ -67,13 +67,6 @@ fun nowLocalDateTime() = LocalDateTime.now()
 
 fun nowLocalDate() = LocalDate.now()
 
-fun Temporal.toLocalDateTime() = when (this) {
-    is LocalDateTime -> this
-    is LocalDate -> LocalDateTime.of(this, LocalTime.of(0, 0, 0, 0))
-    is LocalTime -> LocalDateTime.of(LocalDate.now(), this)
-    else -> LocalDateTime.from(this)
-}
-
 fun Temporal.duration(end: Temporal): Duration {
     if (this is LocalDate) {
         return Duration.between(
@@ -82,14 +75,6 @@ fun Temporal.duration(end: Temporal): Duration {
         )
     }
     return Duration.between(this, end)
-}
-
-fun String?.toLocalDateTime(pattern: String = Constant.DEFAULT_DATE_TIME_FORMATTER): LocalDateTime? {
-    if (this.isNullOrEmpty()) {
-        return null
-    }
-    val format: DateTimeFormatter = DateTimeFormatter.ofPattern(pattern, Locale.CHINA)
-    return LocalDateTime.parse(this, format)
 }
 
 /**格式化时间输出*/
@@ -328,11 +313,6 @@ fun String.diffTime(end: String, pattern: String = "yyyy-MM-dd HH:mm:ss"): Long 
 }
 
 /*----------------------------------------------------------------------------------*/
-
-/**2020-11-05 15:07:16.265363*/
-fun LocalDateTime.toTime(pattern: String = "yyyy-MM-dd HH:mm"): String {
-    return format(DateTimeFormatter.ofPattern(pattern, Locale.CHINA))
-}
 
 /**将2020-11-24 14:13:50转换成毫秒数*/
 fun String.toTime(pattern: String = "yyyy-MM-dd HH:mm:ss"): Long {
