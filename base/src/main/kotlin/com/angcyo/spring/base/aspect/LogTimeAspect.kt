@@ -1,6 +1,7 @@
 package com.angcyo.spring.base.aspect
 
 import com.angcyo.spring.util.L
+import com.angcyo.spring.util.getStackTrace
 import com.angcyo.spring.util.nowTime
 import com.angcyo.spring.util.toElapsedTime
 import org.aspectj.lang.ProceedingJoinPoint
@@ -35,6 +36,7 @@ class LogTimeAspect {
             }
 
             val method = signature.toString()
+            //val stackTrace = getStackTrace()
             L.w("${if (des.isNullOrEmpty()) "" else "[$des]"}调用耗时:${duration}☞↓\n${method}")
             result
         } else {

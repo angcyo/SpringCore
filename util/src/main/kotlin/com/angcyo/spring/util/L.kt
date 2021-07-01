@@ -79,3 +79,17 @@ object L {
         _logDb.info(log.joinToString(" "))
     }
 }
+
+/**
+ * 获取调用栈信息
+ * [front] 当前调用位置的前几个开始
+ * [count] 共几个, 负数表示全部
+ * */
+fun getStackTrace(front: Int = 0, count: Int = -1): List<StackTraceElement> {
+    val stackTrace = Thread.currentThread().stackTrace
+    stackTrace.reverse()
+    val endIndex = stackTrace.size - 3 - front
+    val startIndex = if (count > 0) (endIndex - count) else 0
+    val slice = stackTrace.slice(startIndex until endIndex)
+    return slice
+}
