@@ -1,5 +1,6 @@
 package com.angcyo.spring.security.bean
 
+import com.angcyo.spring.security.table.RoleTable
 import com.angcyo.spring.security.table.UserTable
 import io.swagger.annotations.ApiModel
 import io.swagger.annotations.ApiModelProperty
@@ -15,4 +16,7 @@ class AuthRepBean : UserTable() {
 
     @ApiModelProperty("授权成功,返回的token")
     var token: String? = null
+
+    @ApiModelProperty("角色列表")
+    var roleList: List<RoleTable>? = null
 }
