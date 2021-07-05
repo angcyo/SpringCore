@@ -43,19 +43,34 @@ abstract class BaseController<
         4
     ) as Class
 
+    /**表结构, 转换成返回值类型*/
     fun Table.toReturn(): Return {
-        val any = this as Any
+        val table = this
+        val any = table as Any
         val returnClass = getReturnClass()
 
         val newAny = if (returnClass.isAssignableFrom(any.javaClass)) {
-            any as Return
+            (any as Return).apply {
+                initReturnBean(this, table, false)
+            }
         } else {
             val newAny = returnClass.newInstance()
             any.copyTo(newAny as Any)
-            newAny as Return
+            (newAny as Return).apply {
+                initReturnBean(this, table, true)
+            }
         }
 
         return newAny
+    }
+
+    /**
+     * [returnBean] 需要返回的数据
+     * [table] 表数据
+     * [isNew] true时, returnBean == table
+     * */
+    open fun initReturnBean(returnBean: Return, table: Table, isNew: Boolean) {
+
     }
 
     /**数据结构转换*/
