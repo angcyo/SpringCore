@@ -1,8 +1,10 @@
 package com.angcyo.spring.security.service
 
+import com.angcyo.java.mail.dslSendMail
 import com.angcyo.spring.base.AppProperties
 import com.angcyo.spring.base.beanOf
 import com.angcyo.spring.base.extension.apiError
+import com.angcyo.spring.base.servlet.request
 import com.angcyo.spring.redis.Redis
 import com.angcyo.spring.security.SecurityConstants
 import com.angcyo.spring.security.bean.*
@@ -13,6 +15,7 @@ import com.angcyo.spring.security.table.AccountTable
 import com.angcyo.spring.security.table.UserRoleReTable
 import com.angcyo.spring.security.table.UserTable
 import com.angcyo.spring.util.ImageCode
+import com.angcyo.spring.util.isEmail
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.ApplicationEventPublisher
 import org.springframework.security.core.context.SecurityContextHolder
@@ -88,7 +91,25 @@ class AuthService {
         //code: String
         //需要发送的验证码
         val code = ImageCode.generateCode(6)
-        return redis.set(sendCodeKey(uuid, target, type), code, time)
+
+        var result = false
+
+        if (target.isEmail()) {
+            val title: String
+            val content: String
+
+            if (type == CodeType.Login.value) {
+                title = "欢迎登录${appProperties.fullName ?: appProperties.name}"
+                content = "本次登录验证码: $code"
+            } else {
+                title = "欢迎注册${appProperties.fullName ?: appProperties.name}"
+                content = "本次注册验证码: $code"
+            }
+
+            result = dslSendMail(target, title, content)
+        }
+
+        return result && redis.set(sendCodeKey(uuid, target, type), code, time)
     }
 
     fun getSendCode(uuid: String, target: String, type: Int): String? {
@@ -156,7 +177,24 @@ class AuthService {
     @RegisterAccount
     @Transactional
     fun register(bean: RegisterReqBean): UserTable? {
-        when (bean.grantType?.lowercase()) {
+        val grantType = bean.grantType?.lowercase()
+
+        request()?.let {
+            if (grantType != GrantType.Code.value) {
+                //非验证码注册的情况下, 如果发送了注册验证码或者传递了验证码, 则需要校验
+                val codeKey = it.codeKey()
+                if (bean.code != null || redis.hasKey(imageCodeKey(codeKey, CodeType.Register.value))) {
+                    //如果发送了登录验证码, 则需要验证验证码是否正确
+                    if (bean.code == null ||
+                        bean.code != getImageCode(codeKey, CodeType.Register.value)
+                    ) {
+                        apiError("验证码不正确")
+                    }
+                }
+            }
+        }
+
+        when (grantType) {
             GrantType.Password.value -> {
                 //密码 授权注册方式
             }

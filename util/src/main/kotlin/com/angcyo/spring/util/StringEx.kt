@@ -100,3 +100,11 @@ fun CharSequence?.have(text: CharSequence?, match: Boolean = false): Boolean {
         false
     }
 }
+
+/**判断字符串是否是邮箱地址*/
+fun String?.isEmail(regex: String = PATTERN_EMAIL): Boolean {
+    if (this.isNullOrEmpty()) {
+        return false
+    }
+    return matches(regex.toRegex())
+}

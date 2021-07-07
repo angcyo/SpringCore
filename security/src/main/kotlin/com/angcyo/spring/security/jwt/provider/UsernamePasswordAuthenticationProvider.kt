@@ -36,13 +36,16 @@ open class UsernamePasswordAuthenticationProvider : BaseTokenAuthenticationProvi
         //-------------------------验证码检查---------------------------
 
         request()?.let {
-            val codeKey = it.codeKey()
-            if (redis.hasKey(authService.imageCodeKey(codeKey, CodeType.Login.value))) {
-                //如果发送了登录验证码, 则需要验证验证码是否正确
-                if (authReqBean.code == null ||
-                    authReqBean.code != authService.getImageCode(codeKey, CodeType.Login.value)
-                ) {
-                    error("验证码不正确")
+            if (grantType != GrantType.Code.value) {
+                //非验证码登录的情况下, 如果发送了登录验证码或者传递了验证码, 则需要校验
+                val codeKey = it.codeKey()
+                if (authReqBean.code != null || redis.hasKey(authService.imageCodeKey(codeKey, CodeType.Login.value))) {
+                    //如果发送了登录验证码, 则需要验证验证码是否正确
+                    if (authReqBean.code == null ||
+                        authReqBean.code != authService.getImageCode(codeKey, CodeType.Login.value)
+                    ) {
+                        error("验证码不正确")
+                    }
                 }
             }
         }

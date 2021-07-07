@@ -39,6 +39,9 @@ class AppProperties {
     /**项目应用名*/
     var name: String? = null
 
+    /**项目全名*/
+    var fullName: String? = null
+
     /**应用构建时间*/
     var time: String? = nowTimeString()
 

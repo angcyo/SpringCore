@@ -22,6 +22,9 @@ dependencies {
 
     //用户登录授权
     api(project(":SpringCore:mybatisplus"))
+
+    //发送邮件
+    api(project(":SpringCore:javamail"))
 }
 
 tasks.getByName<org.springframework.boot.gradle.tasks.bundling.BootJar>("bootJar") {

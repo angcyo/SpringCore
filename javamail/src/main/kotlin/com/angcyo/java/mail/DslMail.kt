@@ -1,5 +1,6 @@
 package com.angcyo.java.mail
 
+import com.angcyo.spring.base.beanOf
 import com.angcyo.spring.util.L
 import org.simplejavamail.api.email.Email
 import org.simplejavamail.api.mailer.Mailer
@@ -11,6 +12,8 @@ import org.simplejavamail.mailer.MailerBuilder
  * 发错错误码参考:
  * http://help.163.com/09/1224/17/5RAJ4LMH00753VB8.html
  *
+ * https://www.simplejavamail.org/configuration.html
+ *
  * Email:angcyo@126.com
  * @author angcyo
  * @date 2021/01/20
@@ -18,7 +21,7 @@ import org.simplejavamail.mailer.MailerBuilder
 
 class DslMail {
 
-    var debug: Boolean = true
+    var debug: Boolean = L.isDebug
 
     /**发送邮件服务器的地址*/
     var smtpHost: String = "smtp.126.com"
@@ -64,6 +67,11 @@ class DslMail {
     /**邮件的内容*/
     var emailContent: String = ""
 
+    init {
+        //TransportStrategy.SMTP.setOpportunisticTLS(false)
+        //MailerBuilder.withTransportStrategy(TransportStrategy.SMTP)
+    }
+
     fun _getNameByAddress(emailAddress: String?): String? {
         return if (emailAddress.isNullOrEmpty()) {
             null
@@ -84,7 +92,9 @@ class DslMail {
             //传输协议
             .withTransportStrategy(TransportStrategy.SMTP)
             .withSessionTimeout(10 * 1000)
-            .clearEmailAddressCriteria()//turns off email validation
+            //.clearEmailAddressCriteria()//turns off email validation
+            //.resetEmailAddressCriteria()
+            //.clearSignByDefaultWithSmime()
             .withProperty("mail.smtp.sendpartial", true)
             .withDebugLogging(debug)
             //.async()
@@ -174,5 +184,30 @@ class DslMail {
 fun dslSendMail(action: DslMail.() -> Unit): Boolean {
     val dsl = DslMail()
     dsl.action()
+    return dsl.doIt()
+}
+
+/**
+ * 需要配置 smtp 邮件发送服务器
+ * [to] 目标 xxx@126.com
+ * [title] 邮件标题
+ * [content] 邮件内容
+ * */
+fun dslSendMail(to: String, title: String, content: String, action: DslMail.() -> Unit = {}): Boolean {
+    val dsl = DslMail().apply {
+
+        //smpt配置
+        val properties = beanOf(SmtpProperties::class.java)
+        smtpHost = properties.host ?: smtpHost
+        smtpPort = properties.port
+        smtpUsername = properties.username
+        smtpPassword = properties.passwrod
+
+        //邮件配置
+        emailTo = to
+        emailTitle = title
+        emailContent = content
+        action()
+    }
     return dsl.doIt()
 }
