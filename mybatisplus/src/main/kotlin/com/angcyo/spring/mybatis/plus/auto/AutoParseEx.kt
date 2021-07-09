@@ -180,14 +180,46 @@ fun <Table> QueryWrapper<Table>.sort(param: Any?): QueryWrapper<Table> {
         val desc = param.desc
         if (!desc.isNullOrEmpty()) {
             //降序
-            orderByDesc(desc)
+            sortDesc(desc.split(BaseAutoQueryParam.SPLIT))
         }
 
         val asc = param.asc
         if (!asc.isNullOrEmpty()) {
             //升序
-            orderByAsc(asc)
+            sortAsc(asc.split(BaseAutoQueryParam.SPLIT))
         }
+    }
+    return this
+}
+
+/**降序, 从大到小*/
+fun <Table> QueryWrapper<Table>.sortDesc(vararg columns: String): QueryWrapper<Table> {
+    return sortDesc(columns.toList())
+}
+
+fun <Table> QueryWrapper<Table>.sortDesc(columnList: List<String>): QueryWrapper<Table> {
+    val size = columnList.size
+    if (size == 1) {
+        orderByDesc(columnList[0])
+    } else if (size > 1) {
+        val other = columnList.slice(1 until size)
+        orderByDesc(columnList[0], *other.toTypedArray())
+    }
+    return this
+}
+
+/**升序, 从小到大*/
+fun <Table> QueryWrapper<Table>.sortAsc(vararg columns: String): QueryWrapper<Table> {
+    return sortAsc(columns.toList())
+}
+
+fun <Table> QueryWrapper<Table>.sortAsc(columnList: List<String>): QueryWrapper<Table> {
+    val size = columnList.size
+    if (size == 1) {
+        orderByAsc(columnList[0])
+    } else if (size > 1) {
+        val other = columnList.slice(1 until size)
+        orderByAsc(columnList[0], *other.toTypedArray())
     }
     return this
 }

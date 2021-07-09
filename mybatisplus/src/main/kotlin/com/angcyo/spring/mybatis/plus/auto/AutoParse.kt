@@ -560,13 +560,13 @@ class AutoParse<Table> {
             val desc = param.desc
             if (!desc.isNullOrEmpty()) {
                 //降序
-                queryWrapper.orderByDesc(desc)
+                queryWrapper.sortDesc(desc.split(BaseAutoQueryParam.SPLIT))
             }
 
             val asc = param.asc
             if (!asc.isNullOrEmpty()) {
                 //升序
-                queryWrapper.orderByAsc(asc)
+                queryWrapper.sortAsc(asc.split(BaseAutoQueryParam.SPLIT))
             }
         }
     }

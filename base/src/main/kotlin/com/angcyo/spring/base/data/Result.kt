@@ -3,6 +3,7 @@ package com.angcyo.spring.base.data
 import com.angcyo.spring.base.data.Result.Companion.ERROR_CODE
 import com.angcyo.spring.base.data.Result.Companion.SUCCESS_CODE
 import com.angcyo.spring.base.extension.apiError
+import com.angcyo.spring.util.L
 import com.angcyo.spring.util.str
 import org.springframework.validation.BindingResult
 import org.springframework.validation.FieldError
@@ -176,6 +177,7 @@ inline fun <T> T?.ifError(
     }
 ): T? {
     if (judge()) {
+        L.e(error)
         apiError(error)
     }
     return this

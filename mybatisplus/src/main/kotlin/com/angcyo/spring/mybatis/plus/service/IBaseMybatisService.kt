@@ -215,6 +215,7 @@ interface IBaseMybatisService<Table> : IService<Table> {
     /**[queryColumn] 需要查询的列
      * [queryValue] 值
      * [equalField] 判断相等的属性名*/
+    @Transactional
     fun resetFrom(list: List<Table>, queryColumn: String, queryValue: Any, equalField: String) {
         resetFrom(list, queryList = {
             eq(queryColumn.toLowerName(), queryValue)
@@ -223,6 +224,7 @@ interface IBaseMybatisService<Table> : IService<Table> {
         })
     }
 
+    @Transactional
     fun resetFrom(list: List<Table>, equalField: String, queryList: QueryWrapper<Table>.() -> Unit) {
         resetFrom(list, queryList) { existTable, table ->
             existTable.getMember(equalField) == table.getMember(equalField)
@@ -233,6 +235,26 @@ interface IBaseMybatisService<Table> : IService<Table> {
 
     //<editor-fold desc="Dsl">
 
+    /**如果数据存在, 则更新.
+     * 不存在, 则保存*/
+    @Transactional
+    fun saveOrUpdate(entity: Table, dsl: QueryWrapper<Table>.() -> Unit): Table {
+        val queryWrapper = queryWrapper().apply {
+            last("LIMIT 1")
+            dsl()
+        }
+
+        val one = list(queryWrapper).firstOrNull()
+
+        if (one == null) {
+            save(entity).ifError()
+        } else {
+            (entity as Any).keyField()?.set(entity, one.keyValue())
+            updateById(entity).ifError()
+        }
+        return entity//getOne(queryWrapper, false)
+    }
+
     /**Dsl Remove
      * ```
      * removeQuery {
@@ -241,6 +263,7 @@ interface IBaseMybatisService<Table> : IService<Table> {
      * ```
      *
      * [error] 返回false时, 异常提示*/
+    @Transactional
     fun removeQuery(error: String? = null, dsl: QueryWrapper<Table>.() -> Unit): Boolean {
         return remove(queryWrapper().apply(dsl)).apply {
             if (!this && error != null) {
@@ -250,6 +273,7 @@ interface IBaseMybatisService<Table> : IService<Table> {
     }
 
     /**Dsl Update*/
+    @Transactional
     fun updateQuery(entity: Table, error: String? = null, dsl: UpdateWrapper<Table>.() -> Unit): Boolean {
         return update(entity, updateWrapper().apply(dsl)).apply {
             if (!this && error != null) {
@@ -266,6 +290,7 @@ interface IBaseMybatisService<Table> : IService<Table> {
      *  }
      * ```
      * */
+    @Transactional
     fun updateQuery(error: String? = null, dsl: UpdateWrapper<Table>.() -> Unit): Boolean {
         return update(updateWrapper().apply(dsl)).apply {
             if (!this && error != null) {
