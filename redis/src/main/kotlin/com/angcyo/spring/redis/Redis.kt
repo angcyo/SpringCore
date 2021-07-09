@@ -567,6 +567,11 @@ class Redis {
         redisTemplate.delete(keyList)
     }
 
+    /**[removeCache]*/
+    fun clearCache(pattern: String) {
+        removeCache(pattern)
+    }
+
     /**
      * 快速设置 读取缓存
      * [key] 缓存的key
