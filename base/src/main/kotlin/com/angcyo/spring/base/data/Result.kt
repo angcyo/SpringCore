@@ -159,6 +159,14 @@ inline fun Any.validateResult(vararg propertyName: String) {
     }
 }
 
+/**是否需要返回对象*/
+inline fun <T> T.isReturn(judge: T.() -> Boolean): T? {
+    if (judge()) {
+        return this
+    }
+    return null
+}
+
 inline fun <T> T?.ifError(
     /**异常的提示*/
     error: String = "操作失败",
