@@ -180,6 +180,10 @@ fun <T> List<T>.eachRandomList(count: Int, action: (index: Int, T) -> Unit) {
 
 fun List<*>?.size() = this?.size ?: 0
 
+inline fun <T> Iterable<T>.have(predicate: (T) -> Boolean): Boolean {
+    return find(predicate) != null
+}
+
 /**如果是负数, 则反向取值
  * 如果大于size, 则取模*/
 fun <T> List<T>.getSafe(index: Int): T? {

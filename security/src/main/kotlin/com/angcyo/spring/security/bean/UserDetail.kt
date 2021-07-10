@@ -48,4 +48,10 @@ class UserDetail : IAutoParam {
         targetField = ""
     )
     var userPermissionList: List<PermissionTable>? = null
+
+    /**额外存储的数据*/
+    var data: Any? = null
+
+    /**额外存储的数据映射*/
+    var map: HashMap<String, Any?>? = null
 }
