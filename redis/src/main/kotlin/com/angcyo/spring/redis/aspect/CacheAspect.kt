@@ -1,5 +1,6 @@
 package com.angcyo.spring.redis.aspect
 
+import com.angcyo.spring.base.beanOf
 import com.angcyo.spring.redis.Redis
 import org.aspectj.lang.ProceedingJoinPoint
 import org.aspectj.lang.annotation.Around
@@ -27,8 +28,10 @@ class CacheAspect {
         val signature = point.signature
         if (signature is MethodSignature) {
             val clearRedisCache = signature.method.getAnnotation(ClearRedisCache::class.java)
+            val key = beanOf(clearRedisCache.generateKey.java).getRedisCacheKey(clearRedisCache.key)
+
             if (clearRedisCache.before) {
-                redis.clearCache(clearRedisCache.key, false)
+                redis.clearCache(key, false)
             }
 
             //proceed
@@ -39,10 +42,10 @@ class CacheAspect {
                     if (result == null || result != true || (result is Collection<*> && result.isEmpty())) {
                         //失败了, 则不清理缓存
                     } else {
-                        redis.clearCache(clearRedisCache.key, false)
+                        redis.clearCache(key, false)
                     }
                 } else {
-                    redis.clearCache(clearRedisCache.key, false)
+                    redis.clearCache(key, false)
                 }
             }
 
@@ -57,15 +60,16 @@ class CacheAspect {
         val signature = point.signature
         if (signature is MethodSignature) {
             val setRedisCache = signature.method.getAnnotation(SetRedisCache::class.java)
+            val key = beanOf(setRedisCache.generateKey.java).getRedisCacheKey(setRedisCache.key)
 
             //proceed
             val result = point.proceed(point.args)
 
             if (result == null) {
-                redis.clearCache(setRedisCache.key, false)
+                redis.clearCache(key, false)
             } else {
                 //缓存
-                redis[setRedisCache.key, setRedisCache.time] = result
+                redis[key, setRedisCache.time] = result
             }
 
             return result
