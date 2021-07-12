@@ -8,6 +8,7 @@ import com.angcyo.spring.util.L
 import com.angcyo.spring.util.json.fromJson
 import okhttp3.*
 import okhttp3.internal.http.HttpMethod
+import org.springframework.http.HttpHeaders
 import java.io.IOException
 import java.lang.reflect.Type
 import java.nio.charset.Charset
@@ -107,10 +108,10 @@ class DslRequest {
                 method(requestMethod, body ?: requestBody)
 
                 //base header
-                header("Accept", "*/*")
-                //header("Accept-Encoding", "gzip, deflate, br") //声明gzip压缩,需要手动解压.
-                header("Cache-Control", "no-cache")
-                header("Connection", "keep-alive")
+                header(HttpHeaders.ACCEPT, "*/*")
+                //header(HttpHeaders.ACCEPT_ENCODING, "gzip, deflate, br") //声明gzip压缩,需要手动解压.
+                header(HttpHeaders.CACHE_CONTROL, "no-cache")
+                header(HttpHeaders.CONNECTION, "keep-alive")
 
                 requestUrl?.let {
                     val httpUrl = it.toHttpUrl()

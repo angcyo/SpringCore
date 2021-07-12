@@ -1,6 +1,9 @@
 package com.angcyo.spring.redis
 
+import com.angcyo.spring.base.servlet.param
+import com.angcyo.spring.base.servlet.request
 import org.springframework.data.redis.core.RedisTemplate
+import org.springframework.http.HttpHeaders
 import org.springframework.stereotype.Component
 import java.util.concurrent.TimeUnit
 import javax.annotation.Resource
@@ -585,7 +588,7 @@ class Redis {
         key: String,
         time: Long = 1 * 60 * 60 /*1小时*/,
         update: Boolean = false,
-        refresh: Boolean = false,
+        refresh: Boolean = request()?.param(HttpHeaders.CACHE_CONTROL) == "no-cache",
         doValue: T?.() -> T
     ): T {
         val value: T? = if (refresh) null else get(key) as? T?
