@@ -9,7 +9,7 @@ import org.springframework.context.ConfigurableApplicationContext
  * @author angcyo
  * @date 2021/05/28
  */
-object App {
+object LibApp {
     /**启动目标程序*/
     inline fun <reified T : Any> run(
         vararg args: String,
