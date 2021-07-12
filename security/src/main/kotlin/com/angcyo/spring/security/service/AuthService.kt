@@ -64,7 +64,7 @@ class AuthService {
     /**临时保存图形验证码
      * [time] 有效时长默认1分钟*/
     fun setImageCode(uuid: String, type: Int, code: String, time: Long = 1 * 60) {
-        redis[imageCodeKey(uuid, type), code] = time
+        redis[imageCodeKey(uuid, type), time] = code
     }
 
     /**获取保存过的验证码*/
@@ -109,7 +109,7 @@ class AuthService {
             result = dslSendMail(target, title, content)
         }
 
-        return result && redis.set(sendCodeKey(uuid, target, type), code, time)
+        return result && redis.set(sendCodeKey(uuid, target, type), time, code)
     }
 
     fun getSendCode(uuid: String, target: String, type: Int): String? {
@@ -278,10 +278,10 @@ class AuthService {
     fun _loginEnd(userDetail: UserDetail, token: String, time: Long = appProperties.tokenTime) {
         val id = "${userDetail.userTable?.id}"
         //保存token, 一天超时
-        redis[userTokenKey(id), token] = time
+        redis[userTokenKey(id), time] = token
 
         //将用户信息保存至redis
-        redis[userKey(id), userDetail] = time
+        redis[userKey(id), time] = userDetail
     }
 
     /**退出登录*/

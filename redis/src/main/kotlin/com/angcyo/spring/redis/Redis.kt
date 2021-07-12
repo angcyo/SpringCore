@@ -108,10 +108,6 @@ class Redis {
         }
     }
 
-    operator fun set(key: String, time: Long, value: Any?): Boolean {
-        return set(key, time, value)
-    }
-
     /**
      * 普通缓存放入并设置时间
      * @param key 键
@@ -119,7 +115,7 @@ class Redis {
      * @param time 时间(秒) time要大于0 如果time小于等于0 将设置无限期
      * @return true成功 false 失败
      */
-    operator fun set(key: String, value: Any?, time: Long): Boolean {
+    operator fun set(key: String, time: Long, value: Any?): Boolean {
         return try {
             if (time > 0) {
                 if (value == null) {
@@ -597,7 +593,7 @@ class Redis {
         val value: T? = if (refresh) null else get(key) as? T?
         val result = value.doValue()
         if (update || refresh || value == null || value != result) {
-            set(key, result, time)
+            set(key, time, result)
         }
         return result
     }
