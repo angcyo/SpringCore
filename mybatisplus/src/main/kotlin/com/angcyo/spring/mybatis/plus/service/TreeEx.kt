@@ -72,22 +72,32 @@ fun <T> List<T>.buildTree(
             val childList = childListMap[key] ?: mutableListOf()
             childListMap[key] = childList
 
-            //非顶点
-            if (!getParentId(node).isTopId()) {
-                //子节点
+            //设置子节点
+            setChildList(currentNode, childList)
+
+            //有头的key
+            haveParentChildKeyList.add(key)
+
+            if (getParentId(node).isTopId()) {
+                //是顶点
+
+                //初始化顶点数据
+                val parentNode = parentMap[key] ?: node
+                parentMap[key] = parentNode
+
+                //顶点的子节点集合
+                val parentChildList = childListMap[key] ?: mutableListOf()
+                childListMap[key] = parentChildList
+            } else {
+                //非顶点
                 val parentKey = key.substring(0, key.length - "${node?.keyValue()},".length)
 
-                val parentNode = parentMap[parentKey] ?: node
-                parentMap[parentKey] = parentNode
-
+                //拿到数据父节点的子集合列表
                 val parentChildList = childListMap[parentKey] ?: mutableListOf()
                 childListMap[parentKey] = parentChildList
 
-                //节点属于那个parent
+                //加入到子集合中
                 parentChildList.add(node)
-                setChildList(parentNode, parentChildList)
-                //parentNode.childList = parentChildList
-                haveParentChildKeyList.add(parentKey)
             }
         }
 
