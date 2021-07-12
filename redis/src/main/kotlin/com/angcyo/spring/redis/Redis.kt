@@ -108,6 +108,10 @@ class Redis {
         }
     }
 
+    operator fun set(key: String, time: Long, value: Any?): Boolean {
+        return set(key, time, value)
+    }
+
     /**
      * 普通缓存放入并设置时间
      * @param key 键
@@ -564,14 +568,14 @@ class Redis {
     fun keyList(pattern: String) = redisTemplate.keys(pattern).toList()
 
     /**移除匹配到key对应的缓存*/
-    fun removeCache(pattern: String) {
-        val keyList = keyList("*${pattern}*")
+    fun removeCache(pattern: String, all: Boolean = true) {
+        val keyList = if (all) keyList("*${pattern}*") else listOf(pattern)
         redisTemplate.delete(keyList)
     }
 
     /**[removeCache]*/
-    fun clearCache(pattern: String) {
-        removeCache(pattern)
+    fun clearCache(pattern: String, all: Boolean = true) {
+        removeCache(pattern, all)
     }
 
     /**

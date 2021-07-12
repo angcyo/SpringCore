@@ -11,6 +11,8 @@ import org.aspectj.lang.reflect.MethodSignature
 import org.springframework.stereotype.Component
 
 /**
+ * 打印方法调用耗时日志的切面
+ *
  * Email:angcyo@126.com
  * @author angcyo
  * @date 2021/06/02
