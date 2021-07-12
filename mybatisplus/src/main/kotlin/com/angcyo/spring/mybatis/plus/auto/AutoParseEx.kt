@@ -130,9 +130,9 @@ fun Any?.getMember(member: String): Any? {
     return ReflectionKit.getFieldValue(this, member)
 }
 
-/***/
-fun Any.setMember(member: String, value: Any?): Boolean {
-    val cls: Class<*> = this.javaClass
+/**设置成员的值*/
+fun Any?.setMember(member: String, value: Any?): Boolean {
+    val cls: Class<*> = this?.javaClass ?: return false
     val fieldMaps = ReflectionKit.getFieldMap(cls)
     return try {
         val field = fieldMaps[member]
@@ -172,6 +172,8 @@ fun <Table> QueryWrapper<Table>.noDelete(table: Class<Table>): QueryWrapper<Tabl
     }
     return this
 }
+
+//<editor-fold desc="排序">
 
 /**处理排序字段
  * [com.angcyo.spring.mybatis.plus.auto.AutoParse._handleOrder]*/
@@ -223,3 +225,25 @@ fun <Table> QueryWrapper<Table>.sortAsc(columnList: List<String>): QueryWrapper<
     }
     return this
 }
+
+
+//</editor-fold desc="排序">
+
+//<editor-fold desc="分组">
+
+fun <Table> QueryWrapper<Table>.group(vararg columns: String): QueryWrapper<Table> {
+    return group(columns.toList())
+}
+
+fun <Table> QueryWrapper<Table>.group(columnList: List<String>): QueryWrapper<Table> {
+    val size = columnList.size
+    if (size == 1) {
+        groupBy(columnList[0])
+    } else if (size > 1) {
+        val other = columnList.slice(1 until size)
+        groupBy(columnList[0], *other.toTypedArray())
+    }
+    return this
+}
+
+//</editor-fold desc="分组">

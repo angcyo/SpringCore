@@ -1,5 +1,7 @@
 package com.angcyo.spring.mybatis.plus.service
 
+import com.angcyo.spring.mybatis.plus.auto.getMember
+import com.angcyo.spring.mybatis.plus.auto.setMember
 import com.angcyo.spring.mybatis.plus.keyValue
 import com.angcyo.spring.mybatis.plus.tree.ITree
 import com.angcyo.spring.mybatis.plus.tree.isTopId
@@ -11,7 +13,44 @@ import com.angcyo.spring.mybatis.plus.tree.isTopId
  */
 
 /**将集合打包成树结构*/
-fun <T : ITree<T>> List<T>.buildTree(): List<T> {
+fun <T : ITree<T>> List<T>.buildTree(needNoParentChild: Boolean = true): List<T> {
+    return buildTree(needNoParentChild, getParentId = {
+        it.parentId
+    }, getParentIds = {
+        it.parentIds
+    }, setChildList = { node, childList ->
+        node.childList = childList
+    })
+}
+
+/**通过反射, 获取或者设置对应数结构的属性值*/
+fun <T> List<T>.buildTree(
+    needNoParentChild: Boolean = false,
+    parentIdField: String,
+    parentIdsField: String,
+    setChildListField: String
+): List<T> {
+    return buildTree(needNoParentChild, getParentId = {
+        it.getMember(parentIdField) as? Long
+    }, getParentIds = {
+        it.getMember(parentIdsField) as? String
+    }, setChildList = { node, childList ->
+        node.setMember(setChildListField, childList)
+    })
+}
+
+/**将集合打包成树结构
+ * [needNoParentChild] 是否需要返回无头的child list
+ * [getParentId] 返回节点的父id
+ * [getParentIds] 返回节点的父id集合 ,x, 的格式
+ * */
+fun <T> List<T>.buildTree(
+    needNoParentChild: Boolean = false,
+    getParentId: (node: T) -> Long?,
+    getParentIds: (node: T) -> String?,
+    setChildList: (node: T, childList: List<T>) -> Unit
+): List<T> {
+
     //顶点节点
     val topList = mutableListOf<T>()
     //根据key, 存储节点
@@ -23,8 +62,8 @@ fun <T : ITree<T>> List<T>.buildTree(): List<T> {
     val haveParentChildKeyList = mutableListOf<String>()
 
     this.forEach { node ->
-        val key = node.parentIds
-        if (!key.isNullOrBlank()) {
+        val key = getParentIds(node) //node.parentIds
+        if (!key.isNullOrEmpty()) {
             //根据key 存储节点
             val currentNode = parentMap[key] ?: node
             parentMap[key] = currentNode
@@ -34,9 +73,9 @@ fun <T : ITree<T>> List<T>.buildTree(): List<T> {
             childListMap[key] = childList
 
             //非顶点
-            if (!node.parentId.isTopId()) {
+            if (!getParentId(node).isTopId()) {
                 //子节点
-                val parentKey = key.substring(0, key.length - "${node.keyValue()},".length)
+                val parentKey = key.substring(0, key.length - "${node?.keyValue()},".length)
 
                 val parentNode = parentMap[parentKey] ?: node
                 parentMap[parentKey] = parentNode
@@ -46,24 +85,27 @@ fun <T : ITree<T>> List<T>.buildTree(): List<T> {
 
                 //节点属于那个parent
                 parentChildList.add(node)
-                parentNode.childList = parentChildList
+                setChildList(parentNode, parentChildList)
+                //parentNode.childList = parentChildList
                 haveParentChildKeyList.add(parentKey)
             }
         }
 
-        if (node.parentId.isTopId()) {
+        if (getParentId(node).isTopId()) {
             topList.add(node)
         }
     }
 
-    //--
-    childListMap.keys.forEach { key ->
-        if (haveParentChildKeyList.contains(key)) {
-            //有parent
-        } else {
-            //无parent 的child list
-            val childList = childListMap[key] ?: emptyList()
-            topList.addAll(childList)
+    //--无头的child list
+    if (needNoParentChild) {
+        childListMap.keys.forEach { key ->
+            if (haveParentChildKeyList.contains(key)) {
+                //有parent
+            } else {
+                //无parent 的child list
+                val childList = childListMap[key] ?: emptyList()
+                topList.addAll(childList)
+            }
         }
     }
 
