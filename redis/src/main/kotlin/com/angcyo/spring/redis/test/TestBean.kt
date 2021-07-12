@@ -7,6 +7,6 @@ package com.angcyo.spring.redis.test
  */
 
 data class TestBean(
-        var message: String? = "message",
-        var test: TestBean? = null
+    var message: String? = "message",
+    var test: TestBean? = null
 )
