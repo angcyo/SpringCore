@@ -20,10 +20,10 @@ abstract class BaseAutoParam : IAutoParam {
     @IsKey
     @AutoDelete
     @AutoUpdate
-    @ApiModelProperty("通过id查询/更新/删除记录")
+    @ApiModelProperty("[通用参数]通过id查询/更新/删除记录")
     var id: Long? = null
 
     @AutoQuery
-    @ApiModelProperty("逻辑删除(0:未删除 1:删除)", hidden = true)
+    @ApiModelProperty("[通用参数]逻辑删除(0:未删除 1:删除)", hidden = true)
     var deleteFlag: Int? = 0
 }

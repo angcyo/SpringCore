@@ -94,7 +94,7 @@ abstract class BaseController<
     open fun saveTableAfter(param: SaveParam, table: Table) {
     }
 
-    @ApiOperation("保存数据Base")
+    @ApiOperation("[通用接口]保存数据Base")
     @PostMapping("/save.base")
     open fun saveTable(@RequestBody(required = true) param: SaveParam): Result<Return> {
         if (saveTableBefore(param)) {
@@ -117,7 +117,7 @@ abstract class BaseController<
     open fun deleteTableAfter(param: SaveParam, delete: Boolean) {
     }
 
-    @ApiOperation("使用id软删除数据Base")
+    @ApiOperation("[通用接口]使用id软删除数据Base")
     @PostMapping("/delete.base")
     open fun deleteTable(@RequestBody(required = true) param: SaveParam): Result<Boolean> {
         if (deleteTableBefore(param)) {
@@ -140,7 +140,7 @@ abstract class BaseController<
     open fun removeTableAfter(param: SaveParam, remove: Boolean) {
     }
 
-    @ApiOperation("使用id移除数据(真删除)Base")
+    @ApiOperation("[通用接口]使用id移除数据(真删除)Base")
     @PostMapping("/remove.base")
     open fun removeTable(@RequestBody(required = true) param: SaveParam): Result<Boolean> {
         if (removeTableBefore(param)) {
@@ -163,7 +163,7 @@ abstract class BaseController<
     open fun updateTableAfter(param: SaveParam, update: Boolean) {
     }
 
-    @ApiOperation("使用id更新数据Base")
+    @ApiOperation("[通用接口]使用id更新数据Base")
     @PostMapping("/update.base")
     open fun updateTable(@RequestBody(required = true) param: SaveParam): Result<Boolean> {
         if (updateTableBefore(param)) {
@@ -186,7 +186,7 @@ abstract class BaseController<
     open fun queryTableAfter(param: QueryParam, query: List<Table>) {
     }
 
-    @ApiOperation("查询单条数据Base")
+    @ApiOperation("[通用接口]查询单条数据Base")
     @PostMapping("/query.base")
     open fun queryTable(@RequestBody(required = true) param: QueryParam): Result<List<Return>> {
         if (queryTableBefore(param)) {
@@ -210,7 +210,7 @@ abstract class BaseController<
     open fun listTableAfter(list: List<Table>) {
     }
 
-    @ApiOperation("查询所有列表Base")
+    @ApiOperation("[通用接口]查询所有列表Base")
     @PostMapping("/list.base")
     open fun listTable(): Result<List<Return>> {
         if (listTableBefore()) {
@@ -233,7 +233,7 @@ abstract class BaseController<
     open fun pageTableAfter(param: QueryParam, query: IPage<Table>) {
     }
 
-    @ApiOperation("分页查询列表Base")
+    @ApiOperation("[通用接口]分页查询列表Base")
     @PostMapping("/page.base")
     open fun pageTable(@RequestBody(required = true) param: QueryParam): Result<IPage<Return>> {
         if (pageTableBefore(param)) {

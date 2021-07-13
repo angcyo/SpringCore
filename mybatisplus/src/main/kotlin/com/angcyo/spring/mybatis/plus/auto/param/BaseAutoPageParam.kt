@@ -20,13 +20,13 @@ abstract class BaseAutoPageParam : BaseAutoQueryParam() {
     /**
      * page方法, 才会生效
      * [com.angcyo.spring.mybatis.plus.auto.IBaseAutoMybatisService.autoPage]*/
-    @ApiModelProperty("请求第几页,从1开始")
+    @ApiModelProperty("[通用参数]请求第几页,从1开始.(分页接口时使用)")
     var pageIndex: Long = 1
 
     /**
      * page方法, 才会生效
      * [com.angcyo.spring.mybatis.plus.auto.IBaseAutoMybatisService.autoPage]*/
-    @ApiModelProperty("每页请求数据量")
+    @ApiModelProperty("[通用参数]每页请求数据量.(分页接口时使用)")
     var pageSize: Long = PAGE_SIZE
 
     //</editor-fold desc="page">
