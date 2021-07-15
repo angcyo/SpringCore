@@ -41,7 +41,7 @@ abstract class BaseAuditTable {
 
     @IsAutoIncrement
     @TableId(value = "id", type = IdType.AUTO)
-    @ApiModelProperty("数据Id")
+    @ApiModelProperty("数据Id, 更新或删除接口时使用.")
     @Column(comment = "主键")
     var id: Long? = null
 
