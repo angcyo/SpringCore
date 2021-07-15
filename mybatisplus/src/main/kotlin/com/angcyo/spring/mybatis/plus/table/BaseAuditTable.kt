@@ -65,9 +65,9 @@ abstract class BaseAuditTable {
     var updatedAt: LocalDateTime? = null
 
     @JsonIgnore
-    @ApiModelProperty("创建者", hidden = true)
+    @ApiModelProperty("记录的创建者", hidden = true)
     @TableField(fill = FieldFill.INSERT)
-    @Column(comment = "记录创建者")
+    @Column(comment = "记录的创建者")
     var createdBy: String? = null
 
     @JsonIgnore
