@@ -1,5 +1,6 @@
 package com.angcyo.spring.log.core
 
+import com.angcyo.spring.base.servlet.address
 import com.angcyo.spring.base.servlet.bytes
 import com.angcyo.spring.log.core.wrapper.*
 import com.angcyo.spring.util.*
@@ -78,8 +79,8 @@ object ServletLog {
             //打印
             action(requestWrapper, responseWrapper, requestBuilder, responseBuilder)
 
-            val address =
-                "${request.remoteAddr}:${request.remotePort}/${request.localAddr}:${request.localPort}/${request.localName}"
+            val address = request.address()
+
             if (duration > REQUEST_LONG_TIME) {
                 //慢请求
                 L.dbWarn(">${REQUEST_LONG_TIME}ms", uuid, request.servletPath, "${duration}ms", address)

@@ -76,6 +76,11 @@ fun ServletRequest.isAdmin(): Boolean {
 
 fun String?.isTruthy() = this == "truthy"
 
+/**请求地址*/
+fun HttpServletRequest.address(): String {
+    return "$remoteAddr:$remotePort/$localAddr:$localPort/$localName"
+}
+
 //</editor-fold desc="ServletRequest扩展">
 
 //<editor-fold desc="ServletResponse扩展">

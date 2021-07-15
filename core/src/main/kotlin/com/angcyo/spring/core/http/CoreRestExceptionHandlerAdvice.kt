@@ -2,6 +2,11 @@ package com.angcyo.spring.core.http
 
 import com.angcyo.spring.base.data.Result
 import com.angcyo.spring.base.data.error
+import com.angcyo.spring.base.extension.ApiException
+import com.angcyo.spring.base.servlet.address
+import com.angcyo.spring.base.servlet.request
+import com.angcyo.spring.log.core.ServletLog
+import com.angcyo.spring.util.L
 import com.angcyo.spring.util.str
 import org.springframework.web.bind.MethodArgumentNotValidException
 import org.springframework.web.bind.annotation.ExceptionHandler
@@ -28,5 +33,21 @@ class CoreRestExceptionHandlerAdvice {
     @ExceptionHandler(NestedServletException::class)
     fun apiExtension(exception: NestedServletException): Result<String>? {
         return exception.message.error()
+    }
+
+    @ExceptionHandler(RuntimeException::class)
+    fun runtimeException(exception: RuntimeException): Result<String>? {
+        val request = request()
+        L.dbError(
+            exception.stackTraceToString(),
+            ServletLog.logUuid.get(),
+            request?.servletPath ?: "",
+            "",
+            request?.address() ?: "",
+        )
+        if (exception is ApiException) {
+            return exception.message.error()
+        }
+        throw exception
     }
 }
