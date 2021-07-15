@@ -1,6 +1,7 @@
 package com.angcyo.spring.mybatis.plus
 
 import com.angcyo.spring.base.toObj
+import com.angcyo.spring.mybatis.plus.auto.setMember
 import com.angcyo.spring.mybatis.plus.table.BaseAuditTable
 import com.baomidou.mybatisplus.core.conditions.AbstractWrapper
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper
@@ -98,16 +99,39 @@ fun Any.keyName(def: String = "id") = FieldUtils.getKeyField(this)?.name?.toLowe
 fun Any.keyField() = FieldUtils.getKeyField(this)
 fun Any.keyValue() = FieldUtils.getKeyField(this)?.get(this)
 
+/**清空一下不需要传递过来的字段*/
+fun Any.clearTableField(newTable: Boolean = true) {
+    if (this is BaseAuditTable) {
+        if (newTable) {
+            id = null
+            deleteFlag = BaseAuditTable.NO_DELETE
+        }
+        createdAt = null
+        updatedAt = null
+        createdBy = null
+        updatedBy = null
+    } else {
+        if (newTable) {
+            setMember("id", null)
+            setMember("deleteFlag", BaseAuditTable.NO_DELETE)
+        }
+        setMember("createdAt", null)
+        setMember("updatedAt", null)
+        setMember("createdBy", null)
+        setMember("updatedBy", null)
+    }
+}
+
 inline fun <reified T : BaseAuditTable> Any.toTable(newTable: Boolean = false, dsl: T.() -> Unit = {}): T {
     return this.toObj {
         if (newTable) {
             id = null
-            createdAt = null
-            updatedAt = null
-            createdBy = null
-            updatedBy = null
             deleteFlag = BaseAuditTable.NO_DELETE
         }
+        createdAt = null
+        updatedAt = null
+        createdBy = null
+        updatedBy = null
         dsl()
     }
 }
