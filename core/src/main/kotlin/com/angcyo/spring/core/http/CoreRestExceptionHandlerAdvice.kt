@@ -40,7 +40,7 @@ class CoreRestExceptionHandlerAdvice {
         val request = request()
         L.dbError(
             exception.stackTraceToString(),
-            ServletLog.logUuid.get(),
+            ServletLog.logRequestUuid.get(),
             request?.servletPath ?: "",
             "",
             request?.address() ?: "",

@@ -36,6 +36,17 @@ import javax.servlet.http.HttpServletResponse
 @Order(Ordered.HIGHEST_PRECEDENCE)
 class LoggerRequestFilter : OncePerRequestFilter() {
 
+    companion object {
+        val LOG_IGNORE = arrayOf(
+            ".*\\.js",
+            ".*\\.css",
+            ".*\\.html",
+            "/images/.*",
+            "/webjars/.*",
+            "/.*/favicon.ico"
+        )
+    }
+
     private val id = AtomicLong(1)
 
     /**https://github.com/isrsal/spring-mvc-logger*/
@@ -44,8 +55,17 @@ class LoggerRequestFilter : OncePerRequestFilter() {
         response: HttpServletResponse,
         filterChain: FilterChain
     ) {
-        val requestId = id.incrementAndGet()
+        val path = request.servletPath
+        for (ignore in LOG_IGNORE) {
+            if (ignore.toRegex().matches(path)) {
+                //忽略此请求
+                filterChain.doFilter(request, response)
+                return
+            }
+        }
 
+        //
+        val requestId = id.incrementAndGet()
         ServletLog.wrap(requestId, request, response) { requestWrap, responseWrap, requestBuilder, responseBuilder ->
             if (requestBuilder == null) {
                 filterChain.doFilter(requestWrap, responseWrap)

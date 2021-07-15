@@ -22,7 +22,8 @@ object ServletLog {
     var REQUEST_LONG_TIME = 100
 
     /**保存请求id*/
-    val logUuid = ThreadLocal<String>()
+    val logRequestUuid = ThreadLocal<String>()
+    //val logRequestId = ThreadLocal<String>()
 
     /**包装一下, 请求 返回日志输出*/
     fun wrap(
@@ -40,7 +41,7 @@ object ServletLog {
         // 开始时间
         val startTime = System.currentTimeMillis()
         val uuid = uuid()
-        logUuid.set(uuid)
+        logRequestUuid.set(uuid)
 
         val requestWrapper = if (wrap) RequestWrapper(request) else request
         //val requestWrapper = RequestWrapper2(request)

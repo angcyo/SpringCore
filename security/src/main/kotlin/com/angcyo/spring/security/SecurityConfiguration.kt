@@ -61,6 +61,14 @@ class SecurityConfiguration : WebSecurityConfigurerAdapter() {
             "/error",
         )
 
+        val WEB_IGNORE = arrayOf(
+            "**.js",
+            "**.css",
+            "/images/**",
+            "/webjars/**",
+            "/**/favicon.ico"
+        )
+
         fun configSecurityWhiteList(config: MutableList<String>.() -> Unit) {
             SECURITY_WHITE_LIST.apply(config)
         }
@@ -174,12 +182,6 @@ class SecurityConfiguration : WebSecurityConfigurerAdapter() {
     /**4. 通过重载，配置Spring Security的Filter链*/
     override fun configure(web: WebSecurity) {
         web.ignoring()
-            .antMatchers(
-                "**.js",
-                "**.css",
-                "/images/**",
-                "/webjars/**",
-                "/**/favicon.ico"
-            )
+            .antMatchers(*WEB_IGNORE)
     }
 }
