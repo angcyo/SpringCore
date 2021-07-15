@@ -2,6 +2,7 @@ package com.angcyo.spring.util
 
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import org.slf4j.event.Level
 
 /**
  * Email:angcyo@126.com
@@ -75,8 +76,33 @@ object L {
 
     /*----------------db.log----------------------*/
 
-    fun db(vararg log: Any?) {
-        _logDb.info(log.joinToString(" "))
+    fun db(level: Level = Level.INFO, vararg log: String?) {
+        val args = log.toList()
+        val last = if (args.size() > 1) {
+            args.subList(1, args.size())
+        } else {
+            emptyList()
+        }
+        val first = args.getOrNull(0)
+        when (level) {
+            Level.ERROR -> _logDb.error(first, *last.toTypedArray())
+            Level.WARN -> _logDb.warn(first, *last.toTypedArray())
+            Level.INFO -> _logDb.info(first, *last.toTypedArray())
+            Level.DEBUG -> _logDb.debug(first, *last.toTypedArray())
+            Level.TRACE -> _logDb.trace(first, *last.toTypedArray())
+        }
+    }
+
+    fun dbInfo(vararg log: String) {
+        db(Level.INFO, *log)
+    }
+
+    fun dbWarn(vararg log: String) {
+        db(Level.WARN, *log)
+    }
+
+    fun dbError(vararg log: String) {
+        db(Level.ERROR, *log)
     }
 }
 

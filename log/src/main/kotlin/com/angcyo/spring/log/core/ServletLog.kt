@@ -20,6 +20,9 @@ object ServletLog {
     /**100ms 很慢的请求*/
     var REQUEST_LONG_TIME = 100
 
+    /**保存请求id*/
+    val logUuid = ThreadLocal<String>()
+
     /**包装一下, 请求 返回日志输出*/
     fun wrap(
         requestId: Long,
@@ -36,6 +39,7 @@ object ServletLog {
         // 开始时间
         val startTime = System.currentTimeMillis()
         val uuid = uuid()
+        logUuid.set(uuid)
 
         val requestWrapper = if (wrap) RequestWrapper(request) else request
         //val requestWrapper = RequestWrapper2(request)
@@ -55,7 +59,7 @@ object ServletLog {
             //chain
             action(requestWrapper, responseWrapper, null, null)
         } catch (e: Exception) {
-            L.db(e.stackTraceToString())
+            L.dbError(e.stackTraceToString())
             throw e
         } finally {
             val nowTime = System.currentTimeMillis()
@@ -74,10 +78,18 @@ object ServletLog {
             //打印
             action(requestWrapper, responseWrapper, requestBuilder, responseBuilder)
 
+            val address =
+                "${request.remoteAddr}:${request.remotePort}/${request.localAddr}:${request.localPort}/${request.localName}"
             if (duration > REQUEST_LONG_TIME) {
                 //慢请求
-                L.db("${duration}ms:${request.servletPath}")
+                L.dbWarn(">${REQUEST_LONG_TIME}ms", uuid, request.servletPath, "${duration}ms", address)
             }
+            //请求日志
+            L.dbInfo(buildString {
+                appendLine(requestBuilder)
+                appendLine()
+                append(responseBuilder)
+            }, uuid, request.servletPath, "${duration}ms", address)
         }
     }
 
