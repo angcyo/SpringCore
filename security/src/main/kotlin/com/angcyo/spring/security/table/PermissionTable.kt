@@ -14,6 +14,17 @@ import com.gitee.sunchenbin.mybatis.actable.annotation.TableComment
  * [com.angcyo.spring.security.jwt.JwtPermissionListener]
  * [com.angcyo.spring.security.service.PermissionManagerService.havePermission]
  *
+ * 查询接口命名规则:
+ *  查询详情: query.*$
+ *  所有列表: list.*$
+ *  分页列表: page.*$
+ *  
+ * 操作数据接口命名规则:
+ *   新增: save.*$
+ *   更新: update.*$
+ *   软删: delete.*
+ *   硬删: remove.*$
+ *
  * Email:angcyo@126.com
  * @author angcyo
  * @date 2021/05/28
