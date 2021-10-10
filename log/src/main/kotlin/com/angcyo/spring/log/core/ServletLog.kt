@@ -2,6 +2,8 @@ package com.angcyo.spring.log.core
 
 import com.angcyo.spring.base.servlet.address
 import com.angcyo.spring.base.servlet.bytes
+import com.angcyo.spring.base.servlet.param
+import com.angcyo.spring.log.core.ServletLog.KEY_REQUEST_TRACE_ID
 import com.angcyo.spring.log.core.wrapper.*
 import com.angcyo.spring.util.*
 import org.springframework.util.unit.DataSize
@@ -17,6 +19,9 @@ import javax.servlet.http.HttpServletResponse
  */
 
 object ServletLog {
+
+    /**日志追踪id*/
+    val KEY_REQUEST_TRACE_ID = "requestTraceId"
 
     /**100ms 很慢的请求*/
     var REQUEST_LONG_TIME = 100
@@ -40,8 +45,11 @@ object ServletLog {
     ) {
         // 开始时间
         val startTime = System.currentTimeMillis()
-        val uuid = uuid()
+        val uuid = request.requestTraceId() ?: uuid()
         logRequestUuid.set(uuid)
+
+        //将id返回回去
+        response?.setHeader(KEY_REQUEST_TRACE_ID, uuid)
 
         val requestWrapper = if (wrap) RequestWrapper(request) else request
         //val requestWrapper = RequestWrapper2(request)
@@ -84,10 +92,10 @@ object ServletLog {
 
             if (duration > REQUEST_LONG_TIME) {
                 //慢请求
-                L.dbWarn(">${REQUEST_LONG_TIME}ms", uuid, request.servletPath, "${duration}ms", address)
+                L._logDb.warn(">${REQUEST_LONG_TIME}ms", uuid, request.servletPath, "${duration}ms", address)
             }
             //请求日志
-            L.dbInfo(buildString {
+            L._logDb.info(buildString {
                 appendLine(requestBuilder)
                 appendLine()
                 append(responseBuilder)
@@ -282,6 +290,9 @@ fun HttpServletRequest.isMultipart(): Boolean {
 fun HttpServletResponse.isMultipart(): Boolean {
     return contentType != null && contentType.startsWith("multipart/form-data")
 }
+
+/**请求追踪的id*/
+fun HttpServletRequest.requestTraceId() = param(KEY_REQUEST_TRACE_ID)
 
 fun ServletRequest.log(builder: StringBuilder = StringBuilder(), readStream: Boolean = false): String =
     ServletLog.logRequest(this, builder, readStream)

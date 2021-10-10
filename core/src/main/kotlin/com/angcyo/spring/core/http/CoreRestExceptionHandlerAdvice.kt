@@ -7,6 +7,7 @@ import com.angcyo.spring.base.servlet.address
 import com.angcyo.spring.base.servlet.request
 import com.angcyo.spring.log.core.ServletLog
 import com.angcyo.spring.util.L
+import com.angcyo.spring.util.nowTimeString
 import com.angcyo.spring.util.str
 import org.springframework.web.bind.MethodArgumentNotValidException
 import org.springframework.web.bind.annotation.ExceptionHandler
@@ -38,11 +39,11 @@ class CoreRestExceptionHandlerAdvice {
     @ExceptionHandler(RuntimeException::class)
     fun runtimeException(exception: RuntimeException): Result<String>? {
         val request = request()
-        L.dbError(
+        L._logDb.error(
             exception.stackTraceToString(),
             ServletLog.logRequestUuid.get(),
             request?.servletPath ?: "",
-            "",
+            nowTimeString(),
             request?.address() ?: "",
         )
         if (exception is ApiException) {
