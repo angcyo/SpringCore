@@ -1,6 +1,5 @@
 package com.angcyo.spring.security.bean
 
-import com.gitee.sunchenbin.mybatis.actable.annotation.Column
 import io.swagger.annotations.ApiModel
 import io.swagger.annotations.ApiModelProperty
 import javax.validation.constraints.NotBlank
