@@ -3,6 +3,7 @@ package com.angcyo.spring.app
 import com.angcyo.spring.base.AppProperties
 import com.angcyo.spring.util.*
 import org.springframework.context.ConfigurableApplicationContext
+import java.io.File
 
 /**
  * Email:angcyo@126.com
@@ -25,7 +26,9 @@ object LibApp {
             val nowTime = nowTime()
             val app: AppProperties = getBean(AppProperties::class.java)
             val duration = (nowTime - startTime).toElapsedTime(intArrayOf(1, 1, 1))
-            L.w("${app.name ?: "SpringBoot"} 启动结束,耗时:${duration}☞ http://${getLocalHost()}:${getServerPort()} http://localhost:${getServerPort()}")
+            val file = File("")
+            val path = file.absolutePath
+            L.w("${app.name ?: "SpringBoot"} 启动结束,耗时:${duration}☞ $path http://${getLocalHost()}:${getServerPort()} http://localhost:${getServerPort()}")
         }
     }
 }

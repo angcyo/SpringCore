@@ -6,8 +6,6 @@ import org.springframework.context.annotation.Configuration
 import springfox.documentation.builders.ApiInfoBuilder
 import springfox.documentation.builders.PathSelectors
 import springfox.documentation.builders.RequestHandlerSelectors
-import springfox.documentation.builders.RequestParameterBuilder
-import springfox.documentation.schema.ScalarType
 import springfox.documentation.service.*
 import springfox.documentation.spi.DocumentationType
 import springfox.documentation.spi.service.contexts.SecurityContext
@@ -49,7 +47,8 @@ class Swagger3Configuration {
     fun globalRequestParameters(): List<RequestParameter> {
         val result = mutableListOf<RequestParameter>()
 
-        swaggerProperties.header?.forEach { entry ->
+        //2021-10-12 每个接口都显示这个东西, 有点浪费界面资源, 统一放在描述中显示
+        /*swaggerProperties.header?.forEach { entry ->
             val key = entry.key
             val value = entry.value
 
@@ -58,6 +57,7 @@ class Swagger3Configuration {
                     name(key)
                     description(value)
                     required(false)
+                    hidden(true) //隐藏
                     `in`(ParameterType.HEADER)
                     query {
                         it.model {
@@ -66,7 +66,7 @@ class Swagger3Configuration {
                     }
                 }.build()
             )
-        }
+        }*/
 
         return result
     }
@@ -79,7 +79,7 @@ class Swagger3Configuration {
             //.directModelSubstitute(LocalDate::class.java, String::class.java)
             //.directModelSubstitute(LocalTime::class.java, String::class.java)
             //.directModelSubstitute(ZonedDateTime::class.java, String::class.java)
-            .groupName("RestfulApi")
+            .groupName("默认接口")
             .enable(swaggerProperties.enable)
             .apiInfo(apiInfo())
             .select()
@@ -101,9 +101,22 @@ class Swagger3Configuration {
     }
 
     private fun apiInfo(): ApiInfo {
+
+        val des = buildString {
+            appendln(swaggerProperties.des ?: SWAGGER_DES)
+            swaggerProperties.header?.apply {
+                appendln("   统一接口请求头->")
+                forEach { entry ->
+                    val key = entry.key
+                    val value = entry.value
+                    appendln("  [$key]:$value")
+                }
+            }
+        }
+
         return ApiInfoBuilder()
             .title(swaggerProperties.title ?: SWAGGER_TITLE) //设置文档的标题
-            .description(swaggerProperties.des ?: SWAGGER_DES) // 设置文档的描述
+            .description(des) // 设置文档的描述
             .version(swaggerProperties.version ?: VERSION) // 设置文档的版本信息-> 1.0.0 Version information
             .contact(Contact("angcyo", "https://www.angcyo.com", "angcyo@126.com"))
             //.license()
