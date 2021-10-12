@@ -102,15 +102,18 @@ class Swagger3Configuration {
 
     private fun apiInfo(): ApiInfo {
 
+        //des 支持md文档格式
         val des = buildString {
             appendln(swaggerProperties.des ?: SWAGGER_DES)
             swaggerProperties.header?.apply {
-                appendln("   统一接口请求头->")
+                appendln("   `统一接口请求头->`")
+                appendLine("```")
                 forEach { entry ->
                     val key = entry.key
                     val value = entry.value
                     appendln("  [$key]:$value")
                 }
+                appendLine("```")
             }
         }
 
