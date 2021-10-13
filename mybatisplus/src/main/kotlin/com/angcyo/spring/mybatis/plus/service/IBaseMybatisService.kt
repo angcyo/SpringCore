@@ -330,7 +330,7 @@ interface IBaseMybatisService<Table> : IService<Table> {
     }
 
     /**Dsl Count*/
-    fun countQuery(dsl: QueryWrapper<Table>.() -> Unit): Int {
+    fun countQuery(dsl: QueryWrapper<Table>.() -> Unit): Long {
         return count(queryWrapper().apply(dsl))
     }
 

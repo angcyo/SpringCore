@@ -30,7 +30,7 @@ interface IBaseAutoMybatisService<Table> : IBaseMybatisService<Table> {
 
     /**获取数量*/
     @LogMethodTime
-    fun autoCount(param: IAutoParam): Int {
+    fun autoCount(param: IAutoParam): Long {
         autoFill(param)
         return count(buildAutoParse().parseQuery(queryWrapper(), param))
     }

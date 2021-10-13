@@ -187,7 +187,7 @@ inline fun Int?.ifExist(
     error: String = "数据已存在"
 ): Int? {
     return ifError(error) {
-        this ?: 0 > 0
+        (this ?: 0) > 0
     }
 }
 
@@ -195,6 +195,22 @@ inline fun Int?.ifNotExist(
     error: String = "数据不存在"
 ): Int? {
     return ifError(error) {
-        this ?: 0 <= 0
+        (this ?: 0) <= 0
+    }
+}
+
+inline fun Long?.ifExist(
+    error: String = "数据已存在"
+): Long? {
+    return ifError(error) {
+        (this ?: 0) > 0
+    }
+}
+
+inline fun Long?.ifNotExist(
+    error: String = "数据不存在"
+): Long? {
+    return ifError(error) {
+        (this ?: 0) <= 0
     }
 }

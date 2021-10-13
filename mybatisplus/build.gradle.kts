@@ -6,7 +6,8 @@ dependencies {
     //https://jcenter.bintray.com/com/baomidou/mybatis-plus-boot-starter
     //https://mybatis.plus/guide/
     //https://github.com/baomidou/mybatis-plus
-    api("com.baomidou:mybatis-plus-boot-starter:3.4.4-SNAPSHOT")
+    //api("com.baomidou:mybatis-plus-boot-starter:3.4.4-SNAPSHOT")
+    api("com.baomidou:mybatis-plus-boot-starter:3.4.3.4")
 
     //https://github.com/p6spy/p6spy
     //https://mp.baomidou.com/guide/p6spy.html
