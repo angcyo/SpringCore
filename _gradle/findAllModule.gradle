@@ -53,7 +53,10 @@ def includePath(filePath, parent) {
             def path = parent + ":${name}"
 
             //println "->include " + path
-            allModule[name] = path
+            allModule[name] = path //kts中, 无法使用allModule变量
+
+            ext[":$name"] = path
+            rootProject.ext[":$name"] = path //在kts中, 直接使用ext对象存储
 
             //include path
         }
