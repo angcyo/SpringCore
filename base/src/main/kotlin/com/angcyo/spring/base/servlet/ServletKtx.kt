@@ -1,6 +1,7 @@
 package com.angcyo.spring.base.servlet
 
 import com.angcyo.spring.base.data.error
+import com.angcyo.spring.util.decode
 import com.angcyo.spring.util.json.fromJson
 import com.angcyo.spring.util.json.toJson
 import com.angcyo.spring.util.string
@@ -76,9 +77,14 @@ fun ServletRequest.isAdmin(): Boolean {
 
 fun String?.isTruthy() = this == "truthy"
 
-/**请求地址*/
+/**请求地址, ip地址和本地ip地址*/
 fun ServletRequest.address(): String {
     return "$remoteAddr:$remotePort/$localAddr:$localPort/$localName"
+}
+
+/**请求地址, url地址*/
+fun HttpServletRequest.requestUrl(): String {
+    return requestURL.toString().decode()
 }
 
 //</editor-fold desc="ServletRequest扩展">

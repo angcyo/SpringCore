@@ -84,11 +84,12 @@ fun CharSequence?.have(text: CharSequence?, match: Boolean = false): Boolean {
     if (this == null) {
         return false
     }
-    if (this.str() == text.str()) {
+    val textStr = text.str()
+    if (this.str() == textStr) {
         return true
     }
     return try {
-        val regex = text.toString().toRegex()
+        val regex = textStr.toRegex()
         if (match) {
             this.matches(regex)
         } else {

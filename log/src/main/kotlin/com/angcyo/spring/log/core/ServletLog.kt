@@ -23,12 +23,30 @@ object ServletLog {
     /**日志追踪id*/
     val KEY_REQUEST_TRACE_ID = "requestTraceId"
 
+    /**是否要强制记录日志
+     * "true"
+     * "false"*/
+    val KEY_REQUEST_LOG = "requestLog"
+
     /**100ms 很慢的请求*/
     var REQUEST_LONG_TIME = 100
 
     /**保存请求id*/
     val logRequestUuid = ThreadLocal<String>()
     //val logRequestId = ThreadLocal<String>()
+
+    val ignoreUriList = mutableListOf<String>()
+
+    /**添加需要忽略log的url地址匹配规则
+     * 只匹配servletPath路径即可*/
+    fun addLogIgnore(uriList: List<String>) {
+        uriList.forEach {
+            val uri = it.replace("*", ".*")
+            if (!ignoreUriList.contains(uri)) {
+                ignoreUriList.add(uri)
+            }
+        }
+    }
 
     /**包装一下, 请求 返回日志输出*/
     fun wrap(
@@ -43,6 +61,29 @@ object ServletLog {
             requestBuilder: StringBuilder?, responseBuilder: StringBuilder?
         ) -> Unit
     ) {
+
+        val requestLog = request.param(KEY_REQUEST_LOG)
+        if (requestLog.isNullOrEmpty()) {
+            //未指定, 智能判断
+            if (ignoreUriList.isNotEmpty()) {
+                if (ignoreUriList.matcherOf(request.servletPath)) {
+                    //需要忽略的请求
+                    action(request, response, null, null)
+                    return
+                }
+            }
+
+            if (!request.contentType.have("json")) {
+                //只有json数据, 才记录log
+                action(request, response, null, null)
+                return
+            }
+        } else if (requestLog == "false") {
+            //不需要日志
+            action(request, response, null, null)
+            return
+        }
+
         // 开始时间
         val startTime = System.currentTimeMillis()
         val uuid = request.requestTraceId() ?: uuid()
@@ -88,7 +129,7 @@ object ServletLog {
             //打印
             action(requestWrapper, responseWrapper, requestBuilder, responseBuilder)
 
-            val address = request.address()
+            val address = "${request.address()} ${nowTimeString()}"
 
             if (duration > REQUEST_LONG_TIME) {
                 //慢请求

@@ -79,7 +79,7 @@ class Swagger3Configuration {
             //.directModelSubstitute(LocalDate::class.java, String::class.java)
             //.directModelSubstitute(LocalTime::class.java, String::class.java)
             //.directModelSubstitute(ZonedDateTime::class.java, String::class.java)
-            .groupName("默认接口")
+            .groupName("default")
             .enable(swaggerProperties.enable)
             .apiInfo(apiInfo())
             .select()

@@ -228,3 +228,13 @@ fun getLocalHost(): String? {
 fun ConfigurableApplicationContext.getServerPort(): String? {
     return environment.getProperty("server.port")
 }
+
+/**[str]是否能匹配list中的正则*/
+fun List<CharSequence>.matcherOf(str: CharSequence): Boolean {
+    for (patter in this) {
+        if (str.have(patter, true)) {
+            return true
+        }
+    }
+    return false
+}
