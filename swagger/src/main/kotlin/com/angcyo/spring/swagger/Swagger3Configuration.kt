@@ -28,6 +28,7 @@ import springfox.documentation.spring.web.plugins.Docket
  */
 
 @Configuration
+//@Profile("dev", "pre")
 class Swagger3Configuration {
 
     companion object {
