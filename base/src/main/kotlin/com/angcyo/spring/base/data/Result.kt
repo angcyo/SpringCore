@@ -95,6 +95,8 @@ fun <T> resultOk(msg: String? = "Success", code: Int = SUCCESS_CODE) = msg.error
 /**将[this]当做错误信息返回*/
 fun <T> Any?.error(code: Int = ERROR_CODE) = Result<T>(code = code, msg = this.str(), null)
 
+//<editor-fold desc="BindingResult">
+
 inline fun <T> BindingResult.result(checkNull: Boolean = true, responseEntity: () -> T?): Result<T> {
     return if (hasErrors()) {
         allErrors.joinToString {
@@ -159,6 +161,8 @@ inline fun Any.validateResult(vararg propertyName: String) {
         apiError(validate.joinToString { it.message.str() })
     }
 }
+
+//</editor-fold desc="BindingResult">
 
 /**是否需要返回对象*/
 inline fun <T> T.isReturn(judge: T.() -> Boolean): T? {
