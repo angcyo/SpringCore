@@ -134,7 +134,7 @@ inline fun <T> BindingResult.result(checkNull: Boolean = true, responseEntity: (
  * */
 fun Any.validate(vararg propertyName: String): Set<ConstraintViolation<Any>> {
     val validator = Validation.buildDefaultValidatorFactory().validator
-    if (propertyName.isNullOrEmpty()) {
+    if (propertyName.isEmpty()) {
         //如果指定验证的属性为空,则验证所有字段
         return validator.validate(this, Default::class.java)
     }
