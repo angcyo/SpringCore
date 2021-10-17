@@ -24,6 +24,9 @@ dependencies {
     //https://github.com/promeG/TinyPinyin
     api("com.github.promeg:tinypinyin:2.0.3") // TinyPinyin核心包，约80KB
     api("com.github.promeg:tinypinyin-lexicons-java-cncity:2.0.3") // 可选，适用于Java的中国地区词典
+
+    //启动器
+    //https://docs.spring.io/spring-boot/docs/current/reference/html/using.html#using.build-systems.starters
 }
 
 tasks.getByName<org.springframework.boot.gradle.tasks.bundling.BootJar>("bootJar") {
