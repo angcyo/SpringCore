@@ -137,8 +137,8 @@ object ServletLog {
             }
             //请求日志
             L._logDb.info(buildString {
+                appendLine(nowTimeString())
                 appendLine(requestBuilder)
-                appendLine()
                 append(responseBuilder)
             }, uuid, request.servletPath, "${duration}ms", address)
         }

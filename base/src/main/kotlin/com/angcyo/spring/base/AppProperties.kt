@@ -69,6 +69,11 @@ class AppProperties {
     @Autowired
     lateinit var swaggerProperties: SwaggerProperties
 
+    //------------------------Log-------------------
+
+    /**需要清理多少天前的日志*/
+    var clearLogBefore = 30
+
     @PostConstruct
     fun init() {
         name?.let {

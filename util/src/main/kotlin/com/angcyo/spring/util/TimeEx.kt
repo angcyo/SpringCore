@@ -5,8 +5,6 @@ import java.text.SimpleDateFormat
 import java.time.Duration
 import java.time.LocalDate
 import java.time.LocalDateTime
-import java.time.LocalTime
-import java.time.format.DateTimeFormatter
 import java.time.temporal.Temporal
 import java.util.*
 import kotlin.math.ceil
@@ -327,4 +325,11 @@ fun String.toTime(pattern: String = "yyyy-MM-dd HH:mm:ss"): Long {
     return time
 }
 
+/**耗时围绕*/
+fun wrapDuration(action: () -> Unit): String {
+    val startTime = nowTime()
+    action()
+    val nowTime = nowTime()
+    return (nowTime - startTime).toElapsedTime(intArrayOf(1, 1, 1))
+}
 
