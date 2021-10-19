@@ -28,7 +28,7 @@ class ClearLogTask {
     /**定时任务执行*/
     @Async
     //@Scheduled(cron = "*/5 * * * * ?") //每5秒执行一次
-    @Scheduled(cron = "* * 4 */7 * ? ") //每隔7天的4点执行一次
+    @Scheduled(cron = "0 0 4 */7 * ? ") //每隔7天的4点执行一次
     fun clearLogPoint() {
         L.i("开始清理日志...")
         L.i("清理结束,耗时:${
