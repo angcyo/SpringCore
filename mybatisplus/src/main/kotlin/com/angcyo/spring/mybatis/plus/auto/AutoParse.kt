@@ -53,7 +53,7 @@ class AutoParse<Table> {
 
     /**请求页码*/
     fun page(param: BaseAutoPageParam): Page<Table> {
-        val page = Page<Table>(param.pageIndex, param.pageSize)
+        val page = Page<Table>(param.pageIndex, param.pageSize, param.searchCount)
         page.maxLimit = param.pageSize
         return page
     }

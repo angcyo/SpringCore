@@ -69,9 +69,10 @@ interface IControllerService<
     fun pageTable(
         pageIndex: Long = 1,
         pageSize: Long = BaseAutoPageParam.PAGE_SIZE,
+        searchCount: Boolean = true,
         param: QueryParam
     ): IPage<Table> {
-        return pageQuery(pageIndex, pageSize) {
+        return pageQuery(pageIndex, pageSize, searchCount) {
             sort(param)
             noDelete()
         }

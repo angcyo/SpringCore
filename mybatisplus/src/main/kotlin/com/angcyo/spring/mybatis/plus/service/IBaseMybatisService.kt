@@ -322,9 +322,10 @@ interface IBaseMybatisService<Table> : IService<Table> {
     fun pageQuery(
         pageIndex: Long = 1,
         pageSize: Long = BaseAutoPageParam.PAGE_SIZE,
+        searchCount: Boolean = true,
         dsl: QueryWrapper<Table>.() -> Unit
     ): IPage<Table> {
-        val page = Page<Table>(pageIndex, pageSize)
+        val page = Page<Table>(pageIndex, pageSize, searchCount)
         page.maxLimit = pageSize
         return page(page, queryWrapper().apply(dsl))
     }

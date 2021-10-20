@@ -20,14 +20,19 @@ abstract class BaseAutoPageParam : BaseAutoQueryParam() {
     /**
      * page方法, 才会生效
      * [com.angcyo.spring.mybatis.plus.auto.IBaseAutoMybatisService.autoPage]*/
-    @ApiModelProperty("[通用参数]请求第几页,从1开始.(分页接口时使用)")
+    @ApiModelProperty("[通用分页参数]请求第几页,从1开始.(分页接口时有效)")
     var pageIndex: Long = 1
 
     /**
      * page方法, 才会生效
      * [com.angcyo.spring.mybatis.plus.auto.IBaseAutoMybatisService.autoPage]*/
-    @ApiModelProperty("[通用参数]每页请求数据量.(分页接口时使用)")
+    @ApiModelProperty("[通用分页参数]每页请求数据量.(分页接口时有效)")
     var pageSize: Long = PAGE_SIZE
+
+    /**
+     * page方法, 才会生效
+     * [com.angcyo.spring.mybatis.plus.auto.IBaseAutoMybatisService.autoPage]*/
+    var searchCount: Boolean = true
 
     //</editor-fold desc="page">
 }

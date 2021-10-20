@@ -244,7 +244,7 @@ abstract class BaseController<
             apiError("参数类型不匹配")
         }
 
-        val page = service.pageTable(param.pageIndex, param.pageSize, param)
+        val page = service.pageTable(param.pageIndex, param.pageSize, param.searchCount, param)
         pageTableAfter(param, page)
 
         val result = page.records.toReturnList()
