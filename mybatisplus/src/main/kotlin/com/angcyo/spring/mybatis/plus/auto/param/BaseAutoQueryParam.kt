@@ -20,12 +20,12 @@ abstract class BaseAutoQueryParam : BaseAutoParam() {
 
     /**查询时, 就会生效
      * [com.angcyo.spring.mybatis.plus.auto.AutoParse._handleOrder]*/
-    @ApiModelProperty("[通用参数]需要降序排序字段(从大->小), 多个用,分割.(查询接口时使用)")
+    @ApiModelProperty("[通用查询参数]需要降序排序字段(从大->小), 多个用,分割.(查询接口时使用)")
     var desc: String? = null
 
     /**查询时, 就会生效
      * [com.angcyo.spring.mybatis.plus.auto.AutoParse._handleOrder]*/
-    @ApiModelProperty("[通用参数]需要升序排序字段(从小->大), 多个用,分割.(查询接口时使用)")
+    @ApiModelProperty("[通用查询参数]需要升序排序字段(从小->大), 多个用,分割.(查询接口时使用)")
     var asc: String? = null
 
     //</editor-fold desc="order">
