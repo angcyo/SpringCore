@@ -160,7 +160,7 @@ abstract class BaseAutoController<
     open fun autoUpdateAfter(param: SaveParam, update: Boolean) {
     }
 
-    @ApiOperation("[通用接口]使用id更新数据Auto")
+    @ApiOperation("[通用更新接口]使用id更新数据Auto")
     @PostMapping("/update.auto")
     open fun autoUpdate(@RequestBody(required = true) param: SaveParam): Result<Boolean> {
         autoService.autoFill(param)
@@ -184,7 +184,7 @@ abstract class BaseAutoController<
     open fun autoQueryAfter(param: QueryParam, query: IPage<Table>) {
     }
 
-    @ApiOperation("[通用接口]查询单条数据Auto")
+    @ApiOperation("[通用查询接口]查询单条数据Auto")
     @PostMapping("/query.auto")
     open fun autoQuery(@RequestBody(required = true) param: QueryParam): Result<Return> {
         autoService.autoFill(param)
@@ -214,7 +214,7 @@ abstract class BaseAutoController<
     open fun autoListAfter(param: QueryParam, list: List<Table>) {
     }
 
-    @ApiOperation("[通用接口]查询所有列表Auto")
+    @ApiOperation("[通用列表接口]查询所有列表Auto")
     @PostMapping("/list.auto")
     open fun autoList(@RequestBody(required = true) param: QueryParam): Result<List<Return>> {
         autoService.autoFill(param)
@@ -238,7 +238,7 @@ abstract class BaseAutoController<
     open fun autoPageAfter(param: QueryParam, query: IPage<Table>) {
     }
 
-    @ApiOperation("[通用接口]分页查询列表Auto")
+    @ApiOperation("[通用分页接口]分页查询列表Auto")
     @PostMapping("/page.auto")
     open fun autoPage(@RequestBody(required = true) param: QueryParam): Result<IPage<Return>> {
         autoService.autoFill(param)

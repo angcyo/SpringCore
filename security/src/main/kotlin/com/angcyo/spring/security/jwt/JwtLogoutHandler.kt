@@ -25,9 +25,10 @@ class JwtLogoutHandler : LogoutHandler {
         response: HttpServletResponse,
         authentication: Authentication?
     ) {
-        currentUser().let {
+        val userDetail = currentUserOrNull()
+        if (userDetail != null) {
             val authService = beanOf(AuthService::class.java)
-            authService._logoutEnd(it)
+            authService._logoutEnd(userDetail)
         }
 
         //清除上下文
