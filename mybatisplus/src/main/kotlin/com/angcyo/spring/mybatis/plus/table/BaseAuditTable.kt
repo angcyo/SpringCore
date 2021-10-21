@@ -81,6 +81,7 @@ abstract class BaseAuditTable {
     @ApiModelProperty("逻辑删除(0:未删除 1:删除)", hidden = true)
     @Column(comment = "逻辑删除(0:未删除 1:删除)")
     @JsonIgnore
+    //@TableField(select = false)
     var deleteFlag: Int? = NO_DELETE
 
     override fun toString(): String {
