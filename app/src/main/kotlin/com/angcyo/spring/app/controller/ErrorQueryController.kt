@@ -26,7 +26,12 @@ class ErrorQueryController {
     /**错误信息查询*/
     @GetMapping("/{errorUuid}")
     fun query(@PathVariable(required = true) errorUuid: String): String? {
-        val list = jdbc.queryForList("SELECT * FROM logging_event WHERE arg0 = '${errorUuid}'")
+        val list = if (errorUuid.lowercase() == "last") {
+            jdbc.queryForList("SELECT * FROM logging_event ORDER BY timestmp DESC LIMIT 1")
+        } else {
+            jdbc.queryForList("SELECT * FROM logging_event WHERE arg0 = '${errorUuid}'")
+        }
+
         val builder = StringBuilder()
 
         val accept = request()?.getHeader("Accept")
@@ -48,6 +53,10 @@ class ErrorQueryController {
         }
 
         if (list.size > 0) {
+
+            //log 消息
+            val formattedMessage = list[0]["formatted_message"]
+
             if (isHtml) {
                 time?.apply {
                     builder.append("<p>${this}</p>")
@@ -55,13 +64,13 @@ class ErrorQueryController {
                 builder.append("<p>调用接口:${list[0]["arg1"]} $duration</p>")
                 builder.append("<p>来自:${list[0]["arg3"]}</p>")
                 builder.append("<br>")
-                builder.append("<p>${list[0]["formatted_message"]}</p>")
+                builder.append("<p>${formattedMessage.toString().replace("\n", "<br>")}</p>")
             } else {
                 time?.apply { builder.appendLine(this) }
                 builder.appendLine("调用接口:${list[0]["arg1"]} $duration")
                 builder.appendLine("来自:${list[0]["arg3"]}")
                 builder.appendLine()
-                builder.append(list[0]["formatted_message"])
+                builder.append(formattedMessage)
             }
         }
 
