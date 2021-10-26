@@ -139,7 +139,14 @@ class Redis {
      * @param by 要增加几(大于0)
      * @return
      */
-    fun incr(key: String, delta: Long): Long {
+    fun incr(key: String, delta: Long = 1): Long {
+        if (delta < 0) {
+            throw RuntimeException("递增因子必须大于0")
+        }
+        return redisTemplate.opsForValue().increment(key, delta) ?: -1
+    }
+
+    fun increment(key: String, delta: Long = 1): Long {
         if (delta < 0) {
             throw RuntimeException("递增因子必须大于0")
         }
@@ -152,11 +159,18 @@ class Redis {
      * @param by 要减少几(小于0)
      * @return
      */
-    fun decr(key: String, delta: Long): Long {
+    fun decr(key: String, delta: Long = -1): Long {
         if (delta < 0) {
             throw RuntimeException("递减因子必须大于0")
         }
         return redisTemplate.opsForValue().increment(key, -delta) ?: -1
+    }
+
+    fun decrement(key: String, delta: Long = 1): Long {
+        if (delta < 0) {
+            throw RuntimeException("递增因子必须大于0")
+        }
+        return redisTemplate.opsForValue().decrement(key, delta) ?: -1
     }
 
     //================================Map=================================
