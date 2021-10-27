@@ -11,9 +11,9 @@ import springfox.documentation.annotations.ApiIgnore
  * @date 2020/11/06
  */
 
+@ApiIgnore
 @RestController
 @RequestMapping("/test/security")
-@ApiIgnore
 class SecurityTestController {
 
     @RequestMapping("/")

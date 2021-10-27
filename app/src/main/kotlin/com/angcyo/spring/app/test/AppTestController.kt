@@ -11,14 +11,20 @@ import springfox.documentation.annotations.ApiIgnore
  * @author angcyo
  * @date 2020/11/04
  */
+
+@ApiIgnore
 @RestController
 @RequestMapping("/test")
-@ApiIgnore
-class HelloController {
+class AppTestController {
+
+    @RequestMapping("/")
+    fun test(): String? {
+        return this::class.java.name
+    }
 
     @RequestMapping("/hello")
     fun hello(): String? {
-        return HelloController::class.java.bean().hello2("default value")
+        return AppTestController::class.java.bean().hello2("default value")
     }
 
     @RequestMapping("/hello/{value}")
