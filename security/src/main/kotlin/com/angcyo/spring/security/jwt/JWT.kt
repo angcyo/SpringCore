@@ -11,10 +11,17 @@ import io.jsonwebtoken.security.Keys
 import org.springframework.security.core.GrantedAuthority
 import org.springframework.security.core.authority.SimpleGrantedAuthority
 import org.springframework.security.core.context.SecurityContextHolder
+import org.springframework.security.core.userdetails.UserDetails
 import java.security.SignatureException
 import java.util.*
+import javax.crypto.SecretKey
+
 
 /**
+ * Jwt token 工具类
+ *
+ * http://www.macrozheng.com/#/architect/mall_arch_04?id=%e6%b7%bb%e5%8a%a0jwt-token%e7%9a%84%e5%b7%a5%e5%85%b7%e7%b1%bb
+ *
  * Email:angcyo@126.com
  * @author angcyo
  * @date 2020/11/07
@@ -22,22 +29,53 @@ import java.util.*
 
 object JWT {
 
+    private const val CLAIM_KEY_CREATED = "created"
+
+    fun secretKey(): SecretKey {
+        val signingKey = SecurityConstants.JWT_SECRET.toByteArray()
+        val secretKey = Keys.hmacShaKeyFor(signingKey)
+        return secretKey
+    }
+
+    fun jwtBuilder(): JwtBuilder {
+
+        return Jwts.builder()
+            .signWith(secretKey(), SignatureAlgorithm.HS512)
+            .setHeaderParam(SecurityConstants.KEY_TOKEN_TYPE, SecurityConstants.TOKEN_TYPE)
+            .setIssuer(SecurityConstants.TOKEN_ISSUER)
+            .setAudience(SecurityConstants.TOKEN_AUDIENCE)
+            .setExpiration(generateExpirationDate()) //过期时间
+    }
+
     /**生成一个token
      * [username] token里面可以解析出来的用户名
      * [roles] 用户对应的角色
      * */
     fun generateToken(username: String, roles: Collection<Any>? = null): String {
-        val signingKey = SecurityConstants.JWT_SECRET.toByteArray()
-        val token = Jwts.builder()
-            .signWith(Keys.hmacShaKeyFor(signingKey), SignatureAlgorithm.HS512)
-            .setHeaderParam(SecurityConstants.KEY_TOKEN_TYPE, SecurityConstants.TOKEN_TYPE)
-            .setIssuer(SecurityConstants.TOKEN_ISSUER)
-            .setAudience(SecurityConstants.TOKEN_AUDIENCE)
+        val token = jwtBuilder()
             .setSubject(username)
-            .setExpiration(Date(System.currentTimeMillis() + oneDay))
             .claim(SecurityConstants.TOKEN_ROLES, roles)
             .compact()
         return token
+    }
+
+    /**
+     * 根据负责生成JWT的token
+     */
+    private fun generateToken(username: String, claims: Map<String, Any?>, roles: Collection<Any>? = null): String? {
+        val token = jwtBuilder()
+            .setSubject(username)
+            .claim(SecurityConstants.TOKEN_ROLES, roles)
+            .addClaims(claims)
+            .compact()
+        return token
+    }
+
+    /**
+     * 生成token的过期时间
+     */
+    private fun generateExpirationDate(): Date {
+        return Date(System.currentTimeMillis() + oneDay)
     }
 
     /**从token中解析数据
@@ -88,6 +126,83 @@ object JWT {
         }
         return null
     }
+
+
+    /**
+     * 验证token是否还有效
+     *
+     * @param token       客户端传入的token
+     * @param userDetails 从数据库中查询出来的用户信息
+     */
+    fun validateToken(token: String?, userDetails: UserDetails): Boolean {
+        val username: String? = getUserNameFromToken(token)
+        return username == userDetails.username && !isTokenExpired(token)
+    }
+
+    /**
+     * 从token中获取登录用户名
+     */
+    fun getUserNameFromToken(token: String?): String? {
+        val username: String? = try {
+            val claims: Claims? = getClaimsFromToken(token)
+            claims?.subject
+        } catch (e: Exception) {
+            null
+        }
+        return username
+    }
+
+    /**
+     * 从token中获取JWT中的负载
+     */
+    private fun getClaimsFromToken(token: String?): Claims? {
+        var claims: Claims? = null
+        try {
+            claims = Jwts.parserBuilder()
+                //.requireAudience("string")
+                .setSigningKey(secretKey())
+                .build()
+                .parseClaimsJws(token)
+                .body
+        } catch (e: Exception) {
+            L.i("JWT格式验证失败:{}", token)
+        }
+        return claims
+    }
+
+    /**
+     * 判断token是否已经失效
+     */
+    private fun isTokenExpired(token: String?): Boolean {
+        val expiredDate: Date? = getExpiredDateFromToken(token)
+        return expiredDate?.before(Date()) == true
+    }
+
+    /**
+     * 从token中获取过期时间
+     */
+    private fun getExpiredDateFromToken(token: String?): Date? {
+        val claims = getClaimsFromToken(token)
+        return claims?.expiration
+    }
+
+
+    /**
+     * 判断token是否可以被刷新
+     */
+    fun canRefresh(token: String): Boolean {
+        return !isTokenExpired(token)
+    }
+
+    /**
+     * 刷新token
+     */
+    fun refreshToken(token: String?, username: String, roles: Collection<Any>? = null): String? {
+        val claims = getClaimsFromToken(token)
+        claims!![CLAIM_KEY_CREATED] = Date()
+        return generateToken(username, claims, roles)
+    }
+
 }
 
 /**获取当前登录的用户信息*/
