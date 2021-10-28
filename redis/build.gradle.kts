@@ -8,6 +8,7 @@ dependencies {
     //https://github.com/alibaba/fastjson
     api("com.alibaba:fastjson:1.2.75") //1.2.75
 
+    //https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-starter-data-redis
     api("org.springframework.boot:spring-boot-starter-data-redis")
 }
 
