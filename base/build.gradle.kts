@@ -12,7 +12,9 @@ dependencies {
     api("com.fasterxml.jackson.module:jackson-module-kotlin")
 
     // aspect 切面
-    api("org.springframework:spring-aspects")
+    //api("org.springframework:spring-aspects")
+    api("org.springframework.boot:spring-boot-starter-actuator")
+    api("org.springframework.boot:spring-boot-starter-aop")
 
     //gson
     api("com.google.code.gson:gson")
