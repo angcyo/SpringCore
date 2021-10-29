@@ -10,7 +10,7 @@ import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Component
 
 /**
- * 定时清理日志的任务
+ * 定时清理日志的任务, 需要[@EnableScheduling] //激活定时任务
  *
  * http://www.macrozheng.com/#/architect/mall_arch_06?id=mall%e6%95%b4%e5%90%88springtask%e5%ae%9e%e7%8e%b0%e5%ae%9a%e6%97%b6%e4%bb%bb%e5%8a%a1
  *
