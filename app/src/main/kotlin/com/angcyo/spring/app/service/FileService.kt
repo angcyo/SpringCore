@@ -4,8 +4,6 @@ import com.angcyo.spring.app.FileProperties
 import com.angcyo.spring.app.table.FileTable
 import com.angcyo.spring.app.table.mapper.IFileMapper
 import com.angcyo.spring.base.AppProperties
-import com.angcyo.spring.base.beanOf
-import com.angcyo.spring.base.classOf
 import com.angcyo.spring.base.extension.ApiException
 import com.angcyo.spring.base.servlet.IOssService
 import com.angcyo.spring.mybatis.plus.auto.BaseAutoMybatisServiceImpl
@@ -99,6 +97,9 @@ class FileService : BaseAutoMybatisServiceImpl<IFileMapper, FileTable>() {
         }
     }
 
+    @Autowired(required = false)
+    var ossService: IOssService? = null
+
     /**优先保存至oss, 其次保存至服务器目录*/
     fun saveFileOrOss(file: MultipartFile): FileTable {
         val existTable = findFileByMd5(file.inputStream.md5())
@@ -109,7 +110,8 @@ class FileService : BaseAutoMybatisServiceImpl<IFileMapper, FileTable>() {
         val fileName: String = StringUtils.cleanPath(file.originalFilename!!)
 
         //是否有oss服务
-        val ossClass = classOf("com.angcyo.spring.aliyun.oss.AliyunOssService")
+        //val ossClass = classOf("com.angcyo.spring.aliyun.oss.AliyunOssService")
+        val ossClass = ossService
         val key: String
 
         val uri: String = if (ossClass == null) {
@@ -119,9 +121,8 @@ class FileService : BaseAutoMybatisServiceImpl<IFileMapper, FileTable>() {
                 .path(key)
                 .toUriString()
         } else {
-            val oss = beanOf(ossClass) as IOssService
             key = "${appProperties.name}/${nowTimeString(Constant.DEFAULT_DATE_FORMATTER)}/$fileName"
-            oss.upload(key, file.inputStream)
+            ossClass.upload(key, file.inputStream)
         }
 
         val table = FileTable()
