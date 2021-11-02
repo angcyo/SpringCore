@@ -7,6 +7,7 @@ import com.angcyo.spring.security.jwt.event.AuthenticationTokenEvent
 import com.angcyo.spring.security.jwt.provider.authError
 import com.angcyo.spring.security.jwt.token.ResponseAuthenticationToken
 import org.springframework.context.ApplicationEventPublisher
+import org.springframework.security.authentication.BadCredentialsException
 import org.springframework.security.core.Authentication
 import org.springframework.security.core.AuthenticationException
 import org.springframework.security.core.context.SecurityContextHolder
@@ -57,9 +58,11 @@ interface IAuthorizationHandle {
         SecurityContextHolder.clearContext()
 
         if (response != null) {
-            var code = HttpServletResponse.SC_UNAUTHORIZED
-            if (failed is PermissionException) {
-                code = HttpServletResponse.SC_FORBIDDEN
+            var code = HttpServletResponse.SC_UNAUTHORIZED //401
+            if (failed is LoginException || failed is BadCredentialsException) {
+                code = HttpServletResponse.SC_BAD_REQUEST //400
+            } else if (failed is PermissionException) {
+                code = HttpServletResponse.SC_FORBIDDEN //403
             }
             response.send(resultError<String>(failed?.message, code).toJackson(), code)
         }
