@@ -3,6 +3,7 @@ package com.angcyo.spring.base
 import com.angcyo.spring.util.L
 import com.angcyo.spring.util.copyTo
 import org.springframework.aop.framework.AopContext
+import org.springframework.context.ApplicationContext
 import java.util.*
 
 
@@ -11,6 +12,10 @@ import java.util.*
  * @author angcyo
  * @date 2020/11/04
  */
+
+/**Spring上下文*/
+val app: ApplicationContext
+    get() = Base.applicationContext
 
 fun threadName() = Thread.currentThread().name
 
@@ -83,6 +88,18 @@ inline fun <reified T> beanOf(): T = Base.getBean(T::class.java)
 
 /**获取[application.properties]中, 配置的值*/
 fun String.propertyValue() = Base.applicationContext.environment.getProperty(this)
+
+fun String.propertyValue(def: String) = Base.applicationContext.environment.getProperty(this, def)
+
+/**是否包含属性*/
+fun containsProperty(key: String): Boolean = app.environment.containsProperty(key)
+
+/**[propertyValue]*/
+inline fun <reified T> propertyValueOf(key: String): T? =
+    Base.applicationContext.environment.getProperty(key, T::class.java)
+
+inline fun <reified T> propertyValueOf(key: String, def: T): T =
+    Base.applicationContext.environment.getProperty(key, T::class.java, def)
 
 /**获取暴露的代理对象
  * 需要开启:[@EnableAspectJAutoProxy(exposeProxy = true)]*/

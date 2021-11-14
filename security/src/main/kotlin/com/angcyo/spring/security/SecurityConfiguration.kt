@@ -1,5 +1,7 @@
 package com.angcyo.spring.security
 
+import com.angcyo.spring.base.containsProperty
+import com.angcyo.spring.base.propertyValueOf
 import com.angcyo.spring.security.jwt.*
 import com.angcyo.spring.security.jwt.provider.UsernamePasswordAuthenticationProvider
 import com.angcyo.spring.security.service.AuthService
@@ -123,6 +125,11 @@ class SecurityConfiguration : WebSecurityConfigurerAdapter() {
     @Autowired
     lateinit var applicationEventPublisher: ApplicationEventPublisher
 
+    /**白名单, 使用@Value时, 配置文件中必须指定, 否则会报错.
+     * 通过环境变量, 手动读取则不会报错*/
+    //@Value("\${security.white.list}")
+    //var securityWhiteList: List<String>? = null
+
     /**3. 通过重载，配置如何通过拦截器保护请求*/
     override fun configure(http: HttpSecurity) {
         //super.configure(http)
@@ -130,6 +137,13 @@ class SecurityConfiguration : WebSecurityConfigurerAdapter() {
         //授权管理
         jwtAuthenticationManager.apply {
             defaultAuthenticationProviderList.add(UsernamePasswordAuthenticationProvider())
+        }
+
+        //白名单配置
+        val key = "security.white.list"
+        if (containsProperty(key)) {
+            val whiteListProperties: List<String> = propertyValueOf("security.white.list", emptyList())
+            SECURITY_WHITE_LIST.addAll(whiteListProperties)
         }
 
         //manager
