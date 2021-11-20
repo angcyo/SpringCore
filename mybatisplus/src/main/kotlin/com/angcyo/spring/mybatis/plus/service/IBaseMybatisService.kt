@@ -48,7 +48,8 @@ interface IBaseMybatisService<Table> : IService<Table> {
 
     fun newTable() = tableClass().newInstance()
 
-    /**获取一个[QueryWrapper]*/
+    /**获取一个[QueryWrapper]
+     * 是否需要加上[noDelete]?*/
     fun queryWrapper(): QueryWrapper<Table> {
         return QueryWrapper<Table>()
     }
