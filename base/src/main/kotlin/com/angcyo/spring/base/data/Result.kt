@@ -229,13 +229,14 @@ fun <T, R> T.toBean(cls: Class<R>): R? {
     return json.fromJackson(cls)
 }
 
-/**数据结构转换*/
-/*fun List<Table>.toReturnList(): List<Return> {
-    val result = mutableListOf<Return>()
+fun <T, R> List<T>.toBeanList(cls: Class<R>): List<R> {
+    val result = mutableListOf<R>()
     forEach {
-        result.add(it.toReturn())
+        it.toBean(cls)?.let { bean ->
+            result.add(bean)
+        }
     }
     return result
-}*/
+}
 
 //</editor-fold desc="数据类型转换">

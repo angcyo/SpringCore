@@ -299,6 +299,21 @@ interface IBaseMybatisService<Table> : IService<Table> {
         }
     }
 
+    /**逻辑删除
+     * [dsl] 中是需要删除的条件
+     * */
+    @Transactional
+    fun deleteQuery(error: String? = null, dsl: UpdateWrapper<Table>.() -> Unit): Boolean {
+        return update(updateWrapper().apply {
+            set(BaseAuditTable::deleteFlag.columnName(), BaseAuditTable.DELETE)
+            dsl()
+        }).apply {
+            if (!this && error != null) {
+                apiError(error)
+            }
+        }
+    }
+
     /**Dsl Query*/
     fun listQuery(dsl: QueryWrapper<Table>.() -> Unit): List<Table> {
         return list(queryWrapper().apply(dsl))

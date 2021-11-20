@@ -35,7 +35,10 @@ import java.time.LocalDateTime
 abstract class BaseAuditTable {
 
     companion object {
+        //表示逻辑已删除
         const val DELETE = 1
+
+        //未删除
         const val NO_DELETE = 0
     }
 
