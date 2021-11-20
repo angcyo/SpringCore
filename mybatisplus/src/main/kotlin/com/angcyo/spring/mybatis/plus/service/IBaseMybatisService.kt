@@ -63,6 +63,12 @@ interface IBaseMybatisService<Table> : IService<Table> {
         return wrapper.noDelete(tableClass())
     }
 
+    /**设置软删除数据¬*/
+    fun UpdateWrapper<Table>.setDelete(flag: Int = BaseAuditTable.DELETE): UpdateWrapper<Table> {
+        set(BaseAuditTable::deleteFlag.columnName(), flag)
+        return this
+    }
+
     fun QueryWrapper<Table>.noDelete(): QueryWrapper<Table> {
         return noDelete(tableClass())
     }
@@ -215,7 +221,16 @@ interface IBaseMybatisService<Table> : IService<Table> {
 
     /**[queryColumn] 需要查询的列
      * [queryValue] 值
-     * [equalField] 判断相等的属性名*/
+     * [equalField] 判断相等的属性名
+     * ```
+     * enrollItemReService.resetFrom(
+     *    enrollItemReList,
+     *    EnrollItemReTable::enrollId.columnName(),
+     *    table.id!!,
+     *    EnrollItemReTable::itemId.name
+     *  )
+     * ```
+     * */
     @Transactional
     fun resetFrom(list: List<Table>, queryColumn: String, queryValue: Any, equalField: String) {
         resetFrom(list, queryList = {
@@ -225,6 +240,14 @@ interface IBaseMybatisService<Table> : IService<Table> {
         })
     }
 
+    /**
+      * ```
+      * contestClazzService.resetFrom(clazzList, ContestClazzReTable::clazzId.name) {
+      *   eq(ContestClazzReTable::customerId.columnName(), customerId)
+      *   eq(ContestClazzReTable::contestId.columnName(), contestId)
+      * }
+      * ```
+     * */
     @Transactional
     fun resetFrom(list: List<Table>, equalField: String, queryList: QueryWrapper<Table>.() -> Unit) {
         resetFrom(list, queryList) { existTable, table ->
@@ -306,7 +329,7 @@ interface IBaseMybatisService<Table> : IService<Table> {
     @Transactional
     fun deleteQuery(error: String? = null, dsl: UpdateWrapper<Table>.() -> Unit): Boolean {
         return update(updateWrapper().apply {
-            set(BaseAuditTable::deleteFlag.columnName(), BaseAuditTable.DELETE)
+            setDelete()
             dsl()
         }).apply {
             if (!this && error != null) {

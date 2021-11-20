@@ -224,16 +224,18 @@ inline fun Long?.ifNotExist(
 //<editor-fold desc="数据类型转换">
 
 /**将数据结构[T]通过json转换成[R]*/
-fun <T, R> T.toBean(cls: Class<R>): R? {
+fun <T, R> T.toBean(cls: Class<R>): R {
     val json = this.toJackson()
-    return json.fromJackson(cls)
+    return json.fromJackson(cls)!!
 }
 
-fun <T, R> List<T>.toBeanList(cls: Class<R>): List<R> {
+fun <T, R> List<T>.toBeanList(cls: Class<R>, init: R.(T) -> Unit = {}): List<R> {
     val result = mutableListOf<R>()
     forEach {
         it.toBean(cls)?.let { bean ->
-            result.add(bean)
+            result.add(bean.apply {
+                init(it)
+            })
         }
     }
     return result

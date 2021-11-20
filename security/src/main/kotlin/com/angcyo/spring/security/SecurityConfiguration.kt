@@ -43,6 +43,9 @@ class SecurityConfiguration : WebSecurityConfigurerAdapter() {
         /**密码加密器*/
         val encoder = BCryptPasswordEncoder(BCryptPasswordEncoder.BCryptVersion.`$2B`, 10, SecureRandom())
 
+        /**白名单属性配置key*/
+        const val SECURITY_WHITE_LIST_KEY = "security.white.list"
+
         /**认证白名单, 不需要验证
          * 取消安全验证, 可以使用通配符`*` `**`
          * SecurityConfiguration.SECURITY_WHITE_LIST.add("\**")
@@ -140,9 +143,9 @@ class SecurityConfiguration : WebSecurityConfigurerAdapter() {
         }
 
         //白名单配置
-        val key = "security.white.list"
+        val key = SECURITY_WHITE_LIST_KEY
         if (containsProperty(key)) {
-            val whiteListProperties: List<String> = propertyValueOf("security.white.list", emptyList())
+            val whiteListProperties: List<String> = propertyValueOf(key, emptyList())
             SECURITY_WHITE_LIST.addAll(whiteListProperties)
         }
 

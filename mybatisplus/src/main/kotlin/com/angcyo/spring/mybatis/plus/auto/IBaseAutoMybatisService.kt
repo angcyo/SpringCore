@@ -4,16 +4,14 @@ import com.angcyo.spring.base.aspect.LogMethodTime
 import com.angcyo.spring.base.data.ifError
 import com.angcyo.spring.base.extension.apiError
 import com.angcyo.spring.base.logName
+import com.angcyo.spring.mybatis.plus.*
 import com.angcyo.spring.mybatis.plus.auto.annotation.*
 import com.angcyo.spring.mybatis.plus.auto.param.BaseAutoPageParam
 import com.angcyo.spring.mybatis.plus.auto.param.IAutoParam
-import com.angcyo.spring.mybatis.plus.keyField
-import com.angcyo.spring.mybatis.plus.keyName
-import com.angcyo.spring.mybatis.plus.keyValue
 import com.angcyo.spring.mybatis.plus.service.IBaseMybatisService
 import com.angcyo.spring.mybatis.plus.table.BaseAuditTable
-import com.angcyo.spring.mybatis.plus.toLowerName
 import com.angcyo.spring.util.size
+import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper
 import com.baomidou.mybatisplus.core.metadata.IPage
 import org.springframework.transaction.annotation.Transactional
 import java.io.Serializable
@@ -511,5 +509,25 @@ interface IBaseAutoMybatisService<Table> : IBaseMybatisService<Table> {
 
         //批量更新
         return updateBatchById(updateTableList)
+    }
+
+    /**
+     * 根据自动解析查询参数, 查询出来的结果, 更新表
+     * ```
+     * updateWrapper.set(BaseAuditTable::id.columnName(), xxx)
+     * ```
+     * [param] 查询参数解析对象
+     * */
+    @Transactional
+    fun autoUpdateByQuery(
+        param: IAutoParam,
+        error: String? = null,
+        dsl: UpdateWrapper<Table>.() -> Unit
+    ): Boolean {
+        autoFill(param)
+        return updateQuery {
+            buildAutoParse().parseUpdate(this, param)
+            dsl()
+        }
     }
 }
