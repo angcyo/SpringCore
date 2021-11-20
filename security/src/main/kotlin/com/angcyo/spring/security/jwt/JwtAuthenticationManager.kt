@@ -34,7 +34,7 @@ class JwtAuthenticationManager : AuthenticationManager {
 
         var result: Authentication? = null
 
-        //1:
+        //1:自定义授权提供者
         if (result == null) {
             for (provider in customAuthenticationProviderList) {
                 if (provider.supports(authentication?.javaClass)) {
@@ -48,7 +48,7 @@ class JwtAuthenticationManager : AuthenticationManager {
             }
         }
 
-        //2:
+        //2:默认的授权提供者
         if (result == null) {
             for (provider in defaultAuthenticationProviderList) {
                 if (provider.supports(authentication?.javaClass)) {

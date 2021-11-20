@@ -177,19 +177,16 @@ class AuthService {
     @RegisterAccount
     @Transactional
     fun register(bean: RegisterReqBean): UserTable? {
+
         val grantType = bean.grantType?.lowercase()
 
         request()?.let {
-            if (grantType != GrantType.Code.value) {
-                //非验证码注册的情况下, 如果发送了注册验证码或者传递了验证码, 则需要校验
-                val codeKey = it.codeKey()
-                if (bean.code != null || redis.hasKey(imageCodeKey(codeKey, CodeType.Register.value))) {
-                    //如果发送了登录验证码, 则需要验证验证码是否正确
-                    if (bean.code == null ||
-                        bean.code != getImageCode(codeKey, CodeType.Register.value)
-                    ) {
-                        apiError("验证码不正确")
-                    }
+            val codeKey = it.codeKey()
+            //优先验证图形验证码, 如果有
+            if (redis.hasKey(imageCodeKey(codeKey, CodeType.Register.value))) {
+                if (bean.imageCode != getImageCode(codeKey, CodeType.Register.value)) {
+                    //如果获取了图形验证码, 但是不匹配
+                    apiError("验证码不正确")
                 }
             }
         }

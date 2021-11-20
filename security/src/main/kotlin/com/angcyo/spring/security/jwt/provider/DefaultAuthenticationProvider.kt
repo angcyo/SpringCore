@@ -1,6 +1,7 @@
 package com.angcyo.spring.security.jwt.provider
 
 import com.angcyo.spring.base.beanOf
+import com.angcyo.spring.base.extension.apiError
 import com.angcyo.spring.base.servlet.request
 import com.angcyo.spring.redis.Redis
 import com.angcyo.spring.security.bean.*
@@ -14,14 +15,14 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException
 import org.springframework.security.crypto.password.PasswordEncoder
 
 /**
- * 基础的用户密码授权方式
+ * 基础的用户密码/验证码授权方式
  *
  * Email:angcyo@126.com
  * @author angcyo
  * @date 2021/05/28
  */
 
-open class UsernamePasswordAuthenticationProvider : BaseTokenAuthenticationProvider() {
+open class DefaultAuthenticationProvider : BaseTokenAuthenticationProvider() {
 
     /**开始授权*/
     override fun auth(authReqBean: AuthReqBean): Authentication? {
@@ -36,16 +37,12 @@ open class UsernamePasswordAuthenticationProvider : BaseTokenAuthenticationProvi
         //-------------------------验证码检查---------------------------
 
         request()?.let {
-            if (grantType != GrantType.Code.value) {
-                //非验证码登录的情况下, 如果发送了登录验证码或者传递了验证码, 则需要校验
-                val codeKey = it.codeKey()
-                if (authReqBean.code != null || redis.hasKey(authService.imageCodeKey(codeKey, CodeType.Login.value))) {
-                    //如果发送了登录验证码, 则需要验证验证码是否正确
-                    if (authReqBean.code == null ||
-                        authReqBean.code != authService.getImageCode(codeKey, CodeType.Login.value)
-                    ) {
-                        error("验证码不正确")
-                    }
+            val codeKey = it.codeKey()
+            //优先验证图形验证码, 如果有
+            if (redis.hasKey(authService.imageCodeKey(codeKey, CodeType.Login.value))) {
+                if (authReqBean.imageCode != authService.getImageCode(codeKey, CodeType.Login.value)) {
+                    //如果获取了图形验证码, 但是不匹配
+                    apiError("验证码不正确")
                 }
             }
         }
@@ -101,7 +98,7 @@ open class UsernamePasswordAuthenticationProvider : BaseTokenAuthenticationProvi
             }).firstOrNull() ?: throw  UsernameNotFoundException("账号不存在")
 
             //通过用户, 匹配对应的密码
-            if (user.state ?: 0 < 0) {
+            if ((user.state ?: 0) < 0) {
                 throw  UsernameNotFoundException("账号不可用[${user.state}]")
             }
 

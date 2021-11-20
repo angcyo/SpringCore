@@ -26,8 +26,11 @@ class RegisterReqBean {
     @Size(min = 6, max = 20, message = "密码至少6个字符")
     var password: String? = null
 
-    @ApiModelProperty("注册时的验证码")
+    @ApiModelProperty("使用验证码注册时的验证码")
     var code: String? = null
+
+    @ApiModelProperty("图形验证码,如果请求了")
+    var imageCode: String? = null
 
     @ApiModelProperty("授权类型,默认是password. password/code等")
     var grantType: String? = GrantType.Password.value

@@ -3,7 +3,7 @@ package com.angcyo.spring.security
 import com.angcyo.spring.base.containsProperty
 import com.angcyo.spring.base.propertyValueOf
 import com.angcyo.spring.security.jwt.*
-import com.angcyo.spring.security.jwt.provider.UsernamePasswordAuthenticationProvider
+import com.angcyo.spring.security.jwt.provider.DefaultAuthenticationProvider
 import com.angcyo.spring.security.service.AuthService
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.ApplicationEventPublisher
@@ -136,7 +136,7 @@ class SecurityConfiguration : WebSecurityConfigurerAdapter() {
 
         //授权管理
         jwtAuthenticationManager.apply {
-            defaultAuthenticationProviderList.add(UsernamePasswordAuthenticationProvider())
+            defaultAuthenticationProviderList.add(DefaultAuthenticationProvider())
         }
 
         //白名单配置

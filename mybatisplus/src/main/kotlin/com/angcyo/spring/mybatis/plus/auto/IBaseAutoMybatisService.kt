@@ -44,7 +44,14 @@ interface IBaseAutoMybatisService<Table> : IBaseMybatisService<Table> {
                 val column = entry.key.toLowerName()
                 val value = entry.value
                 if (value is List<*>) {
-                    `in`(column, value)
+                    if (value.isEmpty()) {
+                        //WHERE (id IN ()) 这种语法会报错
+                        and {
+                            it.last("FALSE") //强制塞入 false, 停止语句执行
+                        }
+                    } else {
+                        `in`(column, value)
+                    }
                 } else {
                     if (ignoreNull && value == null) {
                     } else {

@@ -12,6 +12,7 @@ import com.angcyo.spring.security.service.AuthService
 import com.angcyo.spring.security.service.codeKey
 import com.angcyo.spring.util.ImageCode
 import com.angcyo.spring.util.L
+import com.angcyo.spring.util.nowTimeString
 import io.swagger.annotations.*
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.validation.BindingResult
@@ -35,7 +36,7 @@ class AuthController {
     @Autowired
     lateinit var authService: AuthService
 
-    @GetMapping(SecurityConstants.AUTH_REGISTER_CODE_URL)
+    @GetMapping(SecurityConstants.AUTH_IMAGE_CODE_URL)
     @ApiOperation("获取注册时的图形验证码")
     @ApiImplicitParams(
         ApiImplicitParam(name = "clientUuid", value = "客户端的UUID", required = true, dataTypeClass = String::class),
@@ -106,8 +107,9 @@ class AuthController {
     }
 
     @RequestMapping("/auth/test", method = [RequestMethod.GET, RequestMethod.POST])
-    @ApiOperation("授权测试")
+    @ApiOperation("授权验证测试")
     fun test(request: HttpServletRequest): Result<String>? {
-        return request.body()?.ok()
+        val body = request.body()
+        return (body ?: "请求成功:${nowTimeString()}").ok()
     }
 }
