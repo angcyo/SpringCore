@@ -2,6 +2,8 @@ package com.angcyo.spring.app.controller
 
 import com.angcyo.spring.base.servlet.request
 import com.angcyo.spring.util.str
+import io.swagger.annotations.Api
+import io.swagger.annotations.ApiOperation
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.jdbc.core.JdbcTemplate
 import org.springframework.web.bind.annotation.GetMapping
@@ -16,6 +18,7 @@ import org.springframework.web.bind.annotation.RestController
  * @date 2021/10/21
  */
 
+@Api(tags = ["错误日志的控制器"])
 @RestController
 @RequestMapping("/err")
 class ErrorQueryController {
@@ -24,6 +27,7 @@ class ErrorQueryController {
     lateinit var jdbc: JdbcTemplate
 
     /**错误信息查询*/
+    @ApiOperation("根据错误UUID, 查询错误信息")
     @GetMapping("/{errorUuid}")
     fun query(@PathVariable(required = true) errorUuid: String): String? {
         val list = if (errorUuid.lowercase() == "last") {
