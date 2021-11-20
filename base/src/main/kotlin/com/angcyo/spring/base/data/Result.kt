@@ -3,6 +3,8 @@ package com.angcyo.spring.base.data
 import com.angcyo.spring.base.data.Result.Companion.ERROR_CODE
 import com.angcyo.spring.base.data.Result.Companion.SUCCESS_CODE
 import com.angcyo.spring.base.extension.apiError
+import com.angcyo.spring.base.json.fromJackson
+import com.angcyo.spring.base.json.toJackson
 import com.angcyo.spring.util.L
 import com.angcyo.spring.util.str
 import org.springframework.validation.BindingResult
@@ -218,3 +220,22 @@ inline fun Long?.ifNotExist(
         (this ?: 0) <= 0
     }
 }
+
+//<editor-fold desc="数据类型转换">
+
+/**将数据结构[T]通过json转换成[R]*/
+fun <T, R> T.toBean(cls: Class<R>): R? {
+    val json = this.toJackson()
+    return json.fromJackson(cls)
+}
+
+/**数据结构转换*/
+/*fun List<Table>.toReturnList(): List<Return> {
+    val result = mutableListOf<Return>()
+    forEach {
+        result.add(it.toReturn())
+    }
+    return result
+}*/
+
+//</editor-fold desc="数据类型转换">

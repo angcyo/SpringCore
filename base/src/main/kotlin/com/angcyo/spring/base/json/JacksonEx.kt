@@ -3,6 +3,7 @@ package com.angcyo.spring.base.json
 import com.angcyo.spring.base.json.JacksonEx.ignorePropertyMapper
 import com.angcyo.spring.base.json.JacksonEx.mapper
 import com.angcyo.spring.base.json.JacksonEx.onlyPropertyMapper
+import com.fasterxml.jackson.databind.DeserializationFeature
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.ser.impl.SimpleBeanPropertyFilter
 import com.fasterxml.jackson.databind.ser.impl.SimpleFilterProvider
@@ -24,6 +25,8 @@ object JacksonEx {
         //registerModule(LocalDateTimeSerializer(DateTimeFormatter.ofPattern(DEFAULT_DATE_TIME_FORMATTER), Locale.CHINA))
         //registerModule(LocalDateTimeDeserializer())
         registerModule(JavaTimeModule())
+
+        configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
     }
 
     /**忽略指定的属性, 不序列化*/

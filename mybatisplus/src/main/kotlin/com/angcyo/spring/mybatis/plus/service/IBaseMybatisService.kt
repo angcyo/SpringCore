@@ -311,6 +311,15 @@ interface IBaseMybatisService<Table> : IService<Table> {
         }).firstOrNull()
     }
 
+    /**查询最新的一条数据*/
+    fun listQueryNewOne(limit: Long = 1, dsl: QueryWrapper<Table>.() -> Unit): Table? {
+        return list(queryWrapper().apply {
+            orderByDesc(BaseAuditTable::id.columnName())
+            last("LIMIT $limit")
+            dsl()
+        }).firstOrNull()
+    }
+
     fun listQueryIn(coll: Collection<*>, dsl: QueryWrapper<Table>.() -> Unit): List<Table> {
         if (coll.isEmpty()) {
             return emptyList()

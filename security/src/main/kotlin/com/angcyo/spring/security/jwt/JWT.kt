@@ -205,6 +205,9 @@ object JWT {
 
 }
 
+/**当前登录的用户id*/
+fun currentUserId(): Long = currentUser().userTable!!.id!!
+
 /**获取当前登录的用户信息*/
 fun currentUser(): UserDetail {
     return currentUserOrNull() ?: apiError("请先登录")
