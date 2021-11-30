@@ -54,8 +54,9 @@ class AuthController {
 
         val pair = ImageCode.generate(length, width, height)
 
+        val codeKey = request.codeKey()
         //根据session id, 将code 存到redis
-        authService.setImageCode(request.codeKey(), type, pair.first)
+        authService.setImageCode(codeKey, type, pair.first)
 
         //将VerifyCode绑定session
         request.session.setAttribute("code.${type}", pair.first)
@@ -67,6 +68,8 @@ class AuthController {
         response.setDateHeader("Expires", 0)
         //设置响应内容类型
         response.send(pair.second, type = "image/jpeg")
+        //将uuid返回给客户端
+        response.setHeader("clientUuid", codeKey)
         L.i("验证码${type}:${pair.first}")
     }
 
