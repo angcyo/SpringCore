@@ -1,9 +1,9 @@
 package com.angcyo.spring.security.jwt.provider
 
 import com.angcyo.spring.security.bean.AuthReqBean
+import com.angcyo.spring.security.jwt.loginError
 import com.angcyo.spring.security.jwt.token.RequestAuthenticationToken
 import org.springframework.security.authentication.AuthenticationProvider
-import org.springframework.security.authentication.BadCredentialsException
 import org.springframework.security.core.Authentication
 
 /**
@@ -38,4 +38,5 @@ abstract class BaseTokenAuthenticationProvider : AuthenticationProvider {
     fun error(msg: String = "授权失败"): Nothing = authError(msg)
 }
 
-inline fun authError(msg: String = "授权失败"): Nothing = throw BadCredentialsException(msg)
+/**[com.angcyo.spring.security.jwt.IAuthorizationHandle.onDoUnsuccessfulAuthentication]*/
+inline fun authError(msg: String = "授权失败"): Nothing = loginError(msg)

@@ -37,11 +37,17 @@ class AuthController {
     lateinit var authService: AuthService
 
     @GetMapping(SecurityConstants.AUTH_IMAGE_CODE_URL)
-    @ApiOperation("获取注册时的图形验证码")
+    @ApiOperation("获取图形验证码")
     @ApiImplicitParams(
         ApiImplicitParam(name = "clientUuid", value = "客户端的UUID", required = true, dataTypeClass = String::class),
-        ApiImplicitParam(name = "type", value = "验证码类型", required = true, dataTypeClass = Int::class),
-        ApiImplicitParam(name = "l", value = "验证码的长度", required = false, dataTypeClass = Int::class),
+        ApiImplicitParam(
+            name = "type",
+            value = "验证码类型(1:注册,2:登录)",
+            required = true,
+            dataTypeClass = Int::class,
+            allowableValues = "1,2"
+        ),
+        ApiImplicitParam(name = "l", value = "验证码的长度(默认4位)", required = false, dataTypeClass = Int::class),
         ApiImplicitParam(name = "w", value = "验证码的宽度", required = false, dataTypeClass = Int::class),
         ApiImplicitParam(name = "h", value = "验证码的高度", required = false, dataTypeClass = Int::class)
     )
@@ -83,7 +89,7 @@ class AuthController {
             }
         }
 
-        return authService.sendCode(request.codeKey(), req.target!!, req.type!!).result()
+        return authService.sendCode(request.codeKey(), req.target!!, req.type!!, req.lenght ?: 6).result()
     }
 
     /**

@@ -1,10 +1,10 @@
 package com.angcyo.spring.security.jwt.provider
 
 import com.angcyo.spring.base.beanOf
-import com.angcyo.spring.base.extension.apiError
 import com.angcyo.spring.base.servlet.request
 import com.angcyo.spring.redis.Redis
 import com.angcyo.spring.security.bean.*
+import com.angcyo.spring.security.jwt.loginError
 import com.angcyo.spring.security.jwt.token.ResponseAuthenticationToken
 import com.angcyo.spring.security.service.AuthService
 import com.angcyo.spring.security.service.codeKey
@@ -38,11 +38,15 @@ open class DefaultAuthenticationProvider : BaseTokenAuthenticationProvider() {
 
         request()?.let {
             val codeKey = it.codeKey()
-            //优先验证图形验证码, 如果有
-            if (redis.hasKey(authService.imageCodeKey(codeKey, CodeType.Login.value))) {
-                if (authReqBean.imageCode != authService.getImageCode(codeKey, CodeType.Login.value)) {
+            //优先验证图形验证码, 如果有.  或者传入了图形验证码
+            if (!authReqBean.imageCode.isNullOrEmpty() ||
+                redis.hasKey(authService.imageCodeKey(codeKey, CodeType.Login.value))
+            ) {
+                if (authReqBean.imageCode?.lowercase() !=
+                    authService.getImageCode(codeKey, CodeType.Login.value)?.lowercase()
+                ) {
                     //如果获取了图形验证码, 但是不匹配
-                    apiError("验证码不正确")
+                    loginError("验证码不正确")
                 }
             }
         }
@@ -72,8 +76,8 @@ open class DefaultAuthenticationProvider : BaseTokenAuthenticationProvider() {
                 error("无效的账号")
             }
 
-            val code = authService.getSendCode(uuid, account, CodeType.Login.value)
-            if (code == null || code != authReqBean.code) {
+            val code = authService.getSendCode(uuid, account, CodeType.Login.value)?.lowercase()
+            if (code == null || code != authReqBean.code?.lowercase()) {
                 error("验证码不正确")
             }
 

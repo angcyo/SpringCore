@@ -6,7 +6,7 @@ package com.angcyo.spring.base.extension
  * @date 2020/11/23
  */
 
-/**[com.angcyo.spring.base.advice.BaseRestExceptionHandlerAdvice]*/
+/**错误感知处理类[com.angcyo.spring.base.advice.BaseRestExceptionHandlerAdvice]*/
 //@ResponseStatus(value = HttpStatus.NOT_IMPLEMENTED, code = HttpStatus.NOT_IMPLEMENTED, reason = "接口异常")
 open class ApiException(message: String = "接口异常", cause: Throwable? = null) : RuntimeException(message, cause)
 

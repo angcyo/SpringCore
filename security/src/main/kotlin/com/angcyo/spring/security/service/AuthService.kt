@@ -86,11 +86,12 @@ class AuthService {
      * [uuid] 目标客户端
      * [code] 需要发送的验证码
      * [type] 验证码类型
+     * [length] 验证码位数
      * [time] 有效时长默认5分钟*/
-    fun sendCode(uuid: String, target: String, type: Int, time: Long = appProperties.codeTime): Boolean {
+    fun sendCode(uuid: String, target: String, type: Int, length: Int, time: Long = appProperties.codeTime): Boolean {
         //code: String
         //需要发送的验证码
-        val code = ImageCode.generateCode(6)
+        val code = ImageCode.generateCode(length)
 
         var result = false
 
@@ -182,9 +183,9 @@ class AuthService {
 
         request()?.let {
             val codeKey = it.codeKey()
-            //优先验证图形验证码, 如果有
-            if (redis.hasKey(imageCodeKey(codeKey, CodeType.Register.value))) {
-                if (bean.imageCode != getImageCode(codeKey, CodeType.Register.value)) {
+            //优先验证图形验证码, 如果有. 或者传入了图形验证码
+            if (!bean.imageCode.isNullOrEmpty() || redis.hasKey(imageCodeKey(codeKey, CodeType.Register.value))) {
+                if (bean.imageCode?.lowercase() != getImageCode(codeKey, CodeType.Register.value)?.lowercase()) {
                     //如果获取了图形验证码, 但是不匹配
                     apiError("验证码不正确")
                 }
@@ -201,8 +202,8 @@ class AuthService {
                 if (uuid.isNullOrEmpty()) {
                     apiError("无效的客户端")
                 }
-                val code = getSendCode(uuid, bean.account!!, CodeType.Register.value)
-                if (code == null || code != bean.code) {
+                val code = getSendCode(uuid, bean.account!!, CodeType.Register.value)?.lowercase()
+                if (code == null || code != bean.code?.lowercase()) {
                     apiError("验证码不正确")
                 }
             }
