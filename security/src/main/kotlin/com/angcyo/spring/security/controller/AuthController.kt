@@ -76,6 +76,8 @@ class AuthController {
         response.send(pair.second, type = "image/jpeg")
         //将uuid返回给客户端
         response.setHeader("clientUuid", codeKey)
+        //允许CORS跨域请求
+        response.setHeader("Access-Control-Allow-Origin", "*")
         L.i("验证码${type}:${pair.first}")
     }
 
