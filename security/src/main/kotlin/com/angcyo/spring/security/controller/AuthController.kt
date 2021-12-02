@@ -1,20 +1,26 @@
 package com.angcyo.spring.security.controller
 
+import com.angcyo.spring.base.beanOf
 import com.angcyo.spring.base.data.Result
 import com.angcyo.spring.base.data.ok
 import com.angcyo.spring.base.data.result
 import com.angcyo.spring.base.extension.apiError
 import com.angcyo.spring.base.servlet.body
 import com.angcyo.spring.base.servlet.send
+import com.angcyo.spring.base.toObj
 import com.angcyo.spring.security.SecurityConstants
 import com.angcyo.spring.security.bean.*
+import com.angcyo.spring.security.jwt.JWT
+import com.angcyo.spring.security.jwt.event.LoginEvent
 import com.angcyo.spring.security.service.AuthService
+import com.angcyo.spring.security.service.UserRoleService
 import com.angcyo.spring.security.service.codeKey
 import com.angcyo.spring.util.ImageCode
 import com.angcyo.spring.util.L
 import com.angcyo.spring.util.nowTimeString
 import io.swagger.annotations.*
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.context.ApplicationEventPublisher
 import org.springframework.validation.BindingResult
 import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.*
@@ -94,6 +100,9 @@ class AuthController {
         return authService.sendCode(request.codeKey(), req.target!!, req.type!!, req.lenght ?: 6).result()
     }
 
+    @Autowired
+    lateinit var eventPublisher: ApplicationEventPublisher
+
     /**
      * [org.springframework.web.servlet.mvc.method.annotation.AbstractMessageConverterMethodArgumentResolver.isBindExceptionRequired]
      * */
@@ -104,9 +113,28 @@ class AuthController {
         @ApiParam @RequestBody @Validated bean: RegisterReqBean, /*不支持kotlin的data class*/
         bindingResult: BindingResult,/*必须放在模型属性之后, 否则无效*/
         request: HttpServletRequest
-    ): Result<Boolean>? {
+    ): Result<AuthRepBean>? {
         return bindingResult.result {
-            authService.register(bean) != null
+            authService.register(bean)?.toObj<AuthRepBean> {
+                val flag = "$id"
+                val token = JWT.generateToken(flag)
+
+                //1
+                val userDetail = UserDetail().apply {
+                    userTable = this@toObj
+                }
+                authService.userService.autoFill(userDetail)
+
+                //2 将token保存至redis
+                authService._loginEnd(userDetail, token)
+
+                //3 发布事件
+                eventPublisher.publishEvent(LoginEvent(userDetail))
+
+                //返回值复制
+                this.token = SecurityConstants.TOKEN_PREFIX + token
+                this.roleList = beanOf(UserRoleService::class.java).getUserRoleList(userDetail.userTable!!.id!!)
+            }
         }
     }
 
@@ -114,6 +142,13 @@ class AuthController {
     @ApiOperation("授权登录")
     @PostMapping(SecurityConstants.AUTH_LOGIN_URL)
     fun login(@ApiParam("授权登录参数") @RequestBody authReqBean: AuthReqBean): Result<AuthRepBean>? {
+        return null
+    }
+
+    /**注销登录接口, 用来生成Swagger文档*/
+    @ApiOperation("注销登录")
+    @PostMapping(SecurityConstants.AUTH_LOGOUT_URL)
+    fun logout(): Result<Boolean>? {
         return null
     }
 

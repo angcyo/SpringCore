@@ -282,7 +282,8 @@ class AuthService {
         redis[userKey(id), time] = userDetail
     }
 
-    /**退出登录*/
+    /**退出登录
+     * [com.angcyo.spring.security.jwt.JwtLogoutHandler.logout]*/
     fun _logoutEnd(userDetail: UserDetail?) {
         SecurityContextHolder.clearContext()
         val id = "${userDetail?.userTable?.id}"

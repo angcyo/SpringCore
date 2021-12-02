@@ -20,6 +20,7 @@ import javax.servlet.http.HttpServletResponse
  */
 
 class JwtLogoutHandler : LogoutHandler {
+
     override fun logout(
         request: HttpServletRequest,
         response: HttpServletResponse,
