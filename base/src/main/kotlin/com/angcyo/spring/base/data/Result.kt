@@ -221,6 +221,26 @@ inline fun Long?.ifNotExist(
     }
 }
 
+/**当前对象是否是真值*/
+inline fun Any.isTruthy(): Boolean = when (this) {
+    is Boolean -> this
+    is Number -> this != 0
+    is String -> isNotEmpty()
+    is List<*> -> isNotEmpty()
+    is Array<*> -> isNotEmpty()
+    else -> false
+}
+
+/**如果[this]为真, 则返回[result]内容
+ * 真值: Truthy https://developer.mozilla.org/zh-CN/docs/Glossary/Truthy
+ * 假值: Falsy https://developer.mozilla.org/zh-CN/docs/Glossary/Falsy */
+inline fun <T> Any.truthyResult(result: T?): T? {
+    if (this.isTruthy()) {
+        return result
+    }
+    return null
+}
+
 //<editor-fold desc="数据类型转换">
 
 /**将数据结构[T]通过json转换成[R]*/
