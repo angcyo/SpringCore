@@ -10,7 +10,7 @@ import org.springframework.security.core.AuthenticationException
  */
 
 /**[com.angcyo.spring.security.jwt.IAuthorizationHandle.onDoUnsuccessfulAuthentication]*/
-class LoginException(msg: String, cause: Throwable? = null) : AuthenticationException(msg, cause)
+open class LoginException(msg: String, cause: Throwable? = null) : AuthenticationException(msg, cause)
 
 /**登录异常*/
 inline fun loginError(message: Any, cause: Throwable? = null): Nothing = throw LoginException(message.toString(), cause)

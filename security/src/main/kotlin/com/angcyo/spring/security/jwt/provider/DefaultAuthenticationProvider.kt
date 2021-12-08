@@ -4,7 +4,7 @@ import com.angcyo.spring.base.beanOf
 import com.angcyo.spring.base.servlet.request
 import com.angcyo.spring.redis.Redis
 import com.angcyo.spring.security.bean.*
-import com.angcyo.spring.security.jwt.loginError
+import com.angcyo.spring.security.jwt.codeError
 import com.angcyo.spring.security.jwt.token.ResponseAuthenticationToken
 import com.angcyo.spring.security.service.AuthService
 import com.angcyo.spring.security.service.codeKey
@@ -46,7 +46,7 @@ open class DefaultAuthenticationProvider : BaseTokenAuthenticationProvider() {
                     authService.getImageCode(codeKey, CodeType.Login.value)?.lowercase()
                 ) {
                     //如果获取了图形验证码, 但是不匹配
-                    loginError("验证码不正确")
+                    codeError("验证码不正确")
                 }
             }
         }
@@ -57,7 +57,7 @@ open class DefaultAuthenticationProvider : BaseTokenAuthenticationProvider() {
             //密码登录方式
 
             if (authReqBean.account.isNullOrEmpty() || authReqBean.password.isNullOrEmpty()) {
-                throw  UsernameNotFoundException("账号或密码不正确")
+                throw UsernameNotFoundException("账号或密码不正确")
             }
 
             //获取帐号
