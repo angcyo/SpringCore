@@ -50,8 +50,12 @@ interface IBaseMybatisService<Table> : IService<Table> {
 
     /**获取一个[QueryWrapper]
      * 是否需要加上[noDelete]?*/
-    fun queryWrapper(): QueryWrapper<Table> {
-        return QueryWrapper<Table>()
+    fun queryWrapper(filterDelete: Boolean = false): QueryWrapper<Table> {
+        return QueryWrapper<Table>().apply {
+            if (filterDelete) {
+                noDelete()
+            }
+        }
     }
 
     /**获取一个[UpdateWrapper]*/
@@ -93,7 +97,7 @@ interface IBaseMybatisService<Table> : IService<Table> {
      *
      * [com.angcyo.spring.security.service.PermissionService.getUserPermission]
      * */
-    fun selectFrom(from: SelectFrom): List<Table> {
+    fun selectFrom(from: SelectFrom, filterDelete: Boolean = false): List<Table> {
         var keyColumnName: String? = null
         entityClass.eachField {
             if (ColumnUtils.isKey(it, entityClass)) {
@@ -135,7 +139,7 @@ interface IBaseMybatisService<Table> : IService<Table> {
 
         L.i("selectFrom:$sql")
 
-        return list(queryWrapper().apply {
+        return list(queryWrapper(filterDelete).apply {
             if (from.column.isEmpty()) {
                 apply(sql)
             } else {
@@ -176,7 +180,7 @@ interface IBaseMybatisService<Table> : IService<Table> {
         equalTo: (existTable: Table, table: Table) -> Boolean
     ) {
         //获取所有已存在的数据
-        val existTableList = list(queryWrapper().apply(queryList))
+        val existTableList = list(queryWrapper(true).apply(queryList))
         val targetTableList = mutableListOf<Table>()
         targetTableList.addAll(list)
 
@@ -241,12 +245,12 @@ interface IBaseMybatisService<Table> : IService<Table> {
     }
 
     /**
-      * ```
-      * contestClazzService.resetFrom(clazzList, ContestClazzReTable::clazzId.name) {
-      *   eq(ContestClazzReTable::customerId.columnName(), customerId)
-      *   eq(ContestClazzReTable::contestId.columnName(), contestId)
-      * }
-      * ```
+     * ```
+     * contestClazzService.resetFrom(clazzList, ContestClazzReTable::clazzId.name) {
+     *   eq(ContestClazzReTable::customerId.columnName(), customerId)
+     *   eq(ContestClazzReTable::contestId.columnName(), contestId)
+     * }
+     * ```
      * */
     @Transactional
     fun resetFrom(list: List<Table>, equalField: String, queryList: QueryWrapper<Table>.() -> Unit) {
@@ -262,8 +266,8 @@ interface IBaseMybatisService<Table> : IService<Table> {
     /**如果数据存在, 则更新.
      * 不存在, 则保存*/
     @Transactional
-    fun saveOrUpdate(entity: Table, dsl: QueryWrapper<Table>.() -> Unit): Table {
-        val queryWrapper = queryWrapper().apply {
+    fun saveOrUpdate(entity: Table, filterDelete: Boolean = false, dsl: QueryWrapper<Table>.() -> Unit): Table {
+        val queryWrapper = queryWrapper(filterDelete).apply {
             last("LIMIT 1")
             dsl()
         }
@@ -288,8 +292,12 @@ interface IBaseMybatisService<Table> : IService<Table> {
      *
      * [error] 返回false时, 异常提示*/
     @Transactional
-    fun removeQuery(error: String? = null, dsl: QueryWrapper<Table>.() -> Unit): Boolean {
-        return remove(queryWrapper().apply(dsl)).apply {
+    fun removeQuery(
+        error: String? = null,
+        filterDelete: Boolean = false,
+        dsl: QueryWrapper<Table>.() -> Unit
+    ): Boolean {
+        return remove(queryWrapper(filterDelete).apply(dsl)).apply {
             if (!this && error != null) {
                 apiError(error)
             }
@@ -339,31 +347,35 @@ interface IBaseMybatisService<Table> : IService<Table> {
     }
 
     /**Dsl Query*/
-    fun listQuery(dsl: QueryWrapper<Table>.() -> Unit): List<Table> {
-        return list(queryWrapper().apply(dsl))
+    fun listQuery(filterDelete: Boolean = false, dsl: QueryWrapper<Table>.() -> Unit): List<Table> {
+        return list(queryWrapper(filterDelete).apply(dsl))
     }
 
-    fun listQueryOne(limit: Long = 1, dsl: QueryWrapper<Table>.() -> Unit): Table? {
-        return list(queryWrapper().apply {
+    fun listQueryOne(limit: Long = 1, filterDelete: Boolean = false, dsl: QueryWrapper<Table>.() -> Unit): Table? {
+        return list(queryWrapper(filterDelete).apply {
             last("LIMIT $limit")
             dsl()
         }).firstOrNull()
     }
 
     /**查询最新的一条数据*/
-    fun listQueryNewOne(limit: Long = 1, dsl: QueryWrapper<Table>.() -> Unit): Table? {
-        return list(queryWrapper().apply {
+    fun listQueryNewOne(
+        limit: Long = 1, filterDelete: Boolean = false, dsl: QueryWrapper<Table>.() -> Unit
+    ): Table? {
+        return list(queryWrapper(filterDelete).apply {
             orderByDesc(BaseAuditTable::id.columnName())
             last("LIMIT $limit")
             dsl()
         }).firstOrNull()
     }
 
-    fun listQueryIn(coll: Collection<*>, dsl: QueryWrapper<Table>.() -> Unit): List<Table> {
+    fun listQueryIn(
+        coll: Collection<*>, filterDelete: Boolean = false, dsl: QueryWrapper<Table>.() -> Unit
+    ): List<Table> {
         if (coll.isEmpty()) {
             return emptyList()
         }
-        return list(queryWrapper().apply(dsl))
+        return list(queryWrapper(filterDelete).apply(dsl))
     }
 
     /**Dsl Page*/
@@ -371,16 +383,17 @@ interface IBaseMybatisService<Table> : IService<Table> {
         pageIndex: Long = 1,
         pageSize: Long = BaseAutoPageParam.PAGE_SIZE,
         searchCount: Boolean = true,
+        filterDelete: Boolean = false,
         dsl: QueryWrapper<Table>.() -> Unit
     ): IPage<Table> {
         val page = Page<Table>(pageIndex, pageSize, searchCount)
         page.maxLimit = pageSize
-        return page(page, queryWrapper().apply(dsl))
+        return page(page, queryWrapper(filterDelete).apply(dsl))
     }
 
     /**Dsl Count*/
-    fun countQuery(dsl: QueryWrapper<Table>.() -> Unit): Long {
-        return count(queryWrapper().apply(dsl))
+    fun countQuery(filterDelete: Boolean = false, dsl: QueryWrapper<Table>.() -> Unit): Long {
+        return count(queryWrapper(filterDelete).apply(dsl))
     }
 
     //</editor-fold desc="Dsl">
