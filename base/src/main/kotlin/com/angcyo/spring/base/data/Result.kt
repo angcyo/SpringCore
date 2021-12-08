@@ -109,10 +109,10 @@ inline fun <T> BindingResult.result(checkNull: Boolean = true, responseEntity: (
             }
         }.error()
     } else {
+        val resultEntity = responseEntity()
         try {
-            val resultEntity = responseEntity()
-            if (checkNull &&
-                (resultEntity is Boolean && resultEntity == false ||
+            if (checkNull && (resultEntity is Boolean &&
+                        resultEntity == false ||
                         resultEntity == null)
             ) {
                 Result.error(resultEntity)

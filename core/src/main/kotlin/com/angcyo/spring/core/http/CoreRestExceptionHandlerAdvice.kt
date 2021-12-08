@@ -28,16 +28,19 @@ class CoreRestExceptionHandlerAdvice {
     @ExceptionHandler(MethodArgumentNotValidException::class)
     fun methodArgumentNotValidException(exception: MethodArgumentNotValidException): Result<String>? {
         // 从异常对象中拿到ObjectError对象
+        L.w("异常感知:$exception")
         return exception.bindingResult.allErrors.joinToString { it.defaultMessage.str() }.error()
     }
 
     @ExceptionHandler(NestedServletException::class)
     fun apiExtension(exception: NestedServletException): Result<String>? {
+        L.w("异常感知:$exception")
         return exception.message.error()
     }
 
     @ExceptionHandler(RuntimeException::class)
     fun runtimeException(exception: RuntimeException): Result<String>? {
+        L.w("异常感知:$exception")
         val request = request()
         L._logDb.error(
             exception.stackTraceToString(),

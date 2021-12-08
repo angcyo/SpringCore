@@ -50,18 +50,13 @@ object JacksonEx {
  * [@JsonFilter(JacksonEx.DEFAULT_FILTER)]*/
 fun Any?.toJackson(ignoreProperty: Array<out String>? = null, onlyProperty: Array<out String>? = null): String? {
     return this?.run {
-        try {
-            (if (!onlyProperty.isNullOrEmpty()) {
-                onlyPropertyMapper(*onlyProperty)
-            } else if (!ignoreProperty.isNullOrEmpty()) {
-                ignorePropertyMapper(*ignoreProperty)
-            } else {
-                mapper
-            }).writeValueAsString(this)
-        } catch (e: Exception) {
-            e.printStackTrace()
-            null
-        }
+        (if (!onlyProperty.isNullOrEmpty()) {
+            onlyPropertyMapper(*onlyProperty)
+        } else if (!ignoreProperty.isNullOrEmpty()) {
+            ignorePropertyMapper(*ignoreProperty)
+        } else {
+            mapper
+        }).writeValueAsString(this)
     }
 }
 
@@ -72,13 +67,6 @@ fun Any?.toJacksonIgnore(vararg property: String) = toJackson(ignoreProperty = p
 fun Any?.toJacksonOnly(vararg property: String) = toJackson(onlyProperty = property)
 
 fun <T> String?.fromJackson(clazz: Class<T>): T? {
-    return this?.run {
-        try {
-            mapper.readValue<T>(this, clazz)
-        } catch (e: Exception) {
-            e.printStackTrace()
-            null
-        }
-    }
+    return mapper.readValue<T>(this, clazz)
 }
 
