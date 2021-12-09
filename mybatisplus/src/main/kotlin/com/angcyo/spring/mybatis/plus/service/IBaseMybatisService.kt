@@ -97,7 +97,7 @@ interface IBaseMybatisService<Table> : IService<Table> {
      *
      * [com.angcyo.spring.security.service.PermissionService.getUserPermission]
      * */
-    fun selectFrom(from: SelectFrom, filterDelete: Boolean = false): List<Table> {
+    fun selectFrom(from: SelectFrom, filterDelete: Boolean = true): List<Table> {
         var keyColumnName: String? = null
         entityClass.eachField {
             if (ColumnUtils.isKey(it, entityClass)) {
@@ -266,7 +266,7 @@ interface IBaseMybatisService<Table> : IService<Table> {
     /**如果数据存在, 则更新.
      * 不存在, 则保存*/
     @Transactional
-    fun saveOrUpdate(entity: Table, filterDelete: Boolean = false, dsl: QueryWrapper<Table>.() -> Unit): Table {
+    fun saveOrUpdate(entity: Table, filterDelete: Boolean = true, dsl: QueryWrapper<Table>.() -> Unit): Table {
         val queryWrapper = queryWrapper(filterDelete).apply {
             last("LIMIT 1")
             dsl()
@@ -294,7 +294,7 @@ interface IBaseMybatisService<Table> : IService<Table> {
     @Transactional
     fun removeQuery(
         error: String? = null,
-        filterDelete: Boolean = false,
+        filterDelete: Boolean = true,
         dsl: QueryWrapper<Table>.() -> Unit
     ): Boolean {
         return remove(queryWrapper(filterDelete).apply(dsl)).apply {
@@ -347,11 +347,11 @@ interface IBaseMybatisService<Table> : IService<Table> {
     }
 
     /**Dsl Query*/
-    fun listQuery(filterDelete: Boolean = false, dsl: QueryWrapper<Table>.() -> Unit): List<Table> {
+    fun listQuery(filterDelete: Boolean = true, dsl: QueryWrapper<Table>.() -> Unit): List<Table> {
         return list(queryWrapper(filterDelete).apply(dsl))
     }
 
-    fun listQueryOne(limit: Long = 1, filterDelete: Boolean = false, dsl: QueryWrapper<Table>.() -> Unit): Table? {
+    fun listQueryOne(limit: Long = 1, filterDelete: Boolean = true, dsl: QueryWrapper<Table>.() -> Unit): Table? {
         return list(queryWrapper(filterDelete).apply {
             last("LIMIT $limit")
             dsl()
@@ -360,7 +360,7 @@ interface IBaseMybatisService<Table> : IService<Table> {
 
     /**查询最新的一条数据*/
     fun listQueryNewOne(
-        limit: Long = 1, filterDelete: Boolean = false, dsl: QueryWrapper<Table>.() -> Unit
+        limit: Long = 1, filterDelete: Boolean = true, dsl: QueryWrapper<Table>.() -> Unit
     ): Table? {
         return list(queryWrapper(filterDelete).apply {
             orderByDesc(BaseAuditTable::id.columnName())
@@ -370,7 +370,7 @@ interface IBaseMybatisService<Table> : IService<Table> {
     }
 
     fun listQueryIn(
-        coll: Collection<*>, filterDelete: Boolean = false, dsl: QueryWrapper<Table>.() -> Unit
+        coll: Collection<*>, filterDelete: Boolean = true, dsl: QueryWrapper<Table>.() -> Unit
     ): List<Table> {
         if (coll.isEmpty()) {
             return emptyList()
@@ -383,7 +383,7 @@ interface IBaseMybatisService<Table> : IService<Table> {
         pageIndex: Long = 1,
         pageSize: Long = BaseAutoPageParam.PAGE_SIZE,
         searchCount: Boolean = true,
-        filterDelete: Boolean = false,
+        filterDelete: Boolean = true,
         dsl: QueryWrapper<Table>.() -> Unit
     ): IPage<Table> {
         val page = Page<Table>(pageIndex, pageSize, searchCount)
@@ -392,7 +392,7 @@ interface IBaseMybatisService<Table> : IService<Table> {
     }
 
     /**Dsl Count*/
-    fun countQuery(filterDelete: Boolean = false, dsl: QueryWrapper<Table>.() -> Unit): Long {
+    fun countQuery(filterDelete: Boolean = true, dsl: QueryWrapper<Table>.() -> Unit): Long {
         return count(queryWrapper(filterDelete).apply(dsl))
     }
 

@@ -63,11 +63,29 @@ fun AbstractWrapper<*, String, *>.deleteFlag(delete: Boolean? = false) {
     }
 }
 
+/**如果[value]为空时, 不插入查询条件*/
+fun QueryWrapper<*>.eq2(column: String, value: Any?) {
+    if (value != null) {
+        when (value) {
+            is String -> {
+                if (value.isNotEmpty()) {
+                    eq(column, value)
+                }
+            }
+            is Collection<*> -> {
+                if (value.isNotEmpty()) {
+                    eq(column, value)
+                }
+            }
+            else -> eq(column, value)
+        }
+    }
+}
+
 /**UserName 转换成 user_name
  * [com.gitee.sunchenbin.mybatis.actable.utils.ColumnUtils.getTableName]*/
 fun lowerName(value: String) = CaseFormat.LOWER_CAMEL.to(
-    CaseFormat.LOWER_UNDERSCORE,
-    value.replace(ColumnUtils.SQL_ESCAPE_CHARACTER, "")
+    CaseFormat.LOWER_UNDERSCORE, value.replace(ColumnUtils.SQL_ESCAPE_CHARACTER, "")
 ).lowercase()
 
 fun String.toLowerName() = lowerName(this)
@@ -78,15 +96,15 @@ fun lowerCamel(value: String) = CaseFormat.LOWER_UNDERSCORE.to(CaseFormat.LOWER_
 fun String.toLowerCamel() = lowerCamel(this)
 
 /**转换成安全的sql语句, 防止sql注入*/
-fun String.toSafeSql() = replace("\\", "\\\\")
-    .replace("'", "\\'")
-    .replace("-", "\\-")
+fun String.toSafeSql() = replace("\\", "\\\\").replace("'", "\\'").replace("-", "\\-")
 
 /**获取class对应的表名*/
 fun KClass<*>.tableName() = ColumnUtils.getTableName(this.java)
 fun Class<*>.tableName() = ColumnUtils.getTableName(this)
 
 fun KProperty<*>.columnName() = name.toLowerName()
+
+fun KProperty<*>.c() = columnName()
 
 /**获取对象结构的主键属性名*/
 fun Any.keyName(def: String = "id") = FieldUtils.getKeyField(this)?.name?.toLowerName() ?: def

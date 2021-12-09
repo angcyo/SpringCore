@@ -9,31 +9,32 @@ import com.angcyo.spring.util.getSexByIdCard
  */
 
 /**性别*/
-sealed class SexType(val value: Int) {
+sealed class SexType(val value: Int, val label: String) {
     /**男*/
-    object Male : SexType(1)
+    object Male : SexType(1, "男")
 
     /**女*/
-    object Female : SexType(2)
+    object Female : SexType(2, "女")
 
-    object Unknown : SexType(-1)
+    /**保密*/
+    object Secret : SexType(0, "保密")
+
+    object Unknown : SexType(-1, "未知")
 }
 
 fun Int.toSex() = when (this) {
     SexType.Male.value -> SexType.Male
     SexType.Female.value -> SexType.Female
+    SexType.Secret.value -> SexType.Secret
     else -> SexType.Unknown
 }
 
-fun SexType.toStr() = when (this) {
-    SexType.Male -> "男"
-    SexType.Female -> "女"
-    SexType.Unknown -> "未知"
-}
+fun SexType.toStr() = this.label
 
 /**[com.angcyo.spring.base.data.SexType]*/
 fun String.getSexTypeByIdCard() = when (getSexByIdCard()) {
     1 -> SexType.Male.value
-    0 -> SexType.Female.value
+    2 -> SexType.Female.value
+    0 -> SexType.Secret.value
     else -> SexType.Unknown.value
 }

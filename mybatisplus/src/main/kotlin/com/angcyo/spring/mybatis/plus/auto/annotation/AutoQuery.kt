@@ -25,5 +25,9 @@ annotation class AutoQuery(
     val checkNull: Boolean = false,
 
     /**空异常时的错误提示*/
-    val nullError: String = ""
+    val nullError: String = "",
+
+/*
+    *//**相同tag的查询为一组, 过滤其他的tag*//*
+    val tag: String = "default",*/
 )
