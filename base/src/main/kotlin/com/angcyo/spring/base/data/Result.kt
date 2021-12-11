@@ -34,9 +34,7 @@ import javax.validation.groups.Default
  */
 
 data class Result<T>(
-    var code: Int = SUCCESS_CODE,
-    var msg: String? = "Success",
-    var data: T? = null
+    var code: Int = SUCCESS_CODE, var msg: String? = "Success", var data: T? = null
 ) {
     companion object {
 
@@ -102,7 +100,7 @@ fun <T> Any?.error(code: Int = ERROR_CODE) = Result<T>(code = code, msg = this.s
 inline fun <T> BindingResult.result(checkNull: Boolean = true, responseEntity: () -> T?): Result<T> {
     return if (hasErrors()) {
         allErrors.joinToString {
-            if (it is FieldError) {
+            if (it is FieldError && L.isDebug) {
                 "${it.field}:${it.defaultMessage}"
             } else {
                 "${it.defaultMessage}"
@@ -111,10 +109,7 @@ inline fun <T> BindingResult.result(checkNull: Boolean = true, responseEntity: (
     } else {
         val resultEntity = responseEntity()
         try {
-            if (checkNull && (resultEntity is Boolean &&
-                        resultEntity == false ||
-                        resultEntity == null)
-            ) {
+            if (checkNull && (resultEntity is Boolean && resultEntity == false || resultEntity == null)) {
                 Result.error(resultEntity)
             } else {
                 Result.ok(resultEntity)

@@ -1,4 +1,8 @@
 dependencies {
+
+    implementation(project(":SpringCore:base"))
+    implementation(project(":SpringCore:util"))
+
     api("cn.hutool:hutool-all:5.7.14")
 
     //https://www.hutool.cn/docs/#/poi/%E6%A6%82%E8%BF%B0?id=%e4%bb%8b%e7%bb%8d

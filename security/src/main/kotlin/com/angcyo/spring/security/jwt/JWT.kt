@@ -39,11 +39,9 @@ object JWT {
 
     fun jwtBuilder(): JwtBuilder {
 
-        return Jwts.builder()
-            .signWith(secretKey(), SignatureAlgorithm.HS512)
+        return Jwts.builder().signWith(secretKey(), SignatureAlgorithm.HS512)
             .setHeaderParam(SecurityConstants.KEY_TOKEN_TYPE, SecurityConstants.TOKEN_TYPE)
-            .setIssuer(SecurityConstants.TOKEN_ISSUER)
-            .setAudience(SecurityConstants.TOKEN_AUDIENCE)
+            .setIssuer(SecurityConstants.TOKEN_ISSUER).setAudience(SecurityConstants.TOKEN_AUDIENCE)
             .setExpiration(generateExpirationDate()) //过期时间
     }
 
@@ -52,10 +50,7 @@ object JWT {
      * [roles] 用户对应的角色
      * */
     fun generateToken(username: String, roles: Collection<Any>? = null): String {
-        val token = jwtBuilder()
-            .setSubject(username)
-            .claim(SecurityConstants.TOKEN_ROLES, roles)
-            .compact()
+        val token = jwtBuilder().setSubject(username).claim(SecurityConstants.TOKEN_ROLES, roles).compact()
         return token
     }
 
@@ -63,11 +58,8 @@ object JWT {
      * 根据负责生成JWT的token
      */
     private fun generateToken(username: String, claims: Map<String, Any?>, roles: Collection<Any>? = null): String? {
-        val token = jwtBuilder()
-            .setSubject(username)
-            .claim(SecurityConstants.TOKEN_ROLES, roles)
-            .addClaims(claims)
-            .compact()
+        val token =
+            jwtBuilder().setSubject(username).claim(SecurityConstants.TOKEN_ROLES, roles).addClaims(claims).compact()
         return token
     }
 
@@ -160,10 +152,7 @@ object JWT {
         try {
             claims = Jwts.parserBuilder()
                 //.requireAudience("string")
-                .setSigningKey(secretKey())
-                .build()
-                .parseClaimsJws(token)
-                .body
+                .setSigningKey(secretKey()).build().parseClaimsJws(token).body
         } catch (e: Exception) {
             L.i("JWT格式验证失败:{}", token)
         }
@@ -207,6 +196,8 @@ object JWT {
 
 /**当前登录的用户id*/
 fun currentUserId(): Long = currentUser().userTable!!.id!!
+
+fun currentUserIdOrDef(def: Long = -1): Long = currentUser().userTable?.id ?: def
 
 /**获取当前登录的用户信息*/
 fun currentUser(): UserDetail {

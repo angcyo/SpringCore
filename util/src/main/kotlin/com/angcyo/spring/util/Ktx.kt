@@ -180,6 +180,15 @@ fun <T> List<T>.eachRandomList(count: Int, action: (index: Int, T) -> Unit) {
 
 fun List<*>?.size() = this?.size ?: 0
 
+fun Iterator<*>?.size() = this?.run {
+    var size = 0
+    while (hasNext()) {
+        size++
+        next()
+    }
+    size
+} ?: 0
+
 /**集合是否包含元素[element]
  * 集合为空时返回[nullDef]的值*/
 fun <T> List<T>?.containsOrNullDef(element: T?, nullDef: Boolean = true) = this?.contains(element) ?: nullDef
