@@ -59,7 +59,10 @@ class AppProperties {
     var tokenTime: Long = 60 * 60 * 24L
 
     /**默认验证码登录有效时长, 秒*/
-    var codeTime: Long = 5 * 60
+    var codeTime: Long = 15 * 60
+
+    /**图形验证码有效时长, 秒*/
+    var imageCodeTime: Long = 10 * 60
 
     /**redis 缓存数据的时长, 秒*/
     var dataCacheTime: Long = 24 * 60 * 60 //24小时

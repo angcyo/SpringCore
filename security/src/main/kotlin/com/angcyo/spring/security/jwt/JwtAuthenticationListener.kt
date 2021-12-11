@@ -1,5 +1,7 @@
 package com.angcyo.spring.security.jwt
 
+import com.angcyo.spring.base.servlet.request
+import com.angcyo.spring.security.SecurityConstants
 import com.angcyo.spring.security.bean.CodeType
 import com.angcyo.spring.security.jwt.event.AuthenticationTokenEvent
 import com.angcyo.spring.security.service.AuthService
@@ -22,8 +24,12 @@ class JwtAuthenticationListener : ApplicationListener<AuthenticationTokenEvent> 
 
     override fun onApplicationEvent(event: AuthenticationTokenEvent) {
         currentClientUuid()?.let {
-            authService.clearImageCode(it, CodeType.Register.value)
-            authService.clearImageCode(it, CodeType.Login.value)
+            if (request()?.servletPath != SecurityConstants.AUTH_REGISTER_URL) {
+                authService.clearImageCode(it, CodeType.Register.value)
+            }
+            if (request()?.servletPath != SecurityConstants.AUTH_LOGIN_URL) {
+                authService.clearImageCode(it, CodeType.Login.value)
+            }
         }
     }
 }
