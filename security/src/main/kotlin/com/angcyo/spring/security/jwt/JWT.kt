@@ -38,7 +38,6 @@ object JWT {
     }
 
     fun jwtBuilder(): JwtBuilder {
-
         return Jwts.builder().signWith(secretKey(), SignatureAlgorithm.HS512)
             .setHeaderParam(SecurityConstants.KEY_TOKEN_TYPE, SecurityConstants.TOKEN_TYPE)
             .setIssuer(SecurityConstants.TOKEN_ISSUER).setAudience(SecurityConstants.TOKEN_AUDIENCE)

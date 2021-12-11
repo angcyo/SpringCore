@@ -2,6 +2,7 @@ package com.angcyo.spring.util
 
 import java.net.URLDecoder
 import java.net.URLEncoder
+import java.util.*
 import java.util.regex.Pattern
 import kotlin.reflect.KCallable
 
@@ -46,16 +47,14 @@ fun String.getSafe(index: Int): Char? {
 }
 
 fun CharSequence?.patternList(
-    regex: String?,
-    orNoFind: String? = null /*未找到时, 默认*/
+    regex: String?, orNoFind: String? = null /*未找到时, 默认*/
 ): MutableList<String> {
     return this.patternList(regex?.toPattern(), orNoFind)
 }
 
 /**获取字符串中所有匹配的数据(部分匹配), 更像是contains的关系*/
 fun CharSequence?.patternList(
-    pattern: Pattern?,
-    orNoFind: String? = null /*未找到时, 默认*/
+    pattern: Pattern?, orNoFind: String? = null /*未找到时, 默认*/
 ): MutableList<String> {
     val result = mutableListOf<String>()
     if (this == null) {
@@ -109,3 +108,11 @@ fun String?.isEmail(regex: String = PATTERN_EMAIL): Boolean {
     }
     return matches(regex.toRegex())
 }
+
+/**
+ * 1->MQ==
+ * 123->MTIz
+ * */
+fun String.base64Encode(): String = Base64.getEncoder().encodeToString(toByteArray(Charsets.UTF_8))
+
+fun String.base64Decoder(): String = Base64.getDecoder().decode(toByteArray(Charsets.UTF_8)).toString(Charsets.UTF_8)

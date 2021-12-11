@@ -37,18 +37,12 @@ fun request() = servletRequestAttributes()?.request
 fun response() = servletRequestAttributes()?.response
 
 /**读取请求体字符串数据*/
-fun ServletRequest.body() = if (contentLength > 0)
-    if (this is IStreamWrapper)
-        this.toByteArray(true)?.string()
-    else
-        inputStream.readBytes().string()
+fun ServletRequest.body() = if (contentLength > 0) if (this is IStreamWrapper) this.toByteArray(true)?.string()
+else inputStream.readBytes().string()
 else null
 
-fun ServletRequest.bytes() = if (contentLength > 0)
-    if (this is IStreamWrapper)
-        this.toByteArray(true)
-    else
-        inputStream.readBytes()
+fun ServletRequest.bytes() = if (contentLength > 0) if (this is IStreamWrapper) this.toByteArray(true)
+else inputStream.readBytes()
 else null
 
 fun <T> ServletRequest.fromJson(classOfT: Class<T>): T? {
@@ -93,9 +87,7 @@ fun HttpServletRequest.requestUrl(): String {
 
 /**写入返回体消息*/
 fun HttpServletResponse.send(
-    message: String?,
-    code: Int = HttpServletResponse.SC_OK,
-    type: String = "application/json"
+    message: String?, code: Int = HttpServletResponse.SC_OK, type: String = "application/json"
 ) {
     characterEncoding = "UTF-8"
     send(message?.toByteArray(Charsets.UTF_8), code, type)
@@ -113,9 +105,7 @@ fun HttpServletResponse.throwError(message: String?) {
 }
 
 fun HttpServletResponse.send(
-    bytes: ByteArray?,
-    code: Int = HttpServletResponse.SC_OK,
-    type: String = "application/json"
+    bytes: ByteArray?, code: Int = HttpServletResponse.SC_OK, type: String = "application/json"
 ) {
     status = code
     contentType = type
@@ -129,6 +119,13 @@ fun HttpServletResponse.send(
             it.write(bytes)
         }
     }
+}
+
+/**重定向
+ * response.sendRedirect("/redirect/index?base=r2");
+ * https://www.cnblogs.com/yihuihui/p/11650078.html*/
+fun HttpServletResponse.redirect(location: String) {
+    sendRedirect(location)
 }
 
 //</editor-fold desc="ServletResponse扩展">

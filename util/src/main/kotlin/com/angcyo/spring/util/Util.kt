@@ -20,9 +20,10 @@ var chars: Array<String> = arrayOf(
 /**生成短的uuid*/
 fun generateShortUuid(length: Int = 8): String {
     val shortBuffer = StringBuffer()
-    val uuid: String = UUID.randomUUID().toString().replace("-", "")
+    val uuid: String = UUID.randomUUID().toString().replace("-", "") //32位
     for (i in 0 until length) {
-        val str = uuid.substring(i * 4, i * 4 + 4)
+        val ii = i % 8
+        val str = uuid.substring(ii * 4, ii * 4 + 4)
         val x = str.toInt(16)
         shortBuffer.append(chars[x % 0x3E])
     }

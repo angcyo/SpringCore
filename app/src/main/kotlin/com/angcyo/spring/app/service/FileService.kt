@@ -1,6 +1,5 @@
 package com.angcyo.spring.app.service
 
-import com.angcyo.spring.app.FileProperties
 import com.angcyo.spring.app.table.FileTable
 import com.angcyo.spring.app.table.mapper.IFileMapper
 import com.angcyo.spring.base.AppProperties
@@ -21,10 +20,7 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder
 import java.io.IOException
 import java.net.MalformedURLException
 import java.nio.file.Files
-import java.nio.file.Path
-import java.nio.file.Paths
 import java.nio.file.StandardCopyOption
-import javax.annotation.PostConstruct
 
 /**
  * Email:angcyo@126.com
@@ -36,22 +32,10 @@ import javax.annotation.PostConstruct
 class FileService : BaseAutoMybatisServiceImpl<IFileMapper, FileTable>() {
 
     @Autowired
-    lateinit var fileProperties: FileProperties
-
-    lateinit var fileStorageLocation: Path
-
-    @Autowired
     lateinit var appProperties: AppProperties
 
-    @PostConstruct
-    fun init() {
-        fileStorageLocation = Paths.get(fileProperties.uploadDir).toAbsolutePath().normalize()
-        try {
-            Files.createDirectories(fileStorageLocation)
-        } catch (ex: Exception) {
-            throw ApiException("Could not create the directory where the uploaded files will be stored.")
-        }
-    }
+    @Autowired
+    lateinit var filePathService: FilePathService
 
     /**
      * 存储文件到系统
@@ -69,7 +53,7 @@ class FileService : BaseAutoMybatisServiceImpl<IFileMapper, FileTable>() {
             }
 
             // Copy file to the target location (Replacing existing file with the same name)
-            val targetLocation = fileStorageLocation.resolve(fileName)
+            val targetLocation = filePathService.getFileUploadPath(fileName)
             Files.copy(file.inputStream, targetLocation, StandardCopyOption.REPLACE_EXISTING)
             fileName
         } catch (ex: IOException) {
@@ -85,7 +69,7 @@ class FileService : BaseAutoMybatisServiceImpl<IFileMapper, FileTable>() {
      */
     fun loadFileAsResource(fileName: String): Resource {
         return try {
-            val filePath = fileStorageLocation.resolve(fileName).normalize()
+            val filePath = filePathService.fileUploadLocation.resolve(fileName).normalize()
             val resource: Resource = UrlResource(filePath.toUri())
             if (resource.exists()) {
                 resource
@@ -117,9 +101,7 @@ class FileService : BaseAutoMybatisServiceImpl<IFileMapper, FileTable>() {
         val uri: String = if (ossClass == null) {
             storeFile(file)
             key = "/file/downloadFile/${fileName}"
-            ServletUriComponentsBuilder.fromCurrentContextPath()
-                .path(key)
-                .toUriString()
+            ServletUriComponentsBuilder.fromCurrentContextPath().path(key).toUriString()
         } else {
             key = "${appProperties.name}/${nowTimeString(Constant.DEFAULT_DATE_FORMATTER)}/$fileName"
             ossClass.upload(key, file.inputStream)

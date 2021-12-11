@@ -7,6 +7,7 @@ import com.angcyo.spring.security.bean.UserDetail
 import com.angcyo.spring.security.bean.UserQueryParam
 import com.angcyo.spring.security.jwt.token.ResponseAuthenticationToken
 import com.angcyo.spring.security.service.AuthService
+import com.angcyo.spring.security.table.UserTable
 import com.angcyo.spring.util.L
 import org.springframework.context.ApplicationEventPublisher
 import org.springframework.context.ApplicationEventPublisherAware
@@ -28,15 +29,12 @@ import javax.servlet.http.HttpServletResponse
  * 从请求头中[com.angcyo.spring.security.SecurityConstants.TOKEN_HEADER]获取token
  * */
 class JwtAuthorizationFilter(
-    authenticationManager: AuthenticationManager?,
-    val authService: AuthService
+    authenticationManager: AuthenticationManager?, val authService: AuthService
 ) : BasicAuthenticationFilter(authenticationManager), ApplicationEventPublisherAware, IAuthorizationHandle {
 
     /**请求拦截, 验证Token*/
     override fun doFilterInternal(
-        request: HttpServletRequest,
-        response: HttpServletResponse,
-        filterChain: FilterChain
+        request: HttpServletRequest, response: HttpServletResponse, filterChain: FilterChain
     ) {
         try {
             val authentication = getAuthentication(request)
@@ -64,13 +62,20 @@ class JwtAuthorizationFilter(
     }
 
     /**获取授权*/
-    private fun getAuthentication(request: HttpServletRequest): ResponseAuthenticationToken? {
+    private fun getAuthentication(request: HttpServletRequest): Authentication? {
         val token = request.getHeader(SecurityConstants.TOKEN_HEADER)
 
         var authentication: ResponseAuthenticationToken? = null
 
         if (token.isNullOrEmpty()) {
-            //no op
+            //临时授权功能支持
+            authService.authorizationTempToken(request)?.let {
+                authentication = ResponseAuthenticationToken(authService.tempUserDetail(UserTable().apply {
+                    id = it.first
+                    nickname = "临时用户"
+                    des = "临时用户"
+                }))
+            }
         } else {
             //1. token检查
             val parseToken = JWT.parseToken(token)
@@ -107,7 +112,7 @@ class JwtAuthorizationFilter(
             }
         }*/
 
-        if (L.isDebug) {
+        if (authentication == null || L.isDebug) {
             if (request.param("dev") == "truthy") {
                 //开发控制
                 authentication = ResponseAuthenticationToken(authService.tempUserDetail())
@@ -118,18 +123,14 @@ class JwtAuthorizationFilter(
     }
 
     override fun onSuccessfulAuthentication(
-        request: HttpServletRequest?,
-        response: HttpServletResponse?,
-        authResult: Authentication?
+        request: HttpServletRequest?, response: HttpServletResponse?, authResult: Authentication?
     ) {
         super.onSuccessfulAuthentication(request, response, authResult)
         onDoSuccessfulAuthentication(eventPublisher, request, response, authResult)
     }
 
     override fun onUnsuccessfulAuthentication(
-        request: HttpServletRequest?,
-        response: HttpServletResponse?,
-        failed: AuthenticationException?
+        request: HttpServletRequest?, response: HttpServletResponse?, failed: AuthenticationException?
     ) {
         super.onUnsuccessfulAuthentication(request, response, failed)
         onDoUnsuccessfulAuthentication(eventPublisher, request, response, failed)

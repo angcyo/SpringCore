@@ -15,4 +15,7 @@ class FileProperties {
 
     /**文件默认保存路径*/
     var uploadDir: String? = null
+
+    /**生成的office文档保存路径*/
+    var officeDir: String? = null
 }

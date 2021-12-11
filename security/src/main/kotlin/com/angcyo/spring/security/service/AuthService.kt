@@ -4,24 +4,26 @@ import com.angcyo.java.mail.dslSendMail
 import com.angcyo.spring.base.AppProperties
 import com.angcyo.spring.base.beanOf
 import com.angcyo.spring.base.extension.apiError
+import com.angcyo.spring.base.servlet.param
 import com.angcyo.spring.base.servlet.request
 import com.angcyo.spring.redis.Redis
 import com.angcyo.spring.security.SecurityConstants
 import com.angcyo.spring.security.bean.*
+import com.angcyo.spring.security.jwt.currentUserId
 import com.angcyo.spring.security.jwt.event.RegisterAccountEvent
 import com.angcyo.spring.security.service.annotation.RegisterAccount
 import com.angcyo.spring.security.service.annotation.SaveAccount
 import com.angcyo.spring.security.table.AccountTable
 import com.angcyo.spring.security.table.UserRoleReTable
 import com.angcyo.spring.security.table.UserTable
-import com.angcyo.spring.util.ImageCode
-import com.angcyo.spring.util.isEmail
+import com.angcyo.spring.util.*
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.ApplicationEventPublisher
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import javax.servlet.http.HttpServletRequest
 
 /**
  * Email:angcyo@126.com
@@ -43,17 +45,25 @@ class AuthService {
     @Autowired
     lateinit var appProperties: AppProperties
 
+    /**用户存储key前缀*/
     val userPrefix: String
         get() = "${appProperties.name}.USER"
 
+    /**token存储key前缀*/
     val tokenPrefix: String
         get() = "${appProperties.name}.TOKEN"
 
-    val sendCodePrefix: String
-        get() = "${appProperties.name}.CODE.SEND"
+    /**临时token存储前缀*/
+    val tempTokenPrefix: String
+        get() = "${appProperties.name}.TEMP.TOKEN"
 
     //<editor-fold desc="验证码相关">
 
+    /**发送的验证码前缀*/
+    val sendCodePrefix: String
+        get() = "${appProperties.name}.CODE.SEND"
+
+    /**图形验证码前缀*/
     val imageCodePrefix: String
         get() = "${appProperties.name}.CODE.IMAGE"
 
@@ -230,8 +240,8 @@ class AuthService {
         des = "临时用户"
     }
 
-    fun tempUserDetail() = UserDetail().apply {
-        userTable = tempUserTable()
+    fun tempUserDetail(user: UserTable = tempUserTable()) = UserDetail().apply {
+        userTable = user
     }
 
     /**redis 存储token的key*/
@@ -291,4 +301,58 @@ class AuthService {
         redis.del(userTokenKey(id))
         redis.del(userKey(id))
     }
+
+    //<editor-fold desc="临时token支持">
+
+    /**临时token 存储的key*/
+    fun tempTokenKey(token: String): String {
+        return "${tempTokenPrefix}.$token"
+    }
+
+    fun generateTempToken(request: HttpServletRequest): String {
+        return generateTempToken(request.servletPath, currentUserId())
+    }
+
+    /**生成一个临时token, .后面的是用户id base64
+     * key值包含token, value包含可以访问的api, 如果匹配则颁发令牌
+     * [url] 支持正则*/
+    fun generateTempToken(url: String, userId: Long): String {
+        var tryCount = 0
+        var token = ""
+        var key = ""
+        while (tryCount++ <= 5) {
+            token = "${generateShortUuid(16)}.${userId.str().base64Encode()}"//ug1AjFSIug1AjFSI.MQ==
+            key = tempTokenKey(token)
+            if (redis.hasKey(key)) {
+                continue
+            }
+            break
+        }
+        val path = url //请求的路径
+        redis[key, 60] = path //1分钟有效期
+        return token
+    }
+
+    /**是否要颁发临时令牌
+     * 返回第一个参数是 用户id,
+     * 第二个参数是 允许访问的url*/
+    fun authorizationTempToken(request: HttpServletRequest): Pair<Long, String>? {
+        val tempToken = request.param("token")
+        if (tempToken.isNullOrEmpty()) {
+            return null
+        }
+        val key = tempTokenKey(tempToken)
+        val path = request.servletPath //请求的路径
+
+        val url = redis[key]?.str()
+        if (url?.have(path, true) == true) {
+            val userId = tempToken.substring(tempToken.indexOf(".") + 1).base64Decoder().toLong()
+            return userId to url
+        }
+
+        return null
+    }
+
+    //</editor-fold desc="临时token支持">
+
 }

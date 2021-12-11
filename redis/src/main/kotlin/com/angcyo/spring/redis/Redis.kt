@@ -420,7 +420,7 @@ class Redis {
      * @param end 结束  0 到 -1代表所有值
      * @return
      */
-    fun getList(key: String, start: Long, end: Long): List<Any?>? {
+    fun getList(key: String, start: Long = 0, end: Long = -1): List<Any?>? {
         return try {
             redisTemplate.opsForList().range(key, start, end)
         } catch (e: Exception) {

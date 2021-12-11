@@ -140,6 +140,7 @@ class SecurityConfiguration : WebSecurityConfigurerAdapter() {
         //授权管理
         jwtAuthenticationManager.apply {
             defaultAuthenticationProviderList.add(DefaultAuthenticationProvider())
+            defaultAuthenticationProviderList.add(DefaultAuthenticationProvider())
         }
 
         //白名单配置
