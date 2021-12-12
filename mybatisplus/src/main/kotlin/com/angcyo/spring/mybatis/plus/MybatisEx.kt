@@ -82,6 +82,15 @@ fun QueryWrapper<*>.eq2(column: String, value: Any?) {
     }
 }
 
+/**如果值为空时, 则Sql直接返回false*/
+fun QueryWrapper<*>.in2(column: String, value: Collection<Any?>?) {
+    if (value.isNullOrEmpty()) {
+        `in`(column, false)
+    } else {
+        `in`(column, value)
+    }
+}
+
 /**UserName 转换成 user_name
  * [com.gitee.sunchenbin.mybatis.actable.utils.ColumnUtils.getTableName]*/
 fun lowerName(value: String) = CaseFormat.LOWER_CAMEL.to(
