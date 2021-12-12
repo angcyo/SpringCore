@@ -16,7 +16,10 @@ import com.angcyo.spring.security.service.annotation.SaveAccount
 import com.angcyo.spring.security.table.AccountTable
 import com.angcyo.spring.security.table.UserRoleReTable
 import com.angcyo.spring.security.table.UserTable
-import com.angcyo.spring.util.*
+import com.angcyo.spring.util.ImageCode
+import com.angcyo.spring.util.have
+import com.angcyo.spring.util.isEmail
+import com.angcyo.spring.util.str
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.ApplicationEventPublisher
 import org.springframework.security.core.context.SecurityContextHolder
@@ -324,7 +327,7 @@ class AuthService {
         var token = ""
         var key = ""
         while (tryCount++ <= 5) {
-            token = "${generateShortUuid(16)}.${userId.str().base64Encode()}"//ug1AjFSIug1AjFSI.MQ==
+            token = generateShortUserUuid(16)//ug1AjFSIug1AjFSI.MQ==
             key = tempTokenKey(token)
             if (redis.hasKey(key)) {
                 continue
@@ -349,7 +352,7 @@ class AuthService {
 
         val url = redis[key]?.str()
         if (url?.have(path, true) == true) {
-            val userId = tempToken.substring(tempToken.indexOf(".") + 1).base64Decoder().toLong()
+            val userId = tempToken.parseUserId()!!
             return userId to url
         }
 

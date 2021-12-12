@@ -4,7 +4,8 @@ import com.angcyo.spring.base.extension.apiError
 import com.angcyo.spring.base.servlet.param
 import com.angcyo.spring.base.servlet.request
 import com.angcyo.spring.security.bean.ClientType
-import com.angcyo.spring.util.elseNull
+import com.angcyo.spring.security.jwt.currentUserIdOrDef
+import com.angcyo.spring.util.*
 import javax.servlet.http.HttpServletRequest
 
 /**
@@ -40,3 +41,20 @@ fun HttpServletRequest.clientUuid() = param("clientUuid")
 
 /**从请求头中, 获取客户端类型*/
 fun HttpServletRequest.clientType() = param("clientType")
+
+/**从字符串中解析用户id
+ * xxxxxxxx.xxx*/
+fun String.parseUserId(): Long? {
+    val index = indexOf(".")
+    if (index == -1) {
+        return this.base64Decoder().toLongOrNull()
+    }
+    return this.substring(index + 1).base64Decoder().toLongOrNull()
+}
+
+/**
+ * ug1AjFSIug1AjFSI.MQ==
+ * */
+fun generateShortUserUuid(length: Int = 8): String {
+    return "${generateShortUuid(length)}.${currentUserIdOrDef(-1).str().base64Encode()}"
+}
