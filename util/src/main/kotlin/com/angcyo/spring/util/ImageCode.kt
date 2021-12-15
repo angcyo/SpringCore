@@ -32,8 +32,8 @@ object ImageCode {
      * 返回 code 和 图片
      * */
     fun generate(length: Int = 4, width: Int = 80, height: Int = 28): Pair<String, ByteArray> {
-        val bi = BufferedImage(width, height, BufferedImage.TYPE_INT_RGB)
-        val graphics: Graphics2D = bi.graphics as Graphics2D
+        val image = BufferedImage(width, height, BufferedImage.TYPE_INT_RGB)
+        val graphics: Graphics2D = image.graphics as Graphics2D
 
         //背景
         fillBackground(graphics, width, height);
@@ -68,7 +68,7 @@ object ImageCode {
 
         val code = sb.toString()
         val out = ByteArrayOutputStream()
-        ImageIO.write(bi, "JPG", out)
+        ImageIO.write(image, "JPG", out)
 
         return code to out.toByteArray()
     }

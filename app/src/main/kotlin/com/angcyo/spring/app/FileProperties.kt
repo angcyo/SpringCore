@@ -18,4 +18,7 @@ class FileProperties {
 
     /**生成的office文档保存路径*/
     var officeDir: String? = null
+
+    /**公共文件保存地址*/
+    var filesDir: String? = null
 }
