@@ -23,8 +23,9 @@ class Graphics(val width: Int, val height: Int, imageType: Int = BufferedImage.T
 
         //字体优先选择, 需要在系统中安装字体
         val priorityFamilyNames = listOf(
-            "JetBrains Mono",
+            "Microsoft YaHei",
             "微软雅黑",
+            "JetBrains Mono",
             "Microsoft YaHei UI",
             "SansSerif",
             "Dialog",
