@@ -4,10 +4,7 @@ import com.angcyo.spring.base.data.Result
 import com.angcyo.spring.base.data.ok
 import com.angcyo.spring.redis.Redis
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.web.bind.annotation.RequestBody
-import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.web.bind.annotation.RequestParam
-import org.springframework.web.bind.annotation.RestController
+import org.springframework.web.bind.annotation.*
 import springfox.documentation.annotations.ApiIgnore
 
 /**
@@ -24,9 +21,9 @@ class RedisTestController {
     @Autowired
     lateinit var redis: Redis
 
-    @RequestMapping("/hello")
-    fun hello(): String? {
-        return "hello redis"
+    @RequestMapping("/hello/{msg}")
+    fun hello(@PathVariable(required = true) msg: String): String? {
+        return "hello redis->$msg"
     }
 
     @RequestMapping("/set")

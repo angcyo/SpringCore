@@ -72,18 +72,9 @@ class AuthController {
 
         //将VerifyCode绑定session
         request.session.setAttribute("code.${type}", pair.first)
-        //设置响应头
-        response.setHeader("Pragma", "no-cache")
-        //设置响应头
-        response.setHeader("Cache-Control", "no-cache")
-        //在代理服务器端防止缓冲
-        response.setDateHeader("Expires", 0)
-        //设置响应内容类型
-        response.send(pair.second, type = "image/jpeg")
         //将uuid返回给客户端
         response.setHeader("clientUuid", codeKey)
-        //允许CORS跨域请求
-        response.setHeader("Access-Control-Allow-Origin", "*")
+        response.send(pair.second)
         L.i("验证码${type}:${pair.first}")
     }
 

@@ -148,7 +148,7 @@ fun Resource.resultResource(request: HttpServletRequest? = request()): ResponseE
 
     // Fallback to the default content type if type could not be determined
     if (contentType == null) {
-        contentType = "application/octet-stream"
+        contentType = MediaType.APPLICATION_OCTET_STREAM_VALUE //"application/octet-stream"
     }
     //return ResponseEntity.notFound().build()
     return ResponseEntity.ok().contentType(MediaType.parseMediaType(contentType))

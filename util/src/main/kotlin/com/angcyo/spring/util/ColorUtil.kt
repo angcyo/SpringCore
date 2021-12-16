@@ -80,6 +80,12 @@ object ColorUtil {
 
 fun String.toColorInt() = parseColor(this)
 
+fun String.toAwtColor() = if (this[0] == '#') {
+    Color(Integer.parseInt(substring(1), 16))
+} else {
+    Color(Integer.parseInt(this, 16))
+}
+
 fun randomColor(min: Int, max: Int): Color {
     var f = min
     var b = max
@@ -90,7 +96,9 @@ fun randomColor(min: Int, max: Int): Color {
     if (b > 255) {
         b = 255
     }
-    return Color(f + nextInt(b - f),
-            f + nextInt(b - f),
-            f + nextInt(b - f))
+    return Color(
+        f + nextInt(b - f),
+        f + nextInt(b - f),
+        f + nextInt(b - f)
+    )
 }

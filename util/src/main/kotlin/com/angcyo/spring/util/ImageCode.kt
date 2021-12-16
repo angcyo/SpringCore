@@ -68,7 +68,7 @@ object ImageCode {
 
         val code = sb.toString()
         val out = ByteArrayOutputStream()
-        ImageIO.write(image, "JPG", out)
+        ImageIO.write(image, "PNG", out)
 
         return code to out.toByteArray()
     }

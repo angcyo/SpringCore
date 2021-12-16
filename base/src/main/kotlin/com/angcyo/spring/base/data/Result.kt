@@ -176,17 +176,17 @@ inline fun <T> T?.ifError(
     judge: T?.() -> Boolean = {
         this == null || this == false
     }
-): T? {
+): T {
     if (judge()) {
         L.e(error)
         apiError(error)
     }
-    return this
+    return this!!
 }
 
 inline fun Int?.ifExist(
     error: String = "数据已存在"
-): Int? {
+): Int {
     return ifError(error) {
         (this ?: 0) > 0
     }
@@ -194,7 +194,7 @@ inline fun Int?.ifExist(
 
 inline fun Int?.ifNotExist(
     error: String = "数据不存在"
-): Int? {
+): Int {
     return ifError(error) {
         (this ?: 0) <= 0
     }
@@ -202,7 +202,7 @@ inline fun Int?.ifNotExist(
 
 inline fun Long?.ifExist(
     error: String = "数据已存在"
-): Long? {
+): Long {
     return ifError(error) {
         (this ?: 0) > 0
     }
@@ -210,7 +210,7 @@ inline fun Long?.ifExist(
 
 inline fun Long?.ifNotExist(
     error: String = "数据不存在"
-): Long? {
+): Long {
     return ifError(error) {
         (this ?: 0) <= 0
     }

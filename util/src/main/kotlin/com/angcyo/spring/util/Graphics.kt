@@ -32,7 +32,12 @@ class Graphics(val width: Int, val height: Int, imageType: Int = BufferedImage.T
         image = BufferedImage(width, height, imageType)
         graphics = image.graphics as Graphics2D
 
+        /*val ge = GraphicsEnvironment.getLocalGraphicsEnvironment()
+        val allFonts = ge.allFonts
+        val fontFamilyNames = ge.availableFontFamilyNames*/
+
         graphics.font = _defaultFont
+        graphics.color = "#040404".toAwtColor()
     }
 
     fun wrap(dsl: () -> Unit) {
@@ -109,6 +114,25 @@ class Graphics(val width: Int, val height: Int, imageType: Int = BufferedImage.T
         _top += textHeight
     }
 
+    /**自动换行绘制多行文本*/
+    fun drawMultiString(
+        str: String,
+        color: Color = graphics.color,
+        size: Int = _defaultFont.size,
+        marginLeft: Int = 0,
+        marginRight: Int = 0,
+        gravity: Int = Gravity.CENTER_HORIZONTAL
+    ) {
+        val list = str.textLineList(width - marginLeft - marginRight, size)
+        list.forEachIndexed { index, s ->
+            _left += marginLeft
+            drawString(s, color, size, gravity)
+            if (list.lastIndex != index) {
+                newRow()
+            }
+        }
+    }
+
     /**绘制一个矩形*/
     fun drawRect(width: Int, height: Int) {
         graphics.drawRect(_left, _top, width, height)
@@ -147,7 +171,10 @@ class Graphics(val width: Int, val height: Int, imageType: Int = BufferedImage.T
 
     /**绘制图片*/
     fun drawImage(
-        image: Image, imageWidth: Int, imageHeight: Int, gravity: Int = Gravity.CENTER_HORIZONTAL
+        image: Image,
+        imageWidth: Int,
+        imageHeight: Int,
+        gravity: Int = Gravity.CENTER_HORIZONTAL
     ) {
 
         val left = _left
@@ -172,22 +199,11 @@ class Graphics(val width: Int, val height: Int, imageType: Int = BufferedImage.T
     fun newColumn() {
         _top = 0
     }
-
-    fun test(image: BufferedImage) {
-        drawBackground(Color.WHITE)
-        drawString("中国人angcyo", Color.RED)
-        newRow()
-        drawString("中国人angcyo", Color.BLUE, 22)
-        newRow()
-        drawImage(image, image.width, image.height)
-        newRow()
-        drawString("中国人angcyo", Color.GREEN, 30)
-    }
 }
 
 //<editor-fold desc="静态测量方法">
 
-var defaultFont = Font("微软雅黑", Font.PLAIN, 14)
+var defaultFont = Font("Default"/*"微软雅黑"*/, Font.PLAIN, 14)
 
 fun font(size: Int = defaultFont.size): Font {
     return Font(defaultFont.name, defaultFont.style, size)
@@ -209,6 +225,41 @@ fun String.textWidth(size: Int = defaultFont.size): Int {
  * 19px*/
 fun textHeight(size: Int = defaultFont.size): Int {
     return fontMetrics(font(size)).height
+}
+
+/**自动换行文本*/
+fun String.textLineList(width: Int, size: Int = defaultFont.size): List<String> {
+    val result = mutableListOf<String>()
+    getListText(fontMetrics(font(size)), this, width, result)
+    return result
+}
+
+/**
+ * 递归 切割字符串
+ * @param fg
+ * @param text
+ * @param widthLength
+ * @param result
+ */
+private fun getListText(fg: FontMetrics, text: String, widthLength: Int, result: MutableList<String>) {
+    var _text = text
+    val ba = _text
+    var b = true
+    var i = 1
+    while (b) {
+        if (fg.stringWidth(_text) > widthLength) {
+            _text = _text.substring(0, _text.length - 1)
+            i++
+        } else {
+            b = false
+        }
+    }
+    if (i != 1) {
+        result.add(ba.substring(0, ba.length - i))
+        getListText(fg, ba.substring(ba.length - i), widthLength, result)
+    } else {
+        result.add(_text)
+    }
 }
 
 //</editor-fold desc="静态测量方法">
