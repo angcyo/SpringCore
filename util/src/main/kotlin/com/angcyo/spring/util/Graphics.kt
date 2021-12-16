@@ -54,7 +54,7 @@ class Graphics(val width: Int, val height: Int, imageType: Int = BufferedImage.T
             L.i(fontFamilyNames.joinToString(","))
 
             //筛选字体
-            val name = fontFamilyNames.find { priorityFamilyNames.contains(it) } ?: "Default"
+            val name = priorityFamilyNames.find { fontFamilyNames.contains(it) } ?: "Default"
             defaultFont = Font(name, defaultFont.style, defaultFont.size)
         }
     }
