@@ -5,14 +5,19 @@ import com.angcyo.spring.app.table.mapper.IFileMapper
 import com.angcyo.spring.base.AppProperties
 import com.angcyo.spring.base.extension.ApiException
 import com.angcyo.spring.base.servlet.IOssService
+import com.angcyo.spring.base.servlet.request
 import com.angcyo.spring.mybatis.plus.auto.BaseAutoMybatisServiceImpl
 import com.angcyo.spring.mybatis.plus.columnName
 import com.angcyo.spring.util.Constant
+import com.angcyo.spring.util.L
 import com.angcyo.spring.util.md5
 import com.angcyo.spring.util.nowTimeString
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.core.io.Resource
 import org.springframework.core.io.UrlResource
+import org.springframework.http.HttpHeaders
+import org.springframework.http.MediaType
+import org.springframework.http.ResponseEntity
 import org.springframework.stereotype.Service
 import org.springframework.util.StringUtils
 import org.springframework.web.multipart.MultipartFile
@@ -21,6 +26,7 @@ import java.io.IOException
 import java.net.MalformedURLException
 import java.nio.file.Files
 import java.nio.file.StandardCopyOption
+import javax.servlet.http.HttpServletRequest
 
 /**
  * Email:angcyo@126.com
@@ -101,6 +107,7 @@ class FileService : BaseAutoMybatisServiceImpl<IFileMapper, FileTable>() {
         val uri: String = if (ossClass == null) {
             storeFile(file)
             key = "/file/downloadFile/${fileName}"
+            //http://localhost:9203/file/downloadFile/664dde66-0eea-4eec-8791-a7081d5863d1.png
             ServletUriComponentsBuilder.fromCurrentContextPath().path(key).toUriString()
         } else {
             key = "${appProperties.name}/${nowTimeString(Constant.DEFAULT_DATE_FORMATTER)}/$fileName"
@@ -127,4 +134,24 @@ class FileService : BaseAutoMybatisServiceImpl<IFileMapper, FileTable>() {
         }
         return listOf(hashMapOf(FileTable::fileMd5.columnName() to md5)).firstOrNull()
     }
+}
+
+/**返回资源*/
+fun Resource.resultResource(request: HttpServletRequest? = request()): ResponseEntity<Resource> {
+    // Try to determine file's content type
+    var contentType: String? = null
+    try {
+        contentType = request?.servletContext?.getMimeType(file.absolutePath)
+    } catch (ex: IOException) {
+        L.e("Could not determine file type.")
+    }
+
+    // Fallback to the default content type if type could not be determined
+    if (contentType == null) {
+        contentType = "application/octet-stream"
+    }
+    //return ResponseEntity.notFound().build()
+    return ResponseEntity.ok().contentType(MediaType.parseMediaType(contentType))
+        .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=$filename")
+        .body(this)
 }

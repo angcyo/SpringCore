@@ -1,5 +1,6 @@
 package com.angcyo.spring.util
 
+import java.io.File
 import java.net.URLDecoder
 import java.net.URLEncoder
 import java.util.*
@@ -116,3 +117,28 @@ fun String?.isEmail(regex: String = PATTERN_EMAIL): Boolean {
 fun String.base64Encode(): String = Base64.getEncoder().encodeToString(toByteArray(Charsets.UTF_8))
 
 fun String.base64Decoder(): String = Base64.getDecoder().decode(toByteArray(Charsets.UTF_8)).toString(Charsets.UTF_8)
+
+/**[File.separatorChar] \ */
+const val URL_SEPARATOR = '/'
+
+/**连接/符号 */
+fun String.connectSeparator(char: Char = URL_SEPARATOR): String {
+    return if (endsWith(char)) {
+        this
+    } else {
+        this + char
+    }
+}
+
+fun String.connectSeparatorBoth(char: Char = URL_SEPARATOR): String {
+    var result = this
+    if (!startsWith(char)) {
+        result = char + result
+    }
+
+    if (!endsWith(char)) {
+        result += char
+    }
+
+    return result
+}

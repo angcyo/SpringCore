@@ -85,7 +85,10 @@ fun QueryWrapper<*>.eq2(column: String, value: Any?) {
 /**如果值为空时, 则Sql直接返回false*/
 fun QueryWrapper<*>.in2(column: String, value: Collection<Any?>?) {
     if (value.isNullOrEmpty()) {
-        `in`(column, false)
+        and {
+            it.last("FALSE") //强制塞入 false, 停止语句执行
+        }
+        //`in`(column, false)
     } else {
         `in`(column, value)
     }

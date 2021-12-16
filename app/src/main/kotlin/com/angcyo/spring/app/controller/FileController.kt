@@ -1,6 +1,7 @@
 package com.angcyo.spring.app.controller
 
 import com.angcyo.spring.app.service.FileService
+import com.angcyo.spring.app.service.resultResource
 import com.angcyo.spring.app.table.FileTable
 import com.angcyo.spring.base.data.Result
 import com.angcyo.spring.base.data.ok
@@ -8,19 +9,15 @@ import com.angcyo.spring.base.data.result
 import com.angcyo.spring.base.extension.apiError
 import com.angcyo.spring.base.servlet.param
 import com.angcyo.spring.base.servlet.request
-import com.angcyo.spring.util.L
 import io.swagger.annotations.Api
 import io.swagger.annotations.ApiImplicitParam
 import io.swagger.annotations.ApiImplicitParams
 import io.swagger.annotations.ApiOperation
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.core.io.Resource
-import org.springframework.http.HttpHeaders
-import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 import org.springframework.web.multipart.MultipartFile
-import java.io.IOException
 import java.util.*
 import java.util.stream.Collectors
 import javax.servlet.http.HttpServletRequest
@@ -80,25 +77,6 @@ class FileController {
     fun downloadFile(@PathVariable fileName: String, request: HttpServletRequest): ResponseEntity<Resource> {
         // Load file as Resource
         val resource: Resource = fileService.loadFileAsResource(fileName)
-
-        // Try to determine file's content type
-        var contentType: String? = null
-        try {
-            contentType = request.servletContext.getMimeType(resource.file.absolutePath)
-        } catch (ex: IOException) {
-            L.e("Could not determine file type.")
-        }
-
-        // Fallback to the default content type if type could not be determined
-        if (contentType == null) {
-            contentType = "application/octet-stream"
-        }
-        return ResponseEntity.ok()
-            .contentType(MediaType.parseMediaType(contentType))
-            .header(
-                HttpHeaders.CONTENT_DISPOSITION,
-                "attachment; filename=\"" + resource.filename.toString() + "\""
-            )
-            .body(resource)
+        return resource.resultResource(request)
     }
 }

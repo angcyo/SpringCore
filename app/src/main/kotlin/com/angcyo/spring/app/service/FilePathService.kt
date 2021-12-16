@@ -25,16 +25,19 @@ class FilePathService {
     lateinit var fileUploadLocation: Path
     lateinit var fileOfficeLocation: Path
     lateinit var filesLocation: Path
+    lateinit var filesDownloadsLocation: Path
 
     @PostConstruct
     fun init() {
-        fileUploadLocation = Paths.get(fileProperties.uploadDir ?: "uploads").toAbsolutePath().normalize()
-        fileOfficeLocation = Paths.get(fileProperties.officeDir ?: "office").toAbsolutePath().normalize()
-        filesLocation = Paths.get(fileProperties.filesDir ?: "files").toAbsolutePath().normalize()
+        fileUploadLocation = Paths.get(fileProperties.uploadDir!!).toAbsolutePath().normalize()
+        fileOfficeLocation = Paths.get(fileProperties.officeDir!!).toAbsolutePath().normalize()
+        filesLocation = Paths.get(fileProperties.filesDir!!).toAbsolutePath().normalize()
+        filesDownloadsLocation = Paths.get(fileProperties.downloadsDir!!).toAbsolutePath().normalize()
         try {
             Files.createDirectories(fileUploadLocation)
             Files.createDirectories(fileOfficeLocation)
             Files.createDirectories(filesLocation)
+            Files.createDirectories(filesDownloadsLocation)
         } catch (ex: Exception) {
             throw ApiException("Could not create the directory where the uploaded files will be stored.")
         }
@@ -59,5 +62,10 @@ class FilePathService {
     /**在[filesLocation]下, 创建一个文件*/
     fun getFilePath(fileName: String): Path {
         return filesLocation.resolve(fileName)
+    }
+
+    /**在下载中心路径, 创建一个文件*/
+    fun getDownloadsPath(fileName: String): Path {
+        return filesDownloadsLocation.resolve(fileName)
     }
 }
