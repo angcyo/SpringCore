@@ -1,6 +1,7 @@
 package com.angcyo.spring.base.servlet
 
 import com.angcyo.spring.base.data.error
+import com.angcyo.spring.util.connectUrl
 import com.angcyo.spring.util.decode
 import com.angcyo.spring.util.json.fromJson
 import com.angcyo.spring.util.json.toJson
@@ -91,9 +92,15 @@ fun HttpServletRequest.requestUrl(): String {
  * file/downloadFile/664dde66-0eea-4eec-8791-a7081d5863d1.png
  * ->
  * http://localhost:9203/file/downloadFile/664dde66-0eea-4eec-8791-a7081d5863d1.png
+ *
+ * [dir] 所在的文件夹
  * */
-fun String.toServletUri(): String {
-    return ServletUriComponentsBuilder.fromCurrentContextPath().path(this).toUriString()
+fun String.toServletUri(dir: String?): String {
+    var path = this
+    if (!dir.isNullOrEmpty()) {
+        path = dir.connectUrl(path)
+    }
+    return ServletUriComponentsBuilder.fromCurrentContextPath().path(path).toUriString()
 }
 
 //</editor-fold desc="ServletRequest扩展">

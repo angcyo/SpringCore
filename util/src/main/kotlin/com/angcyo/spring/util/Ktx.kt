@@ -63,9 +63,9 @@ fun CharSequence.maxLength(maxLength: Int, dropEnd: Boolean = true): CharSequenc
 
 /**host/url*/
 fun String?.connectUrl(url: String?): String {
-    val h = this?.trimEnd('/') ?: ""
-    val u = url?.trimStart('/') ?: ""
-    return "$h/$u"
+    val h = this?.trimEnd(URL_SEPARATOR) ?: ""
+    val u = url?.trimStart(URL_SEPARATOR) ?: ""
+    return "$h${URL_SEPARATOR}$u"
 }
 
 fun CharSequence?.des(): String {
