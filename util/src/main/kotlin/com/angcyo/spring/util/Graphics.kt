@@ -1,5 +1,6 @@
 package com.angcyo.spring.util
 
+import com.angcyo.spring.util.Graphics.Companion.defaultFont
 import java.awt.*
 import java.awt.image.BufferedImage
 
@@ -16,6 +17,48 @@ import java.awt.image.BufferedImage
 
 class Graphics(val width: Int, val height: Int, imageType: Int = BufferedImage.TYPE_INT_ARGB) {
 
+    companion object {
+
+        var defaultFont = Font("Default"/*"Default" "微软雅黑"*/, Font.PLAIN, 14)
+
+        //字体优先选择, 需要在系统中安装字体
+        val priorityFamilyNames = listOf(
+            "JetBrains Mono",
+            "微软雅黑",
+            "Microsoft YaHei UI",
+            "SansSerif",
+            "Dialog",
+            "Monospaced"
+        ) // "DejaVu Sans Mono",
+
+        init {
+            val ge = GraphicsEnvironment.getLocalGraphicsEnvironment()
+            //val allFonts = ge.allFonts
+            val fontFamilyNames = ge.availableFontFamilyNames
+
+            //Window
+            //Arial,Arial Black,Bahnschrift,Calibri,Calibri Light,Cambria,Cambria Math,Candara,Candara Light,Comic Sans MS,Consolas,Constantia,Corbel,Corbel Light,Courier New,
+            // DejaVu Sans Mono,Dialog,DialogInput,Ebrima,Franklin Gothic Medium,Gabriola,Gadugi,Georgia,HoloLens MDL2 Assets,Impact,Ink Free,Javanese Text,
+            // jdFontAwesome,jdFontCustom,jdIcoFont,jdIcoMoonFree,jdiconfontA,jdiconfontB,jdiconfontC,jdiconfontD,JdIonicons,Leelawadee UI,Leelawadee UI Semilight,Lucida Bright,
+            // Lucida Console,Lucida Sans,Lucida Sans Typewriter,Lucida Sans Unicode,Malgun Gothic,Malgun Gothic Semilight,Marlett,Microsoft Himalaya,Microsoft JhengHei,
+            // Microsoft JhengHei Light,Microsoft JhengHei UI,Microsoft JhengHei UI Light,Microsoft New Tai Lue,Microsoft PhagsPa,Microsoft Sans Serif,
+            // Microsoft Tai Le,Microsoft YaHei UI,Microsoft YaHei UI Light,Microsoft Yi Baiti,MingLiU-ExtB,MingLiU_HKSCS-ExtB,Mongolian Baiti,Monospaced,MS Gothic,MS PGothic,
+            // MS UI Gothic,MT Extra,MV Boli,Myanmar Text,Nirmala UI,Nirmala UI Semilight,Palatino Linotype,PMingLiU-ExtB,SansSerif,Segoe MDL2 Assets,Segoe Print,
+            // Segoe Script,Segoe UI,Segoe UI Black,Segoe UI Emoji,Segoe UI Historic,Segoe UI Light,Segoe UI Semibold,Segoe UI Semilight,Segoe UI Symbol,Serif,
+            // SimSun-ExtB,Sitka Banner,Sitka Display,Sitka Heading,Sitka Small,Sitka Subheading,Sitka Text,Sylfaen,Symbol,Tahoma,TeamViewer15,Times New Roman,Trebuchet MS,
+            // Verdana,Webdings,Wingdings,Yu Gothic,Yu Gothic Light,Yu Gothic Medium,Yu Gothic UI,Yu Gothic UI Light,Yu Gothic UI Semibold,Yu Gothic UI Semilight,
+            // 仿宋,宋体,微软雅黑,微软雅黑 Light,新宋体,楷体,等线,等线 Light,黑体
+
+            //CentOS
+            //Bitstream Charter,Cantarell,Courier 10 Pitch,Cursor,DejaVu Sans Mono,Dialog,DialogInput,Monospaced,SansSerif,Serif,Utopia
+            L.i(fontFamilyNames.joinToString(","))
+
+            //筛选字体
+            val name = fontFamilyNames.find { priorityFamilyNames.contains(it) } ?: "Default"
+            defaultFont = Font(name, defaultFont.style, defaultFont.size)
+        }
+    }
+
     //图片数据对象
     val image: BufferedImage
 
@@ -26,18 +69,14 @@ class Graphics(val width: Int, val height: Int, imageType: Int = BufferedImage.T
     var _left: Int = 0
     var _top: Int = 0
 
-    val _defaultFont = defaultFont
+    var _defaultFont = defaultFont
 
     init {
         image = BufferedImage(width, height, imageType)
         graphics = image.graphics as Graphics2D
 
-        /*val ge = GraphicsEnvironment.getLocalGraphicsEnvironment()
-        val allFonts = ge.allFonts
-        val fontFamilyNames = ge.availableFontFamilyNames*/
-
         graphics.font = _defaultFont
-        graphics.color = "#040404".toAwtColor()
+        graphics.color = "#222222".toAwtColor()
     }
 
     fun wrap(dsl: () -> Unit) {
@@ -202,8 +241,6 @@ class Graphics(val width: Int, val height: Int, imageType: Int = BufferedImage.T
 }
 
 //<editor-fold desc="静态测量方法">
-
-var defaultFont = Font("Default"/*"微软雅黑"*/, Font.PLAIN, 14)
 
 fun font(size: Int = defaultFont.size): Font {
     return Font(defaultFont.name, defaultFont.style, size)
