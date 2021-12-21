@@ -12,6 +12,7 @@ package com.angcyo.spring.mybatis.plus.auto.annotation
 @Retention(AnnotationRetention.RUNTIME)
 @MustBeDocumented
 annotation class AutoCheck(
+
     /**是否要检查数据是否为空, 为空报异常*/
     val checkNull: Boolean = true,
 
@@ -30,6 +31,6 @@ annotation class AutoCheck(
     /**值:限制字符串的最大长度, 数字的最大值, 数组的长度*/
     val max: Long = Long.MAX_VALUE,
 
-    /**异常时的错误提示, 为空时自动更具异常类型提示*/
+    /**异常时的错误提示, 为空时自动根据异常类型提示*/
     val error: String = ""
 )

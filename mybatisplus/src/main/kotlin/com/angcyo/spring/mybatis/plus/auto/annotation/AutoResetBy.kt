@@ -1,7 +1,7 @@
 package com.angcyo.spring.mybatis.plus.auto.annotation
 
 /**
- * 更具注解标识的字段, 查询出数据集合, 然后对记录进行 删除/新增/保存 操作
+ * 根据注解标识的字段, 查询出数据集合, 然后对记录进行 删除/新增/保存 操作
  * [com.angcyo.spring.mybatis.plus.auto.IBaseAutoMybatisService.autoReset]
  * Email:angcyo@126.com
  * @author angcyo

@@ -194,5 +194,8 @@ enum class WhereEnum {
     例: notExists("select id from table where age = 1")--->not exists (select id from table where age = 1)
      * */
     notExists,
+
+    /**忽略, 占位属性*/
+    ignore,
 }
 

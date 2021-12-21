@@ -6,9 +6,7 @@ import com.angcyo.spring.base.extension.ApiException
 import com.angcyo.spring.base.servlet.address
 import com.angcyo.spring.base.servlet.request
 import com.angcyo.spring.log.core.ServletLog
-import com.angcyo.spring.util.L
-import com.angcyo.spring.util.nowTimeString
-import com.angcyo.spring.util.str
+import com.angcyo.spring.util.*
 import org.springframework.web.bind.MethodArgumentNotValidException
 import org.springframework.web.bind.annotation.ExceptionHandler
 import org.springframework.web.bind.annotation.RestControllerAdvice
@@ -28,19 +26,19 @@ class CoreRestExceptionHandlerAdvice {
     @ExceptionHandler(MethodArgumentNotValidException::class)
     fun methodArgumentNotValidException(exception: MethodArgumentNotValidException): Result<String>? {
         // 从异常对象中拿到ObjectError对象
-        L.w("异常感知:$exception")
+        L.w("${getStackTrace(count = 1).lastOrNull()}\n异常感知:$exception")
         return exception.bindingResult.allErrors.joinToString { it.defaultMessage.str() }.error()
     }
 
     @ExceptionHandler(NestedServletException::class)
     fun apiExtension(exception: NestedServletException): Result<String>? {
-        L.w("异常感知:$exception")
+        L.w("${getStackTrace(count = 1).lastOrNull()}\n异常感知:$exception")
         return exception.message.error()
     }
 
     @ExceptionHandler(RuntimeException::class)
     fun runtimeException(exception: RuntimeException): Result<String>? {
-        L.w("异常感知:$exception")
+        L.w("${getStackTrace(count = 1).lastOrNull()}\n异常感知:$exception")
         val request = request()
         L._logDb.error(
             exception.stackTraceToString(),

@@ -15,7 +15,10 @@ package com.angcyo.spring.mybatis.plus.auto.annotation
 annotation class AutoQuery(
 
     /**需要进行的比较条件*/
-    val value: WhereEnum = WhereEnum.eq,
+    val where: WhereEnum = WhereEnum.eq,
+
+    /**[where] 是否需要用 or 包裹*/
+    val isOr: Boolean = false,
 
     /**可以指定对应的查询列名,
      * 如果不指定为空, 则使用属性名当做查询的列表*/
@@ -27,7 +30,7 @@ annotation class AutoQuery(
     /**空异常时的错误提示*/
     val nullError: String = "",
 
-/*
-    *//**相同tag的查询为一组, 过滤其他的tag*//*
+    /**相同tag的查询为一组, 过滤其他的tag*/
+    /*
     val tag: String = "default",*/
 )

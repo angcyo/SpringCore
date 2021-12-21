@@ -119,3 +119,17 @@ fun getStackTrace(front: Int = 0, count: Int = -1): List<StackTraceElement> {
     val slice = stackTrace.slice(startIndex until endIndex)
     return slice
 }
+
+/**最后一条调用栈的信息
+ * com.angcyo.spring.core.http.CoreRestExceptionHandlerAdvice.runtimeException(CoreRestExceptionHandlerAdvice.kt:44)
+ *
+ * 如果是用变量接收返回结果,则[front]使用0
+ * */
+fun atLastStackTrace(front: Int = 0): String {
+    val last = getStackTrace(front, 1).lastOrNull()
+    return if (last == null) {
+        ""
+    } else {
+        "at $last\n"
+    }
+}

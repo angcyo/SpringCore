@@ -14,8 +14,11 @@ package com.angcyo.spring.mybatis.plus.auto.annotation
 @MustBeDocumented
 annotation class AutoUpdate(
 
-    /**[com.angcyo.spring.mybatis.plus.auto.annotation.AutoQuery.value]*/
-    val value: WhereEnum = WhereEnum.eq,
+    /**[com.angcyo.spring.mybatis.plus.auto.annotation.AutoQuery.where]*/
+    val where: WhereEnum = WhereEnum.eq,
+
+    /**[where] 是否需要用 or 包裹*/
+    val isOr: Boolean = false,
 
     /**[com.angcyo.spring.mybatis.plus.auto.annotation.AutoQuery.column]*/
     val column: String = "",
