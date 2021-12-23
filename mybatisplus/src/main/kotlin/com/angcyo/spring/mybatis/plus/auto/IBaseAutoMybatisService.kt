@@ -6,6 +6,8 @@ import com.angcyo.spring.base.extension.apiError
 import com.angcyo.spring.base.logName
 import com.angcyo.spring.mybatis.plus.*
 import com.angcyo.spring.mybatis.plus.auto.annotation.*
+import com.angcyo.spring.mybatis.plus.auto.core.AutoGroupHelper
+import com.angcyo.spring.mybatis.plus.auto.core.AutoParse
 import com.angcyo.spring.mybatis.plus.auto.param.BaseAutoPageParam
 import com.angcyo.spring.mybatis.plus.auto.param.IAutoParam
 import com.angcyo.spring.mybatis.plus.service.IBaseMybatisService
@@ -62,7 +64,7 @@ interface IBaseAutoMybatisService<Table> : IBaseMybatisService<Table> {
 
     /**
      * 通过[IAutoParam]对象查询出来的数据库记录,
-     * 重新赋值给[IAutoParam]对象中用[com.angcyo.spring.mybatis.plus.auto.annotation.AutoQuery]声明的属性
+     * 重新赋值给[IAutoParam]对象中用[com.angcyo.spring.mybatis.plus.auto.annotation.Query]声明的属性
      * */
     fun fillWhereField(list: List<Table>, param: IAutoParam) {
         if (list.isEmpty()) {
@@ -70,7 +72,7 @@ interface IBaseAutoMybatisService<Table> : IBaseMybatisService<Table> {
         }
         if (list.size() == 1) {
             val first = list.first()
-            param.eachAnnotation<AutoQuery> { field ->
+            param.eachAnnotation<Query> { field ->
                 val key = column.ifEmpty { field.name }
                 //赋值属性值
                 field.set(param, first.getMember(key))
@@ -137,8 +139,12 @@ interface IBaseAutoMybatisService<Table> : IBaseMybatisService<Table> {
         if (count > 0) {
             //数据已存在, 抛出异常
             val errorBuilder = StringBuilder()
-            param.eachAnnotation<AutoSave> { field ->
+
+            AutoGroupHelper.getQueryFieldByType(param, AutoType.SAVE, true).forEach { queryField ->
+                val field = queryField.field
                 val fieldValue = field.get(param)
+                val existError = queryField.query.existError
+                val ignoreError = queryField.query.ignoreExistError
                 //检查值
                 if (fieldValue != null && !ignoreError) {
                     if (errorBuilder.isNotEmpty()) {

@@ -1,12 +1,9 @@
 package com.angcyo.spring.mybatis.plus.auto.annotation
 
 /**
- * 自动查询的Where条件生成规则
- *
- * [com.angcyo.spring.mybatis.plus.auto.annotation.WhereEnum]
  * Email:angcyo@126.com
  * @author angcyo
- * @date 2021/05/28
+ * @date 2021/12/23
  */
 
 @Target(AnnotationTarget.FIELD) //VM将在运行期也保留注释，因此可以通过反射机制读取注解的信息
@@ -14,23 +11,6 @@ package com.angcyo.spring.mybatis.plus.auto.annotation
 @MustBeDocumented
 annotation class AutoQuery(
 
-    /**需要进行的比较条件*/
-    val where: WhereEnum = WhereEnum.eq,
-
-    /**[where] 是否需要用 or 包裹*/
-    val isOr: Boolean = false,
-
-    /**可以指定对应的查询列名,
-     * 如果不指定为空, 则使用属性名当做查询的列表*/
-    val column: String = "",
-
-    /**是否检查空值*/
-    val checkNull: Boolean = false,
-
-    /**空异常时的错误提示*/
-    val nullError: String = "",
-
-    /**相同tag的查询为一组, 过滤其他的tag*/
-    /*
-    val tag: String = "default",*/
+    /**不同类型的[Query]*/
+    val queries: Array<Query> = [],
 )

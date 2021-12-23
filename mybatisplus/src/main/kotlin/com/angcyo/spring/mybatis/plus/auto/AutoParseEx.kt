@@ -23,6 +23,10 @@ inline fun Class<*>.eachField(each: (Field) -> Unit) {
     }
 }
 
+inline fun Any.eachField(each: (Field) -> Unit) {
+    javaClass.eachField(each)
+}
+
 /**获取对象上的注解类*/
 inline fun <reified Auto : Annotation> Any.getAnnotation(): Auto? {
     return javaClass.annotation()

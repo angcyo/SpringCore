@@ -1,7 +1,9 @@
-package com.angcyo.spring.mybatis.plus.auto
+package com.angcyo.spring.mybatis.plus.auto.core
 
 import com.angcyo.spring.base.beanOf
+import com.angcyo.spring.base.extension.apiError
 import com.angcyo.spring.base.logName
+import com.angcyo.spring.mybatis.plus.auto.*
 import com.angcyo.spring.mybatis.plus.auto.annotation.*
 import com.angcyo.spring.mybatis.plus.auto.param.BaseAutoPageParam
 import com.angcyo.spring.mybatis.plus.auto.param.BaseAutoQueryParam
@@ -13,7 +15,6 @@ import com.angcyo.spring.util.size
 import com.baomidou.mybatisplus.core.conditions.AbstractWrapper
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper
-import com.baomidou.mybatisplus.core.toolkit.ReflectionKit
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page
 import org.springframework.core.convert.support.DefaultConversionService
 import java.lang.reflect.Field
@@ -59,7 +60,8 @@ class AutoParse<Table> {
         return page
     }
 
-    /**自动验证数据的合法性*/
+    /**自动验证数据的合法性
+     * 根据[AutoCheck]注解, 检查字段值*/
     fun parseCheck(param: IAutoParam) {
         param.eachAnnotation<AutoCheck> { field ->
             val fieldValue = field.get(param)
@@ -112,12 +114,16 @@ class AutoParse<Table> {
     /**根据[param]声明的约束, 自动赋值给[queryWrapper]
      * [org.springframework.beans.BeanUtils.getPropertyDescriptors]
      * */
-    fun parseQuery(queryWrapper: QueryWrapper<Table>, param: IAutoParam): QueryWrapper<Table> {
+    fun parseQuery(
+        queryWrapper: QueryWrapper<Table>,
+        param: IAutoParam,
+        type: AutoType = AutoType.QUERY
+    ): QueryWrapper<Table> {
         //选择列
         _handleSelector(queryWrapper, param)
 
         //查询
-        _handleQuery(queryWrapper, param, AutoQuery::class.java)
+        _handleQuery(type, queryWrapper, param)
 
         //排序
         _handleOrder(queryWrapper, param)
@@ -128,17 +134,21 @@ class AutoParse<Table> {
     }
 
     /**根据[param]声明的约束, 自动赋值给[updateWrapper] */
-    fun parseUpdate(updateWrapper: UpdateWrapper<Table>, param: IAutoParam): UpdateWrapper<Table> {
-        _handleQuery(updateWrapper, param, AutoQuery::class.java) {
-            it.annotation<AutoUpdateBy>() == null
-        }
+    fun parseUpdate(
+        updateWrapper: UpdateWrapper<Table>,
+        param: IAutoParam,
+        type: AutoType = AutoType.UPDATE
+    ): UpdateWrapper<Table> {
+        _handleQuery(type, updateWrapper, param)
         return updateWrapper
     }
 
-    fun parseQueryByUpdate(queryWrapper: QueryWrapper<Table>, param: IAutoParam): QueryWrapper<Table> {
-        _handleQuery(queryWrapper, param, AutoQuery::class.java) {
-            it.annotation<AutoUpdateBy>() == null
-        }
+    fun parseQueryByUpdate(
+        queryWrapper: QueryWrapper<Table>,
+        param: IAutoParam,
+        type: AutoType = AutoType.QUERY
+    ): QueryWrapper<Table> {
+        _handleQuery(type, queryWrapper, param)
         return queryWrapper
     }
 
@@ -156,8 +166,10 @@ class AutoParse<Table> {
     }
 
     /**塞入默认值*/
-    fun parseDefaultValue(param: IAutoParam) {
-        param.eachAnnotation<AutoSave> { field ->
+    fun parseDefaultValue(param: IAutoParam, type: AutoType = AutoType.SAVE) {
+        AutoGroupHelper.getQueryFieldByType(param, type, false).forEach {
+            val field = it.field
+            val defaultValue = it.query.defaultValue
             val fieldValue = field.get(param)
             if (fieldValue == null && defaultValue.isNotEmpty()) {
                 //需要设置默认值
@@ -170,9 +182,13 @@ class AutoParse<Table> {
     /**
      * 检查数据是否已存在
      * [com.angcyo.spring.mybatis.plus.auto.annotation.AutoSave]*/
-    fun parseSaveCheck(queryWrapper: QueryWrapper<Table>, param: IAutoParam): QueryWrapper<Table> {
+    fun parseSaveCheck(
+        queryWrapper: QueryWrapper<Table>,
+        param: IAutoParam,
+        type: AutoType = AutoType.SAVE
+    ): QueryWrapper<Table> {
         //查询
-        _handleQuery(queryWrapper, param, AutoSave::class.java)
+        _handleQuery(type, queryWrapper, param)
 
         val targetSql = queryWrapper.targetSql
         L.i("parseSaveCheck sql->$targetSql")
@@ -183,9 +199,13 @@ class AutoParse<Table> {
     /**
      * 检查数据是否已存在
      * [com.angcyo.spring.mybatis.plus.auto.annotation.AutoDelete]*/
-    fun parseDeleteCheck(queryWrapper: QueryWrapper<Table>, param: IAutoParam): QueryWrapper<Table> {
+    fun parseDeleteCheck(
+        queryWrapper: QueryWrapper<Table>,
+        param: IAutoParam,
+        type: AutoType = AutoType.DELETE
+    ): QueryWrapper<Table> {
         //查询
-        _handleQuery(queryWrapper, param, AutoDelete::class.java)
+        _handleQuery(type, queryWrapper, param)
 
         val targetSql = queryWrapper.targetSql
         L.i("parseDeleteCheck sql->$targetSql")
@@ -196,9 +216,13 @@ class AutoParse<Table> {
     /**
      * 更新检查数据是否已存在
      * [com.angcyo.spring.mybatis.plus.auto.annotation.AutoUpdate]*/
-    fun parseUpdateCheck(queryWrapper: QueryWrapper<Table>, param: IAutoParam): QueryWrapper<Table> {
+    fun parseUpdateCheck(
+        queryWrapper: QueryWrapper<Table>,
+        param: IAutoParam,
+        type: AutoType = AutoType.UPDATE
+    ): QueryWrapper<Table> {
         //查询
-        _handleQuery(queryWrapper, param, AutoUpdate::class.java)
+        _handleQuery(type, queryWrapper, param)
 
         val targetSql = queryWrapper.targetSql
         L.i("parseUpdateCheck sql->$targetSql")
@@ -325,181 +349,85 @@ class AutoParse<Table> {
     /**处理查询语句
      * [jumpField] 是否要跳过当前的字段
      * [com.angcyo.spring.mybatis.plus.auto.AutoParse._handleWhere]*/
-    fun <Wrapper : AbstractWrapper<Table, String, Wrapper>,
-            Where : Annotation,
-            Group : Annotation,
-            > _handleQuery(
+    fun <Wrapper : AbstractWrapper<Table, String, Wrapper>> _handleQuery(
+        type: AutoType,
         wrapper: AbstractWrapper<Table, String, Wrapper>,
         param: IAutoParam,
-        whereClass: Class<Where>,
         jumpField: (field: Field) -> Boolean = { false }
     ) {
-        val group:Group = param.getAnnotation<Group>()
+        val queryGroup = AutoGroupHelper.parseAutoQuery(param, type) ?: apiError("无法处理的查询")
 
-
-        val autoWhereFieldList = mutableListOf<Field>()
-
-        var and: Any? = null
-        var andList: List<Any?>? = null
-
-        var or: Any? = null
-        var orList: List<Any?>? = null
-
-        ReflectionKit.getFieldList(param.javaClass).forEach { field ->
-            field.annotation(whereClass) {
-                if (jumpField.invoke(field)) {
-                    //jump
-                } else {
-                    val fieldValue = field.get(param)
-
-                    if (fieldValue == null) {
-                        //空值处理
-
-                        //空值检查处理
-                        fun checkNull(where: WhereEnum, checkNull: Boolean, error: String) {
-                            if (where == WhereEnum.isNull || where == WhereEnum.isNotNull) {
-                                autoWhereFieldList.add(field)
-                            }
-                            if (checkNull && where != WhereEnum.ignore) {
-                                parseError(error.ifEmpty { "参数[${field.name}]未指定" })
-                            }
-                        }
-
-                        /** [com.angcyo.spring.mybatis.plus.auto.AutoParse._handleWhere]*/
-                        when {
-                            whereClass.isAssignableFrom(AutoQuery::class.java) -> {
-                                this as AutoQuery
-                                checkNull(this.where, checkNull, nullError)
-                            }
-                            whereClass.isAssignableFrom(AutoSave::class.java) -> {
-                                this as AutoSave
-                                checkNull(this.where, checkNull, existError)
-                            }
-                            whereClass.isAssignableFrom(AutoDelete::class.java) -> {
-                                this as AutoDelete
-                                checkNull(this.where, checkNull, nullError)
-                            }
-                            whereClass.isAssignableFrom(AutoUpdate::class.java) -> {
-                                this as AutoUpdate
-                                checkNull(this.where, checkNull, nullError)
-                            }
-                            else -> parseError("参数[$whereClass]类型有误")
-                        }
-                    } else {
-                        if (field.name == "and") {
-                            //特殊字段, and, 等价于 WhereEnum.and
-                            if (fieldValue.isList()) {
-                                andList = fieldValue as List<Any?>?
-                            } else {
-                                and = fieldValue
-                            }
-                        } else if (field.name == "or") {
-                            //特殊字段, or, 等价于 WhereEnum.or
-                            if (fieldValue.isList()) {
-                                orList = fieldValue as List<Any?>?
-                            } else {
-                                or = fieldValue
-                            }
-                        } else {
-                            autoWhereFieldList.add(field)
-                        }
-                    }
-                }
-            }
-        }
-
-        //默认字段的 条件处理
-        if (autoWhereFieldList.isNotEmpty()) {
-            val autoWhere = param.javaClass.annotation<AutoQuery>()
-            if (autoWhere == null || autoWhere.where == WhereEnum.and) {
-                //默认所有字段 and 条件处理
-                wrapper.and { w ->
-                    autoWhereFieldList.forEach { field ->
-                        _handleWhere(w, field, param, whereClass)
-                    }
-                }
-            }
-        }
-
-        //and条件
-        if (and != null && and is IAutoParam) {
-            wrapper.and { w ->
-                _handleQuery(w, and as IAutoParam, whereClass, jumpField)
-            }
-        }
-
-        //and list条件
-        if (!andList.isNullOrEmpty()) {
-            andList?.forEach { _and ->
-                if (_and != null && _and is IAutoParam) {
-                    wrapper.and { wrapper ->
-                        _handleQuery(wrapper, _and, whereClass, jumpField)
-                    }
-                }
-            }
-        }
-
-        //or条件
-        if (or != null && or is IAutoParam) {
-            wrapper.or { w ->
-                _handleQuery(w, or as IAutoParam, whereClass, jumpField)
-            }
-        }
-
-        //or list 条件
-        if (!orList.isNullOrEmpty()) {
-            orList?.forEach { _or ->
-                if (_or != null && _or is IAutoParam) {
-                    wrapper.or { wrapper ->
-                        _handleQuery(wrapper, _or, whereClass, jumpField)
-                    }
+        if (queryGroup.jumpEmpty && queryGroup.isQueryEmpty()) {
+            //跳过空查询
+        } else {
+            if (wrapper.isEmptyOfWhere) {
+                _handleQueryGroup(wrapper, queryGroup, jumpField)
+            } else {
+                wrapper.and {
+                    _handleQueryGroup(it, queryGroup, jumpField)
                 }
             }
         }
     }
 
-    fun <Wrapper : AbstractWrapper<Table, String, Wrapper>, Where : Annotation> _handleWhere(
+    fun <Wrapper : AbstractWrapper<Table, String, Wrapper>> _handleQueryGroup(
         wrapper: AbstractWrapper<Table, String, Wrapper>,
-        field: Field,
-        obj: Any,
-        where: Class<Where>
+        group: QueryGroup,
+        jumpField: (field: Field) -> Boolean = { false }
     ) {
-        field.annotation(where) {
-            //要查询的列
-            var column: String? = null
-            var whereEnum: WhereEnum? = null
-            var isOr: Boolean = false
-            //对应的值
-            val fieldValue: Any? = field.get(obj)
+        val queryFieldList = group.queryFieldList?.filter { !jumpField(it.field) }
+        val childGroupList = group.childQueryGroupList
 
-            fun handle(where: WhereEnum, columnName: String, or: Boolean) {
-                //要查询的列
-                column = columnName.ifEmpty { field.name }.toLowerName()
-                whereEnum = where
-                isOr = or
+        if (!queryFieldList.isNullOrEmpty() || !childGroupList.isNullOrEmpty()) {
+            //需要组装查询
+
+            val param = group.obj!!
+
+            //查询字段拼装
+            queryFieldList?.forEach { queryField ->
+                val field = queryField.field
+                val fieldValue = field.get(param)
+                val where = queryField.query.where
+
+                val ignoreHandle = where == WhereEnum.ignore
+
+                if (!ignoreHandle) {
+                    if (fieldValue == null) {
+                        //空值处理, 异常检查
+                        //[com.angcyo.spring.mybatis.plus.auto.core.AutoGroupHelper._ignoreField]
+                        if (queryField.query.checkNull) {
+                            parseError(queryField.query.nullError.ifEmpty { "参数[${field.name}]未指定" })
+                        }
+                    }
+                }
+
+                if (!ignoreHandle) {
+                    //处理列的查询sql
+                    val column = queryField.query.column.ifEmpty { field.name }.toLowerName()
+
+                    if (group.or) {
+                        wrapper.or {
+                            _handleWhere(it, column, where, fieldValue)
+                        }
+                    } else {
+                        _handleWhere(wrapper, column, where, fieldValue)
+                    }
+                }
             }
 
-            when {
-                where.isAssignableFrom(AutoQuery::class.java) -> {
-                    this as AutoQuery
-                    handle(this.where, this.column, this.isOr)
+            //查询分组拼装
+            childGroupList?.forEach { queryGroup ->
+                if (queryGroup.jumpEmpty && queryGroup.isQueryEmpty()) {
+                    //跳过空查询
+                } else {
+                    if (group.or) {
+                        wrapper.or {
+                            _handleQueryGroup(it, queryGroup, jumpField)
+                        }
+                    } else {
+                        _handleQueryGroup(wrapper, queryGroup, jumpField)
+                    }
                 }
-                where.isAssignableFrom(AutoSave::class.java) -> {
-                    this as AutoSave
-                    handle(this.where, this.column, this.isOr)
-                }
-                where.isAssignableFrom(AutoDelete::class.java) -> {
-                    this as AutoDelete
-                    handle(this.where, this.column, this.isOr)
-                }
-                where.isAssignableFrom(AutoUpdate::class.java) -> {
-                    this as AutoUpdate
-                    handle(this.where, this.column, this.isOr)
-                }
-            }
-
-            if (column != null && whereEnum != null) {
-                _handleWhere(wrapper, column!!, whereEnum!!, fieldValue, isOr)
             }
         }
     }
@@ -509,64 +437,55 @@ class AutoParse<Table> {
         wrapper: AbstractWrapper<Table, String, Wrapper>,
         column: String,
         where: WhereEnum,
-        value: Any?,
-        isOr: Boolean
+        value: Any?
     ) {
-        var _wrapper = wrapper
-
-        if (isOr) {
-            wrapper.or { w ->
-                _wrapper = w
-            }
-        }
-
         when (where) {
-            WhereEnum.eq -> _wrapper.eq(column, value)
-            WhereEnum.ne -> _wrapper.ne(column, value)
-            WhereEnum.gt -> _wrapper.gt(column, value)
-            WhereEnum.ge -> _wrapper.ge(column, value)
-            WhereEnum.lt -> _wrapper.lt(column, value)
-            WhereEnum.le -> _wrapper.le(column, value)
-            WhereEnum.like -> _wrapper.like(column, value)
-            WhereEnum.notLike -> _wrapper.notLike(column, value)
-            WhereEnum.likeLeft -> _wrapper.likeLeft(column, value)
-            WhereEnum.likeRight -> _wrapper.likeRight(column, value)
-            WhereEnum.isNull -> _wrapper.isNull(column)
-            WhereEnum.isNotNull -> _wrapper.isNotNull(column)
-            WhereEnum.inSql -> _wrapper.inSql(column, value?.toString()?.toSafeSql())
-            WhereEnum.notInSql -> _wrapper.notInSql(column, value?.toString()?.toSafeSql())
-            WhereEnum.exists -> _wrapper.exists(column, value?.toString()?.toSafeSql())
-            WhereEnum.notExists -> _wrapper.notExists(column, value?.toString()?.toSafeSql())
-            WhereEnum.last -> _wrapper.last(value?.toString()?.toSafeSql())
-            WhereEnum.apply -> _wrapper.apply(value?.toString()?.toSafeSql())
+            WhereEnum.eq -> wrapper.eq(column, value)
+            WhereEnum.ne -> wrapper.ne(column, value)
+            WhereEnum.gt -> wrapper.gt(column, value)
+            WhereEnum.ge -> wrapper.ge(column, value)
+            WhereEnum.lt -> wrapper.lt(column, value)
+            WhereEnum.le -> wrapper.le(column, value)
+            WhereEnum.like -> wrapper.like(column, value)
+            WhereEnum.notLike -> wrapper.notLike(column, value)
+            WhereEnum.likeLeft -> wrapper.likeLeft(column, value)
+            WhereEnum.likeRight -> wrapper.likeRight(column, value)
+            WhereEnum.isNull -> wrapper.isNull(column)
+            WhereEnum.isNotNull -> wrapper.isNotNull(column)
+            WhereEnum.inSql -> wrapper.inSql(column, value?.toString()?.toSafeSql())
+            WhereEnum.notInSql -> wrapper.notInSql(column, value?.toString()?.toSafeSql())
+            WhereEnum.exists -> wrapper.exists(column, value?.toString()?.toSafeSql())
+            WhereEnum.notExists -> wrapper.notExists(column, value?.toString()?.toSafeSql())
+            WhereEnum.last -> wrapper.last(value?.toString()?.toSafeSql())
+            WhereEnum.apply -> wrapper.apply(value?.toString()?.toSafeSql())
             WhereEnum.ignore -> Unit //忽略
             else -> {
                 val valueClass = value?.javaClass
                 if (valueClass?.isList() == true) {
                     val valueList = value as List<*>
                     when (where) {
-                        WhereEnum.between -> _wrapper.between(
+                        WhereEnum.between -> wrapper.between(
                             column,
                             valueList.getOrNull(0),
                             valueList.getOrNull(1)
                         )
-                        WhereEnum.notBetween -> _wrapper.notBetween(
+                        WhereEnum.notBetween -> wrapper.notBetween(
                             column,
                             valueList.getOrNull(0),
                             valueList.getOrNull(1)
                         )
                         WhereEnum.groupBy -> {
                             val stringList = valueList as List<String>
-                            _wrapper.groupBy(stringList.joinToString(",").toSafeSql())
+                            wrapper.groupBy(stringList.joinToString(",").toSafeSql())
                         }
-                        WhereEnum.`in` -> _wrapper.`in`(column, valueList)
-                        WhereEnum.notIn -> _wrapper.notIn(column, valueList)
+                        WhereEnum.`in` -> wrapper.`in`(column, valueList)
+                        WhereEnum.notIn -> wrapper.notIn(column, valueList)
                         else -> Unit
                     }
                 } else {
                     when (where) {
                         WhereEnum.groupBy -> {
-                            _wrapper.groupBy(value.toString().toSafeSql())
+                            wrapper.groupBy(value.toString().toSafeSql())
                         }
                         else -> Unit
                     }

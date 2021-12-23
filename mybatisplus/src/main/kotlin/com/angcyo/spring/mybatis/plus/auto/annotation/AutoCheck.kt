@@ -2,7 +2,7 @@ package com.angcyo.spring.mybatis.plus.auto.annotation
 
 /**
  * 自动验证数据的有效性
- *
+ * [com.angcyo.spring.mybatis.plus.auto.core.AutoParse.parseCheck]
  * Email:angcyo@126.com
  * @author angcyo
  * @date 2021/06/02

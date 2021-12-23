@@ -195,7 +195,7 @@ enum class WhereEnum {
      * */
     notExists,
 
-    /**忽略, 占位属性*/
+    /**查询语句的时候, 忽略, 占位属性*/
     ignore,
 }
 

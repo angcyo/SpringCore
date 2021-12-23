@@ -1,9 +1,7 @@
 package com.angcyo.spring.security.table
 
-import com.angcyo.spring.mybatis.plus.auto.annotation.AutoQuery
-import com.angcyo.spring.mybatis.plus.auto.annotation.AutoQueryConfig
-import com.angcyo.spring.mybatis.plus.auto.annotation.AutoUpdate
-import com.angcyo.spring.mybatis.plus.auto.annotation.AutoUpdateBy
+import com.angcyo.spring.mybatis.plus.auto.AutoType
+import com.angcyo.spring.mybatis.plus.auto.annotation.*
 import com.angcyo.spring.mybatis.plus.auto.param.IAutoParam
 import com.angcyo.spring.mybatis.plus.table.BaseAuditTable
 import com.baomidou.mybatisplus.annotation.TableName
@@ -18,7 +16,7 @@ import com.gitee.sunchenbin.mybatis.actable.annotation.TableComment
  *  查询详情: query.*$
  *  所有列表: list.*$
  *  分页列表: page.*$
- *  
+ *
  * 操作数据接口命名规则:
  *   新增: save.*$
  *   更新: update.*$
@@ -35,8 +33,11 @@ import com.gitee.sunchenbin.mybatis.actable.annotation.TableComment
 @AutoQueryConfig(updateFailToSave = true)
 class PermissionTable : BaseAuditTable(), IAutoParam {
 
-    @AutoQuery
-    @AutoUpdate
+    @AutoQuery(
+        queries = [
+            Query(type = AutoType.UPDATE),
+        ]
+    )
     @AutoUpdateBy
     @Column(comment = "权限的代码")
     var code: String? = null

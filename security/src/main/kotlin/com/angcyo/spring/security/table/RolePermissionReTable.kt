@@ -1,9 +1,10 @@
 package com.angcyo.spring.security.table
 
+import com.angcyo.spring.mybatis.plus.auto.AutoType
+import com.angcyo.spring.mybatis.plus.auto.annotation.AutoQuery
 import com.angcyo.spring.mybatis.plus.auto.annotation.AutoQueryConfig
 import com.angcyo.spring.mybatis.plus.auto.annotation.AutoUpdateBy
-import com.angcyo.spring.mybatis.plus.auto.annotation.AutoQuery
-import com.angcyo.spring.mybatis.plus.auto.annotation.AutoUpdate
+import com.angcyo.spring.mybatis.plus.auto.annotation.Query
 import com.angcyo.spring.mybatis.plus.auto.param.IAutoParam
 import com.angcyo.spring.mybatis.plus.table.BaseAuditTable
 import com.baomidou.mybatisplus.annotation.TableName
@@ -22,8 +23,11 @@ import com.gitee.sunchenbin.mybatis.actable.annotation.TableComment
 class RolePermissionReTable : BaseAuditTable(), IAutoParam {
 
     @Column(comment = "角色的id")
-    @AutoQuery
-    @AutoUpdate
+    @AutoQuery(
+        queries = [
+            Query(type = AutoType.UPDATE),
+        ]
+    )
     @AutoUpdateBy
     var roleId: Long? = null
 

@@ -1,9 +1,9 @@
 package com.angcyo.spring.mybatis.plus.auto.param
 
-import com.angcyo.spring.mybatis.plus.auto.annotation.AutoDelete
+import com.angcyo.spring.mybatis.plus.auto.AutoType
 import com.angcyo.spring.mybatis.plus.auto.annotation.AutoQuery
-import com.angcyo.spring.mybatis.plus.auto.annotation.AutoUpdate
 import com.angcyo.spring.mybatis.plus.auto.annotation.AutoUpdateBy
+import com.angcyo.spring.mybatis.plus.auto.annotation.Query
 import com.gitee.sunchenbin.mybatis.actable.annotation.IsKey
 import io.swagger.annotations.ApiModelProperty
 
@@ -15,15 +15,19 @@ import io.swagger.annotations.ApiModelProperty
  */
 abstract class BaseAutoParam : IAutoParam {
 
-    @AutoQuery
     @AutoUpdateBy
     @IsKey
-    @AutoDelete
-    @AutoUpdate
+    @AutoQuery(
+        [
+            Query(type = AutoType.QUERY),
+            Query(type = AutoType.DELETE),
+            Query(type = AutoType.UPDATE),
+            Query(type = AutoType.REMOVE),
+        ]
+    )
     @ApiModelProperty("[通用参数]通过id查询/更新/删除记录")
     var id: Long? = null
 
-    @AutoQuery
     @ApiModelProperty("[通用参数]逻辑删除(0:未删除 1:删除)", hidden = true)
     var deleteFlag: Int? = 0
 }
