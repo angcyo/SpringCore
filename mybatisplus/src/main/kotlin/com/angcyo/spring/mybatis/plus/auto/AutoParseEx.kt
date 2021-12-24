@@ -6,6 +6,7 @@ import com.angcyo.spring.mybatis.plus.columnName
 import com.angcyo.spring.mybatis.plus.table.BaseAuditTable
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper
 import com.baomidou.mybatisplus.core.toolkit.ReflectionKit
+import org.springframework.core.annotation.AnnotationUtils
 import org.springframework.util.ReflectionUtils
 import java.lang.reflect.AnnotatedElement
 import java.lang.reflect.Field
@@ -32,12 +33,13 @@ inline fun <reified Auto : Annotation> Any.getAnnotation(): Auto? {
     return javaClass.annotation()
 }
 
-/**快速获取注解类*/
+/**快速获取注解类, 函数形式
+ * 支持注解上的注解*/
 fun <Auto : Annotation> AnnotatedElement.annotation(
     annotationClass: Class<Auto>,
     dsl: Auto.() -> Unit = {}
 ): Auto? {
-    val auto = getDeclaredAnnotation(annotationClass)
+    val auto = AnnotationUtils.findAnnotation(this, annotationClass)
     return if (auto != null) {
         //isAccessible = true
         if (this is Field) {
@@ -50,14 +52,15 @@ fun <Auto : Annotation> AnnotatedElement.annotation(
     }
 }
 
-/**快速获取注解类*/
+/**快速获取注解类, 内联形式
+ * 支持注解上的注解*/
 inline fun <reified Auto : Annotation> AnnotatedElement.annotation(dsl: Auto.() -> Unit = {}): Auto? {
-    val auto = getDeclaredAnnotation(Auto::class.java)
+    if (this is Field) {
+        ReflectionUtils.makeAccessible(this)
+    }
+    val auto = AnnotationUtils.findAnnotation(this, Auto::class.java)
     return if (auto != null) {
         //isAccessible = true
-        if (this is Field) {
-            ReflectionUtils.makeAccessible(this)
-        }
         auto.dsl()
         auto
     } else {

@@ -157,8 +157,11 @@ class AutoParse<Table> {
      * @return 是否解析成功, 没有出现错误*/
     fun parseFill(param: IAutoParam): Boolean {
         var haveError = false
-        param.eachAnnotation<AutoFill> { field ->
-            if (!_handleFill(this, field, param)) {
+
+        val fillList = AnnotationHelper.parseAnnotations(param, AutoFill::class.java)
+
+        for (fill in fillList) {
+            if (!_handleFill(fill.annotation, fill.field, param)) {
                 haveError = true
             }
         }

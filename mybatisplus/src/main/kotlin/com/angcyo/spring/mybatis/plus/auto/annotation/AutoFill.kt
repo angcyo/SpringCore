@@ -14,7 +14,7 @@ import kotlin.reflect.KClass
  * @date 2021/06/01
  */
 
-@Target(AnnotationTarget.FIELD)
+@Target(AnnotationTarget.FIELD, AnnotationTarget.CLASS, AnnotationTarget.TYPE)
 @Retention(AnnotationRetention.RUNTIME)
 @MustBeDocumented
 annotation class AutoFill(
