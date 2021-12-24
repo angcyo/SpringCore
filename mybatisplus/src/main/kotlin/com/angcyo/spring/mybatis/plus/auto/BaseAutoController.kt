@@ -247,7 +247,7 @@ abstract class BaseAutoController<
         }
 
         if (param !is BaseAutoPageParam) {
-            apiError("参数类型不匹配")
+            apiError("分页查询参数类型不匹配")
         }
 
         val page = autoService.autoPage(param)

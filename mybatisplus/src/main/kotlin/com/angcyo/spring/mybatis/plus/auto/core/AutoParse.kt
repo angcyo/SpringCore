@@ -378,7 +378,9 @@ class AutoParse<Table> {
         val queryFieldList = group.queryFieldList?.filter { !jumpField(it.field) }
         val childGroupList = group.childQueryGroupList
 
-        if (!queryFieldList.isNullOrEmpty() || !childGroupList.isNullOrEmpty()) {
+        if (group.isQueryEmpty()) {
+            wrapper.last("FALSE")
+        } else {
             //需要组装查询
 
             val param = group.obj!!
