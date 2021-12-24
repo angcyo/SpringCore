@@ -142,6 +142,16 @@ fun Any?.getMember(member: String): Any? {
     return ReflectionKit.getFieldValue(this, member)
 }
 
+/**获取指定的key的属性Field*/
+fun Any.getField(key: String?): Field? {
+    if (key.isNullOrEmpty()) {
+        return null
+    }
+    val cls: Class<*> = javaClass
+    val fieldMaps = ReflectionKit.getFieldMap(cls)
+    return fieldMaps[key]
+}
+
 /**设置成员的值*/
 fun Any?.setMember(member: String, value: Any?): Boolean {
     val cls: Class<*> = this?.javaClass ?: return false

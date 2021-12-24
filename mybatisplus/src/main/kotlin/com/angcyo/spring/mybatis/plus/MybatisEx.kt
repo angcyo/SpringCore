@@ -1,6 +1,7 @@
 package com.angcyo.spring.mybatis.plus
 
 import com.angcyo.spring.base.toObj
+import com.angcyo.spring.mybatis.plus.auto.getField
 import com.angcyo.spring.mybatis.plus.auto.setMember
 import com.angcyo.spring.mybatis.plus.table.BaseAuditTable
 import com.baomidou.mybatisplus.core.conditions.AbstractWrapper
@@ -11,6 +12,7 @@ import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper
 import com.gitee.sunchenbin.mybatis.actable.utils.ColumnUtils
 import com.gitee.sunchenbin.mybatis.actable.utils.FieldUtils
 import com.google.common.base.CaseFormat
+import java.lang.reflect.Field
 import kotlin.reflect.KClass
 import kotlin.reflect.KProperty
 
@@ -125,8 +127,13 @@ fun Any.keyName(def: String = "id") = FieldUtils.getKeyField(this)?.name?.toLowe
  * [com.gitee.sunchenbin.mybatis.actable.annotation.IsKey]
  * [javax.persistence.Id]
  * [com.baomidou.mybatisplus.annotation.TableId]
+ *
+ * [defKey] 默认的主键字段属性名
  * */
-fun Any.keyField() = FieldUtils.getKeyField(this)
+fun Any.keyField(defKey: String? = "id"): Field? {
+    return FieldUtils.getKeyField(this) ?: getField(defKey)
+}
+
 fun Any.keyValue() = FieldUtils.getKeyField(this)?.get(this)
 
 /**清空一下不需要传递过来的字段*/

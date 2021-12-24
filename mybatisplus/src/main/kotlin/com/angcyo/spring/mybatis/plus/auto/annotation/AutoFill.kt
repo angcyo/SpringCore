@@ -22,6 +22,9 @@ annotation class AutoFill(
     /**描述信息*/
     val des: String = "",
 
+    /**使用Spring表达式语言（简称SpEL）解析*/
+    val spEL: String = "",
+
     //<editor-fold desc="数据来源的服务">
 
     /**需要访问的服务类名
@@ -32,7 +35,9 @@ annotation class AutoFill(
     val serviceName: String = "",
 
     /**需要调用的服务方法名
-     * 默认是[com.angcyo.spring.mybatis.plus.auto.IBaseAutoMybatisService.listOf]
+     * 默认list查询, 根据参数自动选择以下方法
+     * [com.angcyo.spring.mybatis.plus.auto.IBaseAutoMybatisService.listOf]
+     * [com.angcyo.spring.mybatis.plus.auto.IBaseAutoMybatisService.autoList]
      * */
     val serviceMethod: String = "",
 

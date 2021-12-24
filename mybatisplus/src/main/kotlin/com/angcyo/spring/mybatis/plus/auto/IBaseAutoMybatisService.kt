@@ -6,7 +6,6 @@ import com.angcyo.spring.base.extension.apiError
 import com.angcyo.spring.base.logName
 import com.angcyo.spring.mybatis.plus.*
 import com.angcyo.spring.mybatis.plus.auto.annotation.*
-import com.angcyo.spring.mybatis.plus.auto.core.AutoGroupHelper
 import com.angcyo.spring.mybatis.plus.auto.core.AutoParse
 import com.angcyo.spring.mybatis.plus.auto.param.BaseAutoPageParam
 import com.angcyo.spring.mybatis.plus.auto.param.IAutoParam
@@ -38,6 +37,7 @@ interface IBaseAutoMybatisService<Table> : IBaseMybatisService<Table> {
     /**根据[map], 查询出所有数据
      * [ignoreNull] 当value为null时, 跳过where*/
     @LogMethodTime
+    @AutoFillRef("com.angcyo.spring.mybatis.plus.auto.core.AutoParse._handleFill")
     fun listOf(map: Map<String, Any?>, ignoreNull: Boolean = true): List<Table> {
         return list(queryWrapper(true).apply {
             map.forEach { entry ->
@@ -107,6 +107,7 @@ interface IBaseAutoMybatisService<Table> : IBaseMybatisService<Table> {
 
     /**根据[param], 自动查询出所有数据*/
     @LogMethodTime
+    @AutoFillRef("com.angcyo.spring.mybatis.plus.auto.core.AutoParse._handleFill")
     fun autoList(param: IAutoParam): List<Table> {
         autoFill(param)
         return list(buildAutoParse().parseQuery(queryWrapper(true), param))
@@ -138,30 +139,7 @@ interface IBaseAutoMybatisService<Table> : IBaseMybatisService<Table> {
         val count = count(autoParse.parseSaveCheck(queryWrapper(true), param))
         if (count > 0) {
             //数据已存在, 抛出异常
-            val errorBuilder = StringBuilder()
-
-            AutoGroupHelper.getQueryFieldByType(param, AutoType.SAVE, true).forEach { queryField ->
-                val field = queryField.field
-                val fieldValue = field.get(param)
-                val existError = queryField.query.existError
-                val ignoreError = queryField.query.ignoreExistError
-                //检查值
-                if (fieldValue != null && !ignoreError) {
-                    if (errorBuilder.isNotEmpty()) {
-                        errorBuilder.append(" or ")
-                    }
-                    if (existError.isNotEmpty()) {
-                        errorBuilder.append(existError)
-                    } else {
-                        errorBuilder.append("[${field.name}:${fieldValue}]已存在")
-                    }
-                }
-            }
-            if (errorBuilder.isEmpty()) {
-                apiError("无法保存数据,数据已存在.")
-            } else {
-                apiError(errorBuilder)
-            }
+            AutoParse.handleExistError(param, AutoType.SAVE)
         } else {
             //数据不存在, 检查是否需要插入默认值
             autoParse.parseDefaultValue(param)
@@ -188,7 +166,8 @@ interface IBaseAutoMybatisService<Table> : IBaseMybatisService<Table> {
         return autoRemove(param, false)
     }
 
-    /**真删除, 必须指定主键*/
+    /**真删除, 必须指定主键
+     * [remove] 硬删除, 否则就是软删除*/
     @LogMethodTime
     @Transactional
     fun autoRemove(param: IAutoParam, remove: Boolean = true): Boolean {
@@ -199,7 +178,13 @@ interface IBaseAutoMybatisService<Table> : IBaseMybatisService<Table> {
         val keyValue = keyField.get(param) ?: apiError("未指定主键${keyField.name}值")
 
         //否则检查数据是否合法, 保存数据
-        val count = count(autoParse.parseDeleteCheck(queryWrapper(true), param))
+        val count = count(
+            autoParse.parseDeleteCheck(
+                queryWrapper(true),
+                param,
+                if (remove) AutoType.REMOVE else AutoType.DELETE
+            )
+        )
         if (count > 0) {
             return if (remove) {
                 removeById(keyValue as Serializable)
@@ -452,7 +437,7 @@ interface IBaseAutoMybatisService<Table> : IBaseMybatisService<Table> {
     }
 
     @Transactional
-    fun autoUpdateByKey(vararg tables: Any): Boolean {
+    fun autoUpdateByKey(vararg tables: Any): List<Table>? {
         return autoUpdateByKey(tables.toList())
     }
 
@@ -464,14 +449,21 @@ interface IBaseAutoMybatisService<Table> : IBaseMybatisService<Table> {
      * [com.angcyo.spring.mybatis.plus.auto.param.IAutoParam]
      * */
     @Transactional
-    fun autoUpdateByKey(tableList: List<Any>): Boolean {
+    fun autoUpdateByKey(tableList: List<Any>): List<Table>? {
+
         if (tableList.isEmpty()) {
-            return true
+            return null
         }
 
         val autoParse = buildAutoParse()
 
+        //需要更新的表数据
         val updateTableList = mutableListOf<Table>()
+
+        //主键列表, 用来实现查询返回
+        val keyList = mutableListOf<Serializable>()
+
+        //临时存储
         var keyFieldValue: Any? = null
 
         tableList.forEach { table ->
@@ -483,13 +475,22 @@ interface IBaseAutoMybatisService<Table> : IBaseMybatisService<Table> {
             keyFieldValue = keyField?.get(table)
             if (keyFieldValue == null) {
                 apiError("未指定主键值,无法更新")
+            } else {
+                keyList.add(keyFieldValue as Serializable)
             }
 
             if (table is IAutoParam) {
                 //查询数据有效性
-                val count = count(autoParse.parseUpdateCheck(queryWrapper(true), table))
+                var count = count(autoParse.parseUpdateCheck(queryWrapper(true), table))
                 if (count <= 0) {
                     apiError("数据[$keyFieldValue]不存在, 无法更新")
+                }
+
+                //检查数据是否能被更新
+                count = count(autoParse.parseSaveCheck(queryWrapper(true), table, AutoType.UPDATE_CHECK))
+                if (count > 0) {
+                    //数据已存在, 抛出异常
+                    AutoParse.handleExistError(table, AutoType.UPDATE_CHECK)
                 }
             }
 
@@ -497,32 +498,18 @@ interface IBaseAutoMybatisService<Table> : IBaseMybatisService<Table> {
         }
 
         if (updateTableList.isEmpty()) {
-            return true
+            return null
         }
 
-        /*//判断需要更新的数据是否存在
-        val count = if (updateTableList.size() > 1) {
-            count(queryWrapper(true).apply {
-                `in`(keyFieldName, updateTableList.mapTo(mutableListOf()) {
-                    (it as Any).keyValue()
-                })
-            })
-        } else {
-            count(queryWrapper(true).apply {
-                eq(keyFieldName, (updateTableList.first() as Any).keyValue())
-            })
-        }
-
-        if (count <= 0) {
-            apiError("数据[$keyFieldValue]不存在, 无法更新")
-        }
-*/
         if (updateTableList.size() > BaseAutoPageParam.PAGE_SIZE) {
             apiError("更新的数据量太大")
         }
 
         //批量更新
-        return updateBatchById(updateTableList)
+        if (updateBatchById(updateTableList)) {
+            return listByIds(keyList)
+        }
+        return null
     }
 
     /**

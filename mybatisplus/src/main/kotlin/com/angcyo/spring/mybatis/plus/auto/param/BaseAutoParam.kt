@@ -20,9 +20,9 @@ abstract class BaseAutoParam : IAutoParam {
     @AutoQuery(
         [
             Query(type = AutoType.QUERY),
-            Query(type = AutoType.DELETE),
-            Query(type = AutoType.UPDATE),
-            Query(type = AutoType.REMOVE),
+            Query(type = AutoType.DELETE, checkNull = true, nullError = "请指定数据id"),
+            Query(type = AutoType.UPDATE, checkNull = true, nullError = "请指定数据id"),
+            Query(type = AutoType.REMOVE, checkNull = true, nullError = "请指定数据id"),
         ]
     )
     @ApiModelProperty("[通用参数]通过id查询/更新/删除记录")

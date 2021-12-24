@@ -17,4 +17,5 @@ import com.angcyo.spring.mybatis.plus.auto.annotation.AutoFill
     serviceMethod = "getCurrentUserId",
     targetField = ""
 )
+//@AutoFill(spEL = "@userService.getCurrentUserId()")
 annotation class AutoFillUserId

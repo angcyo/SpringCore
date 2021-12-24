@@ -1,6 +1,7 @@
 package com.angcyo.spring.security.service
 
 import com.angcyo.spring.mybatis.plus.auto.BaseAutoMybatisServiceImpl
+import com.angcyo.spring.mybatis.plus.auto.annotation.AutoFillRef
 import com.angcyo.spring.mybatis.plus.columnName
 import com.angcyo.spring.mybatis.plus.tableName
 import com.angcyo.spring.security.mapper.IPermissionMapper
@@ -19,6 +20,7 @@ import org.springframework.stereotype.Service
 class PermissionService : BaseAutoMybatisServiceImpl<IPermissionMapper, PermissionTable>() {
 
     /**获取指定用户的权限集合*/
+    @AutoFillRef("com.angcyo.spring.security.bean.UserDetail.getUserPermissionList")
     fun getUserPermission(userId: Long): List<PermissionTable> {
         val list = list(queryWrapper().apply {
             //先获取用户id 对应的 角色id

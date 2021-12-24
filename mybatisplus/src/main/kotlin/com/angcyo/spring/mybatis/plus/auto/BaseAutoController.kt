@@ -157,19 +157,19 @@ abstract class BaseAutoController<
         return false
     }
 
-    open fun autoUpdateAfter(param: SaveParam, update: Boolean) {
+    open fun autoUpdateAfter(param: SaveParam, update: List<Table>?) {
     }
 
     @ApiOperation("[通用更新接口]使用id更新数据Auto")
     @PostMapping("/update.auto")
-    open fun autoUpdate(@RequestBody(required = true) param: SaveParam): Result<Boolean> {
+    open fun autoUpdate(@RequestBody(required = true) param: SaveParam): Result<Return> {
         autoService.autoFill(param)
         if (autoUpdateBefore(param)) {
             return Result.ok()
         }
         val result = autoService.autoUpdateByKey(param)
         autoUpdateAfter(param, result)
-        return result.result()
+        return result?.toReturnList()?.lastOrNull().result()
     }
 
     //</editor-fold desc="update">

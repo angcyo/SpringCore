@@ -1,5 +1,6 @@
 package com.angcyo.spring.mybatis.plus.auto.core
 
+import com.angcyo.spring.base.app
 import com.angcyo.spring.base.beanOf
 import com.angcyo.spring.base.extension.apiError
 import com.angcyo.spring.base.logName
@@ -16,8 +17,13 @@ import com.baomidou.mybatisplus.core.conditions.AbstractWrapper
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page
+import org.springframework.context.expression.BeanFactoryResolver
 import org.springframework.core.convert.support.DefaultConversionService
+import org.springframework.expression.ExpressionParser
+import org.springframework.expression.spel.standard.SpelExpressionParser
+import org.springframework.expression.spel.support.StandardEvaluationContext
 import java.lang.reflect.Field
+
 
 /**
  * [com.angcyo.spring.mybatis.plus.auto.IBaseAutoMybatisService]
@@ -30,6 +36,36 @@ class AutoParse<Table> {
 
     companion object {
         const val OBJ_DOT = "."
+
+        /**处理查询的数据是否已存在
+         * 保存前, 更新前的检查*/
+        fun handleExistError(param: IAutoParam, type: AutoType) {
+            //数据已存在, 抛出异常
+            val errorBuilder = StringBuilder()
+            AutoGroupHelper.getQueryFieldByType(param, type, true).forEach { queryField ->
+                val field = queryField.field
+                val fieldValue = field.get(param)
+                val existError = queryField.query.existError
+                val ignoreError = queryField.query.ignoreExistError
+                //检查值
+                if (fieldValue != null && !ignoreError) {
+                    if (errorBuilder.isNotEmpty()) {
+                        errorBuilder.append(" or ")
+                    }
+                    if (existError.isNotEmpty()) {
+                        errorBuilder.append(existError)
+                    } else {
+                        errorBuilder.append("[${field.name}:${fieldValue}]已存在")
+                    }
+                }
+            }
+            if (errorBuilder.isEmpty()) {
+                apiError("无法保存数据,数据已存在.")
+            } else {
+                apiError(errorBuilder)
+            }
+        }
+
     }
 
     /**
@@ -238,7 +274,21 @@ class AutoParse<Table> {
         //反射获取对应服务
         var service: Any? = null
         var serviceClass: Class<*>? = null
-        if (fill.service !is PlaceholderAutoMybatisService) {
+
+        if (fill.spEL.isNotEmpty()) {
+            //使用Spring表达式语言（简称SpEL）解析
+
+            //创建SpEL表达式的解析器
+            val parser: ExpressionParser = SpelExpressionParser()
+            val exp = parser.parseExpression(fill.spEL)
+            //取出解析结果
+            val context = StandardEvaluationContext(obj)
+            context.setBeanResolver(BeanFactoryResolver(app))
+            val result = exp.getValue(context)
+
+            field.set(obj, result)
+            return true
+        } else if (fill.service !is PlaceholderAutoMybatisService) {
             serviceClass = fill.service.java
             service = beanOf(fill.service.java)
         } else if (fill.serviceName.isNotEmpty()) {

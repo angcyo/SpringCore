@@ -26,32 +26,32 @@ object AutoGroupHelper {
         val autoQueryGroup: AutoQueryGroup? = param.getAnnotation()
         if (autoQueryGroup == null) {
             //无分组信息
-            result = QueryGroup().apply {
-                obj = param
-                or = false
-                queryFieldList = getQueryFieldByType(param, type, true)
-            }
+            result = defaultAutoQueryGroup(param, type)
         } else {
             //具有分组信息
-            autoQueryGroup.queries.find {
+            val autoQueryGroupQuery = autoQueryGroup.queries.find {
                 it.type == type
-            }?.let {
+            }
+            result = if (autoQueryGroupQuery == null) {
+                defaultAutoQueryGroup(param, type)
+            } else {
                 //找到了对应类型的分组
-
-                val expression = GroupPatternParse().parse(it.pattern)
+                val expression = GroupPatternParse().parse(autoQueryGroupQuery.pattern)
                 if (expression.groupList.isNotEmpty() || expression.expressionList.isNotEmpty()) {
-                    result = getQueryGroup(param, expression, it.jumpEmpty)
+                    getQueryGroup(param, expression, autoQueryGroupQuery.jumpEmpty)
                 } else {
-                    result = QueryGroup().apply {
-                        obj = param
-                        or = false
-                        //无分组, 则使用默认
-                        queryFieldList = getQueryFieldByType(param, type, true)
-                    }
+                    defaultAutoQueryGroup(param, type)
                 }
             }
         }
         return result
+    }
+
+    /**默认的查询分组*/
+    fun defaultAutoQueryGroup(param: IAutoParam, type: AutoType) = QueryGroup().apply {
+        obj = param
+        or = false
+        queryFieldList = getQueryFieldByType(param, type, true)
     }
 
     /**获取分组以及分组中的字段*/
