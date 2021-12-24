@@ -51,3 +51,6 @@ class Base : ApplicationContextAware {
         L.isDebug = activeProfiles.contains("dev") || activeProfiles.contains("pre")
     }
 }
+
+/**[ApplicationContext]*/
+fun app() = Base.applicationContext
