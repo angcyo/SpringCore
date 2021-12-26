@@ -36,8 +36,7 @@ inline fun <reified Auto : Annotation> Any.getAnnotation(): Auto? {
 /**快速获取注解类, 函数形式
  * 支持注解上的注解*/
 fun <Auto : Annotation> AnnotatedElement.annotation(
-    annotationClass: Class<Auto>,
-    dsl: Auto.() -> Unit = {}
+    annotationClass: Class<Auto>, dsl: Auto.() -> Unit = {}
 ): Auto? {
     val auto = AnnotationUtils.findAnnotation(this, annotationClass)
     return if (auto != null) {
@@ -95,7 +94,7 @@ inline fun <reified Auto : Annotation> Any.annotations(checkNullValue: Boolean =
     return result
 }
 
-/**是否有指定的注解*/
+/**对象所有字段中, 是否有指定的注解*/
 inline fun <reified Auto : Annotation> Any.haveAnnotation(checkNullValue: Boolean = false): Boolean {
     var have = false
     for (field in ReflectionKit.getFieldList(this.javaClass)) {

@@ -11,7 +11,9 @@ package com.angcyo.spring.mybatis.plus.auto.annotation
 @Retention(AnnotationRetention.RUNTIME)
 @MustBeDocumented
 annotation class AutoQueryConfig(
+
     /**当调用自动更新保存方法, 更新失败时, 自动转为保存操作
      * [com.angcyo.spring.mybatis.plus.auto.IBaseAutoMybatisService.autoSaveOrUpdate]*/
     val updateFailToSave: Boolean = false,
-)
+
+    )

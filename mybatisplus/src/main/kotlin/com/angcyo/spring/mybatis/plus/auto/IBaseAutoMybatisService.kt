@@ -180,9 +180,7 @@ interface IBaseAutoMybatisService<Table> : IBaseMybatisService<Table> {
         //否则检查数据是否合法, 保存数据
         val count = count(
             autoParse.parseDeleteCheck(
-                queryWrapper(true),
-                param,
-                if (remove) AutoType.REMOVE else AutoType.DELETE
+                queryWrapper(true), param, if (remove) AutoType.REMOVE else AutoType.DELETE
             )
         )
         if (count > 0) {
@@ -230,7 +228,7 @@ interface IBaseAutoMybatisService<Table> : IBaseMybatisService<Table> {
      * @return 操作是否全部成功*/
     @LogMethodTime
     @Transactional
-    fun autoSaveOrUpdate(tableList: List<Any>, config: AutoQueryConfig? = null): Boolean {
+    fun autoSaveOrUpdate(tableList: List<Any>, config: QueryConfig? = null): Boolean {
         val autoParse = buildAutoParse()
 
         //更新失败的列表
@@ -258,7 +256,7 @@ interface IBaseAutoMybatisService<Table> : IBaseMybatisService<Table> {
             //操作的表对象
             val targetTable: Table = table.toTable()
 
-            if (targetTable is BaseAuditTable && targetTable.id ?: 0 > 0) {
+            if (targetTable is BaseAuditTable && (targetTable.id ?: 0) > 0) {
                 //通过id更新记录
                 if (updateById(targetTable)) {
                     updateSuccessList.add(targetTable)
@@ -275,8 +273,7 @@ interface IBaseAutoMybatisService<Table> : IBaseMybatisService<Table> {
                     if (update(targetTable, autoParse.parseUpdate(updateWrapper(), targetTable))) {
                         updateSuccessList.add(targetTable)
                     } else {
-                        val autoQuery =
-                            targetTable.javaClass.annotation<com.angcyo.spring.mybatis.plus.auto.annotation.AutoQueryConfig>()
+                        val autoQuery = targetTable.javaClass.annotation<AutoQueryConfig>()
                         if (config?.updateFailToSave == true || autoQuery?.updateFailToSave == true) {
                             saveList.add(targetTable)
                         } else {
@@ -428,7 +425,7 @@ interface IBaseAutoMybatisService<Table> : IBaseMybatisService<Table> {
         }
 
         if (noAnnotationTableList.isNotEmpty()) {
-            autoSaveOrUpdate(noAnnotationTableList, AutoQueryConfig().apply {
+            autoSaveOrUpdate(noAnnotationTableList, QueryConfig().apply {
                 updateFailToSave = true
             }).ifError("自动更新数据失败[${noAnnotationTableList}]")
         }
@@ -521,9 +518,7 @@ interface IBaseAutoMybatisService<Table> : IBaseMybatisService<Table> {
      * */
     @Transactional
     fun autoUpdateByQuery(
-        param: IAutoParam,
-        error: String? = null,
-        dsl: UpdateWrapper<Table>.() -> Unit
+        param: IAutoParam, error: String? = null, dsl: UpdateWrapper<Table>.() -> Unit
     ): Boolean {
         autoFill(param)
         return updateQuery {
