@@ -9,3 +9,6 @@ apply from: allGradle.qiniu
 
 //添加蒲公英文件上传任务
 apply from: allGradle.pgyer*/
+
+
+//https://stackoverflow.com/questions/45753733/ext-in-buildscript-can-not-be-recognised-by-gradle-kotlin-dsl

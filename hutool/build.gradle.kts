@@ -18,8 +18,8 @@ dependencies {
     //https://mvnrepository.com/artifact/com.github.oshi/oshi-core
     api("com.github.oshi:oshi-core:5.8.3")
 
-    //二维码支持
+    //二维码支持, 改用jar包的形式依赖
     //https://search.maven.org/artifact/com.google.zxing/core
-    api("com.google.zxing:core:3.4.1")
-
+    //api("com.google.zxing:core:3.3.2") //3.4.1 需要android.jar
+    api(fileTree(mapOf("dir" to "libs", "include" to listOf("*.jar"))))
 }
