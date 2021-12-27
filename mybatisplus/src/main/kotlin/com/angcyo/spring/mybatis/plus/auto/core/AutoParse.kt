@@ -533,8 +533,7 @@ class AutoParse<Table> {
                             valueList.getOrNull(1)
                         )
                         WhereEnum.groupBy -> {
-                            val stringList = valueList as List<String>
-                            wrapper.groupBy(stringList.joinToString(",").toSafeSql())
+                            wrapper.groupBy(valueList.joinToString(",").toSafeSql())
                         }
                         WhereEnum.`in` -> wrapper.`in`(column, valueList)
                         WhereEnum.notIn -> wrapper.notIn(column, valueList)
