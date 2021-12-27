@@ -1,5 +1,7 @@
 package com.angcyo.spring.mybatis.plus.service
 
+import com.angcyo.spring.base.AppProperties
+import com.angcyo.spring.base.beanOf
 import com.angcyo.spring.base.data.ifError
 import com.angcyo.spring.base.data.ifNotExist
 import com.angcyo.spring.base.extension.apiError
@@ -50,12 +52,22 @@ interface IBaseMybatisService<Table> : IService<Table> {
 
     /**获取一个[QueryWrapper]
      * 是否需要加上[noDelete]?*/
-    fun queryWrapper(filterDelete: Boolean = false): QueryWrapper<Table> {
+    fun queryWrapper(
+        filterDelete: Boolean = false,
+    ): QueryWrapper<Table> {
         return QueryWrapper<Table>().apply {
             if (filterDelete) {
                 noDelete()
             }
+
         }
+    }
+
+    fun QueryWrapper<Table>.maxCountLimit(maxCountLimit: Long? = beanOf(AppProperties::class.java).maxCountLimit): QueryWrapper<Table> {
+        if ((maxCountLimit ?: 0) > 0) {
+            last("LIMIT $maxCountLimit")
+        }
+        return this
     }
 
     /**获取一个[UpdateWrapper]*/

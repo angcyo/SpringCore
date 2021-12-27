@@ -1,5 +1,6 @@
 package com.angcyo.spring.mybatis.plus.auto.core
 
+import com.angcyo.spring.base.AppProperties
 import com.angcyo.spring.base.app
 import com.angcyo.spring.base.beanOf
 import com.angcyo.spring.base.extension.apiError
@@ -23,6 +24,7 @@ import org.springframework.expression.ExpressionParser
 import org.springframework.expression.spel.standard.SpelExpressionParser
 import org.springframework.expression.spel.support.StandardEvaluationContext
 import java.lang.reflect.Field
+import kotlin.math.min
 
 
 /**
@@ -92,7 +94,8 @@ class AutoParse<Table> {
     /**请求页码*/
     fun page(param: BaseAutoPageParam): Page<Table> {
         val page = Page<Table>(param.pageIndex, param.pageSize, param.searchCount)
-        page.maxLimit = param.pageSize
+        val maxCountLimit: Long = beanOf(AppProperties::class.java).maxCountLimit
+        page.maxLimit = min(maxCountLimit, param.pageSize)
         return page
     }
 

@@ -110,7 +110,7 @@ interface IBaseAutoMybatisService<Table> : IBaseMybatisService<Table> {
     @AutoFillRef("com.angcyo.spring.mybatis.plus.auto.core.AutoParse._handleFill")
     fun autoList(param: IAutoParam): List<Table> {
         autoFill(param)
-        return list(buildAutoParse().parseQuery(queryWrapper(true), param))
+        return list(buildAutoParse().parseQuery(queryWrapper(true).maxCountLimit(), param))
     }
 
     /**根据[param], 自动分页查询出数据*/

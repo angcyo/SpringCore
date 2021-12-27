@@ -45,7 +45,7 @@ class AppProperties {
     /**应用构建时间*/
     var time: String? = nowTimeString()
 
-    /**是否允许多端登录, 否则统一时间只能一个设备登录
+    /**是否允许多端登录, 否则同一段时间只能一个设备登录
      * [com.angcyo.spring.security.jwt.JwtLoginFilter.successfulAuthentication]*/
     var multiLogin: Boolean = true
 
@@ -66,6 +66,9 @@ class AppProperties {
 
     /**redis 缓存数据的时长, 秒*/
     var dataCacheTime: Long = 24 * 60 * 60 //24小时
+
+    /**list 查询 page 查询时, 允许返回的最大数量*/
+    var maxCountLimit: Long = 5_000
 
     //------------------------swagger-------------------
 
