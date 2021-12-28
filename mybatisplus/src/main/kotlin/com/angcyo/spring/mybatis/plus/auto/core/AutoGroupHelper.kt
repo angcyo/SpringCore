@@ -38,7 +38,7 @@ object AutoGroupHelper {
                 //找到了对应类型的分组
                 val expression = GroupPatternParse().parse(autoQueryGroupQuery.pattern)
                 if (expression.groupList.isNotEmpty() || expression.expressionList.isNotEmpty()) {
-                    getQueryGroup(param, expression, autoQueryGroupQuery.jumpEmpty)
+                    getQueryGroup(param, expression, autoQueryGroupQuery.jumpEmpty, type)
                 } else {
                     defaultAutoQueryGroup(param, type)
                 }
@@ -55,7 +55,12 @@ object AutoGroupHelper {
     }
 
     /**获取分组以及分组中的字段*/
-    fun getQueryGroup(param: IAutoParam, expression: GroupPatternExpression, jumpEmpty: Boolean): QueryGroup {
+    fun getQueryGroup(
+        param: IAutoParam,
+        expression: GroupPatternExpression,
+        jumpEmpty: Boolean,
+        type: AutoType
+    ): QueryGroup {
         return QueryGroup().apply {
             obj = param
             or = expression.op == GroupPatternExpression.OR
@@ -72,7 +77,7 @@ object AutoGroupHelper {
                             obj = param
                             or = false
                             this.jumpEmpty = jumpEmpty
-                            queryFieldList = getQueryFieldByGroup(param, groupName, true)
+                            queryFieldList = getQueryFieldByGroup(param, groupName, true, type)
                         })
                     }
                 }
@@ -85,7 +90,7 @@ object AutoGroupHelper {
                     childQueryGroupList = groupList
 
                     forEach { groupPatternExpression ->
-                        groupList.add(getQueryGroup(param, groupPatternExpression, jumpEmpty))
+                        groupList.add(getQueryGroup(param, groupPatternExpression, jumpEmpty, type))
                     }
                 }
             }
@@ -108,11 +113,11 @@ object AutoGroupHelper {
     }
 
     /**获取指定分组名的所有字段*/
-    fun getQueryFieldByGroup(param: IAutoParam, group: String, checkIgnore: Boolean): List<QueryField> {
+    fun getQueryFieldByGroup(param: IAutoParam, group: String, checkIgnore: Boolean, type: AutoType): List<QueryField> {
         val result = mutableListOf<QueryField>()
         param.eachField { field ->
             field.annotation<AutoQuery> {
-                queries.find { it.groups.contains(group) }?.let {
+                queries.find { it.groups.contains(group) && it.type == type }?.let {
                     if (!checkIgnore || !_ignoreField(it, field, param)) {
                         result.add(QueryField(field, it))
                     }

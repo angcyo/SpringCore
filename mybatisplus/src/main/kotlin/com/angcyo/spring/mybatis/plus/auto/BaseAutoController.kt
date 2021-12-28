@@ -37,10 +37,13 @@ abstract class BaseAutoController<
 
         > {
 
-    //<editor-fold desc="core">
+    //<editor-fold desc="泛型获取">
 
-    @Autowired
-    lateinit var autoService: AutoService
+    open fun getQueryClass(): Class<*> = ReflectionKit.getSuperClassGenericType(
+        this.javaClass,
+        BaseAutoController::class.java,
+        3
+    ) as Class
 
     /**获取返回值类型*/
     open fun getReturnClass(): Class<*> = ReflectionKit.getSuperClassGenericType(
@@ -48,6 +51,13 @@ abstract class BaseAutoController<
         BaseAutoController::class.java,
         4
     ) as Class
+
+    //</editor-fold desc="泛型获取">
+
+    //<editor-fold desc="core">
+
+    @Autowired
+    lateinit var autoService: AutoService
 
     fun Table.toReturn(): Return {
         val any = this as Any
@@ -99,6 +109,7 @@ abstract class BaseAutoController<
     }
 
     open fun autoSaveAfter(param: SaveParam, table: Table) {
+        //no op
     }
 
     //</editor-fold desc="save">
@@ -123,6 +134,7 @@ abstract class BaseAutoController<
     }
 
     open fun autoDeleteAfter(param: QueryParam, delete: Boolean) {
+        //no op
     }
 
 
@@ -148,6 +160,7 @@ abstract class BaseAutoController<
     }
 
     open fun autoRemoveAfter(param: QueryParam, remove: Boolean) {
+        //no op
     }
 
     //</editor-fold desc="remove">
@@ -160,6 +173,7 @@ abstract class BaseAutoController<
     }
 
     open fun autoUpdateAfter(param: SaveParam, update: List<Table>?) {
+        //no op
     }
 
     @ApiOperation("[通用]单表根据数据id更新接口")
@@ -202,6 +216,7 @@ abstract class BaseAutoController<
     }
 
     open fun autoQueryAfter(param: QueryParam, query: IPage<Table>) {
+        //no op
     }
 
     //</editor-fold desc="query">
@@ -215,17 +230,19 @@ abstract class BaseAutoController<
 
     @ApiOperation("[通用]单表列表查询接口")
     @PostMapping("/list.auto")
-    open fun autoList(@RequestBody(required = true) param: QueryParam): Result<List<Return>> {
-        autoService.autoFill(param)
-        if (autoListBefore(param)) {
+    open fun autoList(@RequestBody(required = false) param: QueryParam?): Result<List<Return>> {
+        val queryParam = param ?: getQueryClass().newInstance() as QueryParam
+        autoService.autoFill(queryParam)
+        if (autoListBefore(queryParam)) {
             return Result.ok()
         }
-        val list = autoService.autoList(param)
-        autoListAfter(param, list)
+        val list = autoService.autoList(queryParam)
+        autoListAfter(queryParam, list)
         return list.toReturnList().result()
     }
 
     open fun autoListAfter(param: QueryParam, list: List<Table>) {
+        //no op
     }
 
     //</editor-fold desc="list">
@@ -239,18 +256,19 @@ abstract class BaseAutoController<
 
     @ApiOperation("[通用]单表数据分页查询接口")
     @PostMapping("/page.auto")
-    open fun autoPage(@RequestBody(required = true) param: QueryParam): Result<IPage<Return>> {
-        autoService.autoFill(param)
-        if (autoPageBefore(param)) {
+    open fun autoPage(@RequestBody(required = false) param: QueryParam?): Result<IPage<Return>> {
+        val queryParam = param ?: getQueryClass().newInstance() as QueryParam
+        autoService.autoFill(queryParam)
+        if (autoPageBefore(queryParam)) {
             return Result.ok()
         }
 
-        if (param !is BaseAutoPageParam) {
+        if (queryParam !is BaseAutoPageParam) {
             apiError("分页查询参数类型不匹配")
         }
 
-        val page = autoService.autoPage(param)
-        autoPageAfter(param, page)
+        val page = autoService.autoPage(queryParam)
+        autoPageAfter(queryParam, page)
 
         val result = page.records.toReturnList()
         val resultPage = result.toIPage(page)
@@ -258,6 +276,7 @@ abstract class BaseAutoController<
     }
 
     open fun autoPageAfter(param: QueryParam, query: IPage<Table>) {
+        //no op
     }
 
     //</editor-fold desc="page">
