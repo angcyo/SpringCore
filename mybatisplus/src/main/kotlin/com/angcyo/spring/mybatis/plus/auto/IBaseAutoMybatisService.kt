@@ -177,13 +177,13 @@ interface IBaseAutoMybatisService<Table> : IBaseMybatisService<Table> {
         val keyField = param.keyField() ?: apiError("未指定主键id")
         val keyValue = keyField.get(param) ?: apiError("未指定主键${keyField.name}值")
 
+        val type = if (remove) AutoType.REMOVE else AutoType.DELETE
+
         //否则检查数据是否合法, 保存数据
-        val count = count(
-            autoParse.parseDeleteCheck(
-                queryWrapper(true), param, if (remove) AutoType.REMOVE else AutoType.DELETE
-            )
-        )
+        val count = count(autoParse.parseDeleteCheck(queryWrapper(true), param, type))
+
         if (count > 0) {
+            //查询后, 有数据则删除
             return if (remove) {
                 removeById(keyValue as Serializable)
             } else {
@@ -202,6 +202,8 @@ interface IBaseAutoMybatisService<Table> : IBaseMybatisService<Table> {
                     onDeleteTable(keyValue as Serializable, remove)
                 }
             }
+        } else if (count == 0L) {
+            return true
         } else {
             apiError("数据[$keyValue]不存在无法删除")
         }
