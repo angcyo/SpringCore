@@ -52,14 +52,11 @@ interface IBaseMybatisService<Table> : IService<Table> {
 
     /**获取一个[QueryWrapper]
      * 是否需要加上[noDelete]?*/
-    fun queryWrapper(
-        filterDelete: Boolean = false,
-    ): QueryWrapper<Table> {
+    fun queryWrapper(filterDelete: Boolean = false): QueryWrapper<Table> {
         return QueryWrapper<Table>().apply {
             if (filterDelete) {
                 noDelete()
             }
-
         }
     }
 
@@ -92,7 +89,7 @@ interface IBaseMybatisService<Table> : IService<Table> {
     fun isBaseAuditTable() = BaseAuditTable::class.java.isAssignableFrom(tableClass())
 
     /**处理排序字段
-     * [com.angcyo.spring.mybatis.plus.auto.AutoParse._handleOrder]*/
+     * [com.angcyo.spring.mybatis.plus.auto.core.AutoParse._handleOrder]*/
     fun sort(wrapper: QueryWrapper<Table>, param: Any): QueryWrapper<Table> {
         wrapper.sort(param)
         return wrapper

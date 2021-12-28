@@ -9,6 +9,8 @@ import com.baomidou.mybatisplus.core.metadata.IPage
  * @author angcyo
  * @date 2021/06/18
  */
+
+@Deprecated("已废弃", ReplaceWith("com.angcyo.spring.mybatis.plus.auto.IBaseAutoMybatisService"))
 interface IControllerService<
         Table,
         /**保存时的参数类型*/

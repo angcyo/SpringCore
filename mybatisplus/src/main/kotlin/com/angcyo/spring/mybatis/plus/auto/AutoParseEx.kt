@@ -5,7 +5,9 @@ import com.angcyo.spring.mybatis.plus.auto.param.BaseAutoQueryParam
 import com.angcyo.spring.mybatis.plus.columnName
 import com.angcyo.spring.mybatis.plus.table.BaseAuditTable
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper
+import com.baomidou.mybatisplus.core.metadata.IPage
 import com.baomidou.mybatisplus.core.toolkit.ReflectionKit
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page
 import org.springframework.core.annotation.AnnotationUtils
 import org.springframework.util.ReflectionUtils
 import java.lang.reflect.AnnotatedElement
@@ -197,7 +199,7 @@ fun <Table> QueryWrapper<Table>.noDelete(table: Class<Table>): QueryWrapper<Tabl
 //<editor-fold desc="排序">
 
 /**处理排序字段
- * [com.angcyo.spring.mybatis.plus.auto.AutoParse._handleOrder]*/
+ * [com.angcyo.spring.mybatis.plus.auto.core.AutoParse._handleOrder]*/
 fun <Table> QueryWrapper<Table>.sort(param: Any?): QueryWrapper<Table> {
     if (param != null && param is BaseAutoQueryParam) {
         val desc = param.desc
@@ -247,7 +249,6 @@ fun <Table> QueryWrapper<Table>.sortAsc(columnList: List<String>): QueryWrapper<
     return this
 }
 
-
 //</editor-fold desc="排序">
 
 //<editor-fold desc="分组">
@@ -265,6 +266,17 @@ fun <Table> QueryWrapper<Table>.group(columnList: List<String>): QueryWrapper<Ta
         groupBy(columnList[0], *other.toTypedArray())
     }
     return this
+}
+
+/**将列表数据, 转换成[IPage]对象*/
+fun <T> List<T>.toIPage(page: IPage<*>): IPage<T> {
+    val resultPage = Page<T>()
+    resultPage.records = this //数据记录
+    resultPage.total = page.total //总数量
+    resultPage.size = page.size //每页请求数量
+    resultPage.current = page.current //当前页
+    resultPage.pages = page.pages //总页数
+    return resultPage
 }
 
 //</editor-fold desc="分组">

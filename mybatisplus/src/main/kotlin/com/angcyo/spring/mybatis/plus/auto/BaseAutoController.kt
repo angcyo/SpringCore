@@ -9,7 +9,6 @@ import com.angcyo.spring.mybatis.plus.auto.param.IAutoParam
 import com.angcyo.spring.util.copyTo
 import com.baomidou.mybatisplus.core.metadata.IPage
 import com.baomidou.mybatisplus.core.toolkit.ReflectionKit
-import com.baomidou.mybatisplus.extension.plugins.pagination.Page
 import io.swagger.annotations.ApiOperation
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.web.bind.annotation.PostMapping
@@ -24,6 +23,7 @@ import org.springframework.web.bind.annotation.RequestBody
  * @date 2021/06/08
  */
 abstract class BaseAutoController<
+
         /**自动服务的提供类*/
         AutoService : IBaseAutoMybatisService<Table>,
         /**对应的表*/
@@ -34,6 +34,7 @@ abstract class BaseAutoController<
         QueryParam : IAutoParam,
         /**数据返回的类型*/
         Return
+
         > {
 
     //<editor-fold desc="core">
@@ -84,9 +85,6 @@ abstract class BaseAutoController<
         return false
     }
 
-    open fun autoSaveAfter(param: SaveParam, table: Table) {
-    }
-
     @ApiOperation("[通用]单表数据新增接口")
     @PostMapping("/save.auto")
     open fun autoSave(@RequestBody(required = true) param: SaveParam): Result<Return> {
@@ -100,21 +98,21 @@ abstract class BaseAutoController<
         return table.toReturn().result()
     }
 
+    open fun autoSaveAfter(param: SaveParam, table: Table) {
+    }
+
     //</editor-fold desc="save">
 
     //<editor-fold desc="delete">
 
     /**@return true 拦截后面的操作*/
-    open fun autoDeleteBefore(param: SaveParam): Boolean {
+    open fun autoDeleteBefore(param: QueryParam): Boolean {
         return false
-    }
-
-    open fun autoDeleteAfter(param: SaveParam, delete: Boolean) {
     }
 
     @ApiOperation("[通用]单表数据id软删除接口")
     @PostMapping("/delete.auto")
-    open fun autoDelete(@RequestBody(required = true) param: SaveParam): Result<Boolean> {
+    open fun autoDelete(@RequestBody(required = true) param: QueryParam): Result<Boolean> {
         autoService.autoFill(param)
         if (autoDeleteBefore(param)) {
             return Result.ok()
@@ -124,21 +122,22 @@ abstract class BaseAutoController<
         return delete.result()
     }
 
+    open fun autoDeleteAfter(param: QueryParam, delete: Boolean) {
+    }
+
+
     //</editor-fold desc="delete">
 
     //<editor-fold desc="remove">
 
     /**@return true 拦截后面的操作*/
-    open fun autoRemoveBefore(param: SaveParam): Boolean {
+    open fun autoRemoveBefore(param: QueryParam): Boolean {
         return false
-    }
-
-    open fun autoRemoveAfter(param: SaveParam, remove: Boolean) {
     }
 
     @ApiOperation("[通用]单表数据id移除数据(真删除)接口", hidden = true)
     @PostMapping("/remove.auto")
-    open fun autoRemove(@RequestBody(required = true) param: SaveParam): Result<Boolean> {
+    open fun autoRemove(@RequestBody(required = true) param: QueryParam): Result<Boolean> {
         autoService.autoFill(param)
         if (autoRemoveBefore(param)) {
             return Result.ok()
@@ -146,6 +145,9 @@ abstract class BaseAutoController<
         val remove = autoService.autoRemove(param)
         autoRemoveAfter(param, remove)
         return remove.result()
+    }
+
+    open fun autoRemoveAfter(param: QueryParam, remove: Boolean) {
     }
 
     //</editor-fold desc="remove">
@@ -181,9 +183,6 @@ abstract class BaseAutoController<
         return false
     }
 
-    open fun autoQueryAfter(param: QueryParam, query: IPage<Table>) {
-    }
-
     @ApiOperation("[通用]单表数据单条查询接口")
     @PostMapping("/query.auto")
     open fun autoQuery(@RequestBody(required = true) param: QueryParam): Result<Return> {
@@ -202,6 +201,9 @@ abstract class BaseAutoController<
         return result.firstOrNull().ok()
     }
 
+    open fun autoQueryAfter(param: QueryParam, query: IPage<Table>) {
+    }
+
     //</editor-fold desc="query">
 
     //<editor-fold desc="list">
@@ -209,9 +211,6 @@ abstract class BaseAutoController<
     /**@return true 拦截后面的操作*/
     open fun autoListBefore(param: QueryParam): Boolean {
         return false
-    }
-
-    open fun autoListAfter(param: QueryParam, list: List<Table>) {
     }
 
     @ApiOperation("[通用]单表列表查询接口")
@@ -226,6 +225,9 @@ abstract class BaseAutoController<
         return list.toReturnList().result()
     }
 
+    open fun autoListAfter(param: QueryParam, list: List<Table>) {
+    }
+
     //</editor-fold desc="list">
 
     //<editor-fold desc="page">
@@ -233,9 +235,6 @@ abstract class BaseAutoController<
     /**@return true 拦截后面的操作*/
     open fun autoPageBefore(param: QueryParam): Boolean {
         return false
-    }
-
-    open fun autoPageAfter(param: QueryParam, query: IPage<Table>) {
     }
 
     @ApiOperation("[通用]单表数据分页查询接口")
@@ -254,15 +253,11 @@ abstract class BaseAutoController<
         autoPageAfter(param, page)
 
         val result = page.records.toReturnList()
-
-        val resultPage = Page<Return>()
-        resultPage.records = result //数据记录
-        resultPage.total = page.total //总数量
-        resultPage.size = page.size //每页请求数量
-        resultPage.current = page.current //当前页
-        resultPage.pages = page.pages //总页数
-
+        val resultPage = result.toIPage(page)
         return resultPage.result()
+    }
+
+    open fun autoPageAfter(param: QueryParam, query: IPage<Table>) {
     }
 
     //</editor-fold desc="page">

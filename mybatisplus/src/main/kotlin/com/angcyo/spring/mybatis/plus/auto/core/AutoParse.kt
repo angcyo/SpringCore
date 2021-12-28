@@ -37,6 +37,8 @@ import kotlin.math.min
 class AutoParse<Table> {
 
     companion object {
+
+        /**xx.xx.xx*/
         const val OBJ_DOT = "."
 
         /**处理查询的数据是否已存在

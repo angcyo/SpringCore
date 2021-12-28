@@ -12,6 +12,8 @@ import io.swagger.annotations.ApiModelProperty
 abstract class BaseAutoPageParam : BaseAutoQueryParam() {
 
     companion object {
+
+        /**分页请求时, 默认每页请求的数量*/
         const val PAGE_SIZE = 20L
     }
 
@@ -26,12 +28,13 @@ abstract class BaseAutoPageParam : BaseAutoQueryParam() {
     /**
      * page方法, 才会生效
      * [com.angcyo.spring.mybatis.plus.auto.IBaseAutoMybatisService.autoPage]*/
-    @ApiModelProperty("[通用分页参数]每页请求数据量.(分页接口时有效)")
+    @ApiModelProperty("[通用分页参数]每页请求数据量,默认20.(分页接口时有效)")
     var pageSize: Long = PAGE_SIZE
 
     /**
      * page方法, 才会生效
      * [com.angcyo.spring.mybatis.plus.auto.IBaseAutoMybatisService.autoPage]*/
+    @ApiModelProperty("[通用分页参数]分页请求之前,是否先查询数量.(分页接口时有效)", hidden = true)
     var searchCount: Boolean = true
 
     //</editor-fold desc="page">

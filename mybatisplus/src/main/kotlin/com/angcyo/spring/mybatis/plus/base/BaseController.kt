@@ -4,11 +4,11 @@ import com.angcyo.spring.base.data.Result
 import com.angcyo.spring.base.data.result
 import com.angcyo.spring.base.extension.apiError
 import com.angcyo.spring.mybatis.plus.auto.param.BaseAutoPageParam
+import com.angcyo.spring.mybatis.plus.auto.toIPage
 import com.angcyo.spring.mybatis.plus.service.IControllerService
 import com.angcyo.spring.util.copyTo
 import com.baomidou.mybatisplus.core.metadata.IPage
 import com.baomidou.mybatisplus.core.toolkit.ReflectionKit
-import com.baomidou.mybatisplus.extension.plugins.pagination.Page
 import io.swagger.annotations.ApiOperation
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.web.bind.annotation.PostMapping
@@ -19,7 +19,10 @@ import org.springframework.web.bind.annotation.RequestBody
  * @author angcyo
  * @date 2021/06/18
  */
+
+@Deprecated("已废弃", ReplaceWith("com.angcyo.spring.mybatis.plus.auto.BaseAutoController"))
 abstract class BaseController<
+
         BaseService : IControllerService<Table, SaveParam, QueryParam>,
         /**对应的表*/
         Table,
@@ -29,6 +32,7 @@ abstract class BaseController<
         QueryParam,
         /**数据返回的类型*/
         Return
+
         > {
 
     //<editor-fold desc="core">
@@ -248,14 +252,7 @@ abstract class BaseController<
         pageTableAfter(param, page)
 
         val result = page.records.toReturnList()
-
-        val resultPage = Page<Return>()
-        resultPage.records = result //数据记录
-        resultPage.total = page.total //总数量
-        resultPage.size = page.size //每页请求数量
-        resultPage.current = page.current //当前页
-        resultPage.pages = page.pages //总页数
-
+        val resultPage = result.toIPage(page)
         return resultPage.result()
     }
 
