@@ -3,7 +3,6 @@ package com.angcyo.spring.security.test
 import com.angcyo.spring.util.nowTimeString
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
-import springfox.documentation.annotations.ApiIgnore
 
 /**
  * Email:angcyo@126.com
@@ -11,7 +10,6 @@ import springfox.documentation.annotations.ApiIgnore
  * @date 2020/11/06
  */
 
-@ApiIgnore
 @RestController
 @RequestMapping("/test/security")
 class SecurityTestController {

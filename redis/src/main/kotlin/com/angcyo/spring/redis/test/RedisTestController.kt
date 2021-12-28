@@ -5,7 +5,6 @@ import com.angcyo.spring.base.data.ok
 import com.angcyo.spring.redis.Redis
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.web.bind.annotation.*
-import springfox.documentation.annotations.ApiIgnore
 
 /**
  * Email:angcyo@126.com
@@ -15,7 +14,6 @@ import springfox.documentation.annotations.ApiIgnore
 
 @RestController
 @RequestMapping("/test/redis")
-@ApiIgnore
 class RedisTestController {
 
     @Autowired

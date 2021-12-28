@@ -14,7 +14,6 @@ import springfox.documentation.annotations.ApiIgnore
  * @date 2020/11/04
  */
 
-@ApiIgnore
 @RestController
 @RequestMapping("/test")
 class AppTestController {

@@ -4,7 +4,6 @@ import com.angcyo.spring.util.nowTimeString
 import org.springframework.http.MediaType
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
-import springfox.documentation.annotations.ApiIgnore
 import javax.servlet.http.HttpServletResponse
 
 /**
@@ -13,7 +12,6 @@ import javax.servlet.http.HttpServletResponse
  * @date 2021/10/27
  */
 
-@ApiIgnore
 @RequestMapping("/test/svg")
 @RestController
 class BatikTestController {
