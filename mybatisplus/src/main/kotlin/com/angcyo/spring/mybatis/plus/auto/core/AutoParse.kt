@@ -71,13 +71,16 @@ class AutoParse<Table> {
         }
 
         /**处理长度提示*/
-        fun handleLengthTip(name: String, predicate: String = "的长度", min: Long, max: Long): String {
+        fun handleLengthTip(name: String, predicate: String, min: Long, max: Long): String {
             return buildString {
                 append("[${name}]${predicate}")
-                append("需要")
 
                 if (min != Long.MIN_VALUE && max != Long.MAX_VALUE) {
-                    append("在[$min~$max]之间")
+                    append("需要在[$min~$max]之间")
+                } else if (max == Long.MAX_VALUE) {
+                    append("需要[>=$min]")
+                } else {
+                    append("需要[<=$max]")
                 }
             }
         }
@@ -145,15 +148,15 @@ class AutoParse<Table> {
                 if (checkLength || (min != Long.MIN_VALUE || max != Long.MAX_VALUE)) {
                     if (field.isClass(String::class.java)) {
                         if (fieldValue == null || ((fieldValue as String).length < min || fieldValue.length > max)) {
-                            parseError(error.ifEmpty { "[${field.name}]长度需要在[$min..$max]之间" })
+                            parseError(error.ifEmpty { handleLengthTip(field.name, "的长度", min, max) })
                         }
                     } else if (field.isClass(List::class.java)) {
                         if (fieldValue == null || ((fieldValue as List<*>).size() < min || fieldValue.size() > max)) {
-                            parseError(error.ifEmpty { "[${field.name}]长度需要在[$min..$max]之间" })
+                            parseError(error.ifEmpty { handleLengthTip(field.name, "的长度", min, max) })
                         }
                     } else if (field.isClass(Array::class.java)) {
                         if (fieldValue == null || ((fieldValue as Array<*>).size() < min || fieldValue.size() > max)) {
-                            parseError(error.ifEmpty { "[${field.name}]长度需要在[$min..$max]之间" })
+                            parseError(error.ifEmpty { handleLengthTip(field.name, "的长度", min, max) })
                         }
                     }
                 }
@@ -162,7 +165,14 @@ class AutoParse<Table> {
                 if (checkSize || (min != Long.MIN_VALUE || max != Long.MAX_VALUE)) {
                     if (field.isClass(Number::class.java)) {
                         if (fieldValue == null || ((fieldValue as Number).toLong() < min || fieldValue.toLong() > max)) {
-                            parseError(error.ifEmpty { "[${field.name}]大小需要在[$min..$max]之间" })
+                            parseError(error.ifEmpty {
+                                handleLengthTip(
+                                    field.name,
+                                    "的大小",
+                                    min,
+                                    max
+                                )
+                            })
                         }
                     }
                 }
@@ -542,8 +552,10 @@ class AutoParse<Table> {
             WhereEnum.apply -> wrapper.apply(value?.toString()?.toSafeSql())
             WhereEnum.ignore -> Unit //忽略
             else -> {
+                //其他条件
                 val valueClass = value?.javaClass
                 if (valueClass?.isList() == true) {
+                    //列表情况下
                     val valueList = value as List<*>
                     when (where) {
                         WhereEnum.between -> wrapper.between(
@@ -564,6 +576,7 @@ class AutoParse<Table> {
                         else -> Unit
                     }
                 } else {
+                    //单对象情况下
                     when (where) {
                         WhereEnum.groupBy -> {
                             wrapper.groupBy(value.toString().toSafeSql())
