@@ -22,7 +22,9 @@ open class BaseAutoMybatisServiceImpl<Mapper : IBaseAutoMapper<Table>, Table> :
         if (_fillHashCode == hashCode) {
             return param
         }
-        return super.autoFill(param)
+        val result = super.autoFill(param)
+        _fillHashCode = hashCode
+        return result
     }
 
     /**[com.angcyo.spring.mybatis.plus.auto.IBaseAutoMapper.sqlMaps]*/

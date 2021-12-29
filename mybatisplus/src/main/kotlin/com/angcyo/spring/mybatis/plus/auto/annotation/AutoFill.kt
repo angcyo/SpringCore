@@ -44,7 +44,8 @@ annotation class AutoFill(
     /**从哪个属性中获取方法的参数
      * 为空则不传递参数
      * 支持[|]分割多个参数
-     * 支持[obj.id]对象引用*/
+     * 支持[obj.id]对象引用
+     * 如果是this, 则传入当前数据对象*/
     val methodParamField: String = "",
 
     //</editor-fold desc="数据来源的服务">

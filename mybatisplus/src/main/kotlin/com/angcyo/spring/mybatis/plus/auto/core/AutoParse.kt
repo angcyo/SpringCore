@@ -317,16 +317,20 @@ class AutoParse<Table> {
                 val args = mutableListOf<Any?>()
                 argList.forEach { key ->
                     if (key.isNotEmpty()) {
-                        args.add(obj.getObjMember(key))
+                        if (key == "this") {
+                            args.add(obj)
+                        } else {
+                            args.add(obj.getObjMember(key))
+                        }
                     }
                 }
-                //1.
+                //1.开始调用方法
                 val methodResult = if (args.isEmpty()) {
                     service.invokeMethod(fill.serviceMethod)
                 } else {
                     service.invokeMethodClass(fill.serviceMethod, serviceClass, *args.toTypedArray())
                 }
-                //2.
+                //2.获取方法返回值
                 result = if (methodResult is List<*>) {
                     methodResult
                 } else {

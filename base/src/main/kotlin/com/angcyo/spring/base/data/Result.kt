@@ -244,12 +244,12 @@ fun <T, R> T.toBean(cls: Class<R>): R {
     return json.fromJackson(cls)!!
 }
 
-fun <T, R> List<T>.toBeanList(cls: Class<R>, init: R.(T) -> Unit = {}): List<R> {
+fun <T, R> List<T>.toBeanList(cls: Class<R>, initBean: R.(T) -> Unit = {}): List<R> {
     val result = mutableListOf<R>()
     forEach {
         it.toBean(cls)?.let { bean ->
             result.add(bean.apply {
-                init(it)
+                initBean(it)
             })
         }
     }
