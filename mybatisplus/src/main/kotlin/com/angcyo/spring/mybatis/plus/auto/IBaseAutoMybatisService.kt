@@ -99,9 +99,9 @@ interface IBaseAutoMybatisService<Table> : IBaseMybatisService<Table> {
     }
 
     /**自动检查数据有效性*/
-    fun <T : IAutoParam> autoCheck(param: T): T {
+    fun <T : IAutoParam> autoCheck(param: T, type: AutoType): T {
         val autoParse = buildAutoParse()
-        autoParse.parseCheck(param)
+        autoParse.parseCheck(param, type)
         return param
     }
 

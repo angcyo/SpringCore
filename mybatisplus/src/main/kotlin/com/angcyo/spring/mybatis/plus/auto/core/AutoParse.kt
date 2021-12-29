@@ -70,6 +70,17 @@ class AutoParse<Table> {
             }
         }
 
+        /**处理长度提示*/
+        fun handleLengthTip(name: String, predicate: String = "的长度", min: Long, max: Long): String {
+            return buildString {
+                append("[${name}]${predicate}")
+                append("需要")
+
+                if (min != Long.MIN_VALUE && max != Long.MAX_VALUE) {
+                    append("在[$min~$max]之间")
+                }
+            }
+        }
     }
 
     /**
@@ -102,50 +113,57 @@ class AutoParse<Table> {
     }
 
     /**自动验证数据的合法性
-     * 根据[AutoCheck]注解, 检查字段值*/
-    fun parseCheck(param: IAutoParam) {
+     * 根据[Check]注解, 检查字段值*/
+    fun parseCheck(param: IAutoParam, type: AutoType) {
         param.eachAnnotation<AutoCheck> { field ->
-            val fieldValue = field.get(param)
-            val error = this.error
+            this.checks.find { it.type == type }?.apply {
 
-            //
-            if (checkNull) {
-                if (fieldValue == null) {
-                    parseError(error.ifEmpty { "[${field.name}]不能为null" })
-                }
-            }
+                val fieldValue = field.get(param)
+                val error = this.error
 
-            //
-            if (checkEmpty) {
-                if (field.isClass(String::class.java)) {
-                    if (fieldValue == null || (fieldValue as String).isEmpty()) {
-                        parseError(error.ifEmpty { "[${field.name}]不能为空" })
-                    }
-                } else if (field.isClass(List::class.java)) {
-                    if (fieldValue == null || (fieldValue as List<*>).isEmpty()) {
-                        parseError(error.ifEmpty { "[${field.name}]不能为空" })
+                //检查null
+                if (checkNull) {
+                    if (fieldValue == null) {
+                        parseError(error.ifEmpty { "[${field.name}]不能为null" })
                     }
                 }
-            }
 
-            //
-            if (checkLength) {
-                if (field.isClass(String::class.java)) {
-                    if (fieldValue == null || ((fieldValue as String).length < min || fieldValue.length > max)) {
-                        parseError(error.ifEmpty { "[${field.name}]长度需要在[$min..$max]之间" })
-                    }
-                } else if (field.isClass(List::class.java)) {
-                    if (fieldValue == null || ((fieldValue as List<*>).size() < min || fieldValue.size() > max)) {
-                        parseError(error.ifEmpty { "[${field.name}]长度需要在[$min..$max]之间" })
+                //检查空对象
+                if (checkEmpty) {
+                    if (field.isClass(String::class.java)) {
+                        if (fieldValue == null || (fieldValue as String).isEmpty()) {
+                            parseError(error.ifEmpty { "[${field.name}]不能为空" })
+                        }
+                    } else if (field.isClass(List::class.java)) {
+                        if (fieldValue == null || (fieldValue as List<*>).isEmpty()) {
+                            parseError(error.ifEmpty { "[${field.name}]不能为空" })
+                        }
                     }
                 }
-            }
 
-            //
-            if (checkSize) {
-                if (field.isClass(Number::class.java)) {
-                    if (fieldValue == null || ((fieldValue as Number).toLong() < min || fieldValue.toLong() > max)) {
-                        parseError(error.ifEmpty { "[${field.name}]大小需要在[$min..$max]之间" })
+                //检查字符串/数组的长度
+                if (checkLength || (min != Long.MIN_VALUE || max != Long.MAX_VALUE)) {
+                    if (field.isClass(String::class.java)) {
+                        if (fieldValue == null || ((fieldValue as String).length < min || fieldValue.length > max)) {
+                            parseError(error.ifEmpty { "[${field.name}]长度需要在[$min..$max]之间" })
+                        }
+                    } else if (field.isClass(List::class.java)) {
+                        if (fieldValue == null || ((fieldValue as List<*>).size() < min || fieldValue.size() > max)) {
+                            parseError(error.ifEmpty { "[${field.name}]长度需要在[$min..$max]之间" })
+                        }
+                    } else if (field.isClass(Array::class.java)) {
+                        if (fieldValue == null || ((fieldValue as Array<*>).size() < min || fieldValue.size() > max)) {
+                            parseError(error.ifEmpty { "[${field.name}]长度需要在[$min..$max]之间" })
+                        }
+                    }
+                }
+
+                //检查数字的大小
+                if (checkSize || (min != Long.MIN_VALUE || max != Long.MAX_VALUE)) {
+                    if (field.isClass(Number::class.java)) {
+                        if (fieldValue == null || ((fieldValue as Number).toLong() < min || fieldValue.toLong() > max)) {
+                            parseError(error.ifEmpty { "[${field.name}]大小需要在[$min..$max]之间" })
+                        }
                     }
                 }
             }

@@ -180,6 +180,8 @@ fun <T> List<T>.eachRandomList(count: Int, action: (index: Int, T) -> Unit) {
 
 fun List<*>?.size() = this?.size ?: 0
 
+fun Array<*>?.size() = this?.size ?: 0
+
 fun Iterator<*>?.size() = this?.run {
     var size = 0
     while (hasNext()) {

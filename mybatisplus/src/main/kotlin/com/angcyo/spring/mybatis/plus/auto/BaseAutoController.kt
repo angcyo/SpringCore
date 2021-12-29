@@ -102,7 +102,7 @@ abstract class BaseAutoController<
         if (autoSaveBefore(param)) {
             return Result.ok()
         }
-        autoService.autoCheck(param)
+        autoService.autoCheck(param, AutoType.SAVE)
         val table = autoService.autoSave(param)
         autoSaveAfter(param, table)
         return table.toReturn().result()
@@ -183,6 +183,7 @@ abstract class BaseAutoController<
         if (autoUpdateBefore(param)) {
             return Result.ok()
         }
+        autoService.autoCheck(param, AutoType.UPDATE)
         val result = autoService.autoUpdateByKey(param)
         autoUpdateAfter(param, result)
         return result?.toReturnList()?.lastOrNull().result()

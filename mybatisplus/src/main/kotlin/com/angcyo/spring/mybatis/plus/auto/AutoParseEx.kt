@@ -69,7 +69,8 @@ inline fun <reified Auto : Annotation> AnnotatedElement.annotation(dsl: Auto.() 
     }
 }
 
-/**枚举对象中所有包含指定注解的字段*/
+/**枚举对象中所有包含指定注解的字段
+ * 支持注解上的注解*/
 inline fun <reified Auto : Annotation> Any.eachAnnotation(dsl: Auto.(field: Field) -> Unit) {
     ReflectionKit.getFieldList(this.javaClass).forEach { field ->
         field.annotation<Auto> {
