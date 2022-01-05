@@ -25,6 +25,10 @@ annotation class AutoFill(
     /**使用Spring表达式语言（简称SpEL）解析*/
     val spEL: String = "",
 
+    /**不管字段是否已经有值, 都强制填充.
+     * 默认只有字段为null时, 才填充*/
+    val force: Boolean = false,
+
     //<editor-fold desc="数据来源的服务">
 
     /**需要访问的服务类名

@@ -230,8 +230,19 @@ class AutoParse<Table> {
         val fillList = AnnotationHelper.parseAnnotations(param, AutoFill::class.java)
 
         for (fill in fillList) {
+
+            if (!fill.annotation.force) {
+                //非强制填充
+                val value = fill.field.get(param)
+                if (value != null) {
+                    //已经有值了, 跳过填充
+                    continue
+                }
+            }
+
             if (!_handleFill(fill.annotation, fill.field, param)) {
                 haveError = true
+                break
             }
         }
         return !haveError
