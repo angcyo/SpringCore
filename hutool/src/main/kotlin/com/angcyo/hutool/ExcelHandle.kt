@@ -10,6 +10,7 @@ import org.apache.poi.ss.usermodel.*
 import java.io.File
 import javax.servlet.http.HttpServletResponse
 import kotlin.math.max
+import kotlin.math.min
 
 /**
  * https://www.hutool.cn/docs/#/poi/Excel%E7%94%9F%E6%88%90-ExcelWriter
@@ -86,7 +87,8 @@ class ExcelHandle(destFilePath: String) {
         CellUtil.setCellValue(cell, value)
     }
 
-    /**一行一行写入
+    /**追加一行数据
+     * 一行一行写入
      * [nextRow] 结束之后, 是否切换到下一行*/
     fun appendCellRow(valueList: List<Any?>, nextRow: Boolean = true, style: CellStyle.() -> Unit = {}) {
         if (valueList.isEmpty()) {
@@ -181,6 +183,19 @@ class ExcelHandle(destFilePath: String) {
         if (nextRow) {
             writer.currentRow = writer.currentRow + 1
         }
+    }
+
+    /**
+     * 设置表格列的宽度
+     * https://blog.csdn.net/duqian42707/article/details/51491312
+     * [width] 像素, WPS里面显示的是字符数, 1个中文按照2个字符计算
+     *
+     * The maximum column width for an individual cell is 255 characters.
+     * */
+    fun setColumnWidth(columnIndex: Int, width: Int) {
+        //255*256
+        writer.sheet.setColumnWidth(columnIndex, min(256 * width + 184, 255 * 256))
+        //writer.sheet.defaultRowHeight = 20
     }
 
     //</editor-fold desc="样式操作">
