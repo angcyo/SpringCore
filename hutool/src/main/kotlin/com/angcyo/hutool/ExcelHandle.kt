@@ -186,6 +186,7 @@ class ExcelHandle(destFilePath: String) {
     }
 
     /**
+     * 默认值是8
      * 设置表格列的宽度
      * https://blog.csdn.net/duqian42707/article/details/51491312
      * [width] 像素, WPS里面显示的是字符数, 1个中文按照2个字符计算
@@ -195,7 +196,39 @@ class ExcelHandle(destFilePath: String) {
     fun setColumnWidth(columnIndex: Int, width: Int) {
         //255*256
         writer.sheet.setColumnWidth(columnIndex, min(256 * width + 184, 255 * 256))
-        //writer.sheet.defaultRowHeight = 20
+    }
+
+    /**
+     * 默认值300
+     * 1/20 of a point
+     * */
+    fun setDefaultRowHeight(height: Short) {
+        writer.sheet.defaultRowHeight = height
+    }
+
+    /**
+     * 默认值15.0
+     * pt单位*/
+    fun setDefaultRowHeightInPoints(height: Float) {
+        writer.sheet.defaultRowHeightInPoints = height
+    }
+
+    /**
+     * https://blog.csdn.net/lipinganq/article/details/78081300
+     *
+     * [height] -1设置成默认, 单位为twips(缇)
+     * */
+    fun setRowHeight(rowIndex: Int, height: Short) {
+        val row: Row = writer.sheet.getRow(rowIndex) ?: writer.sheet.createRow(rowIndex)
+        row.height = height
+    }
+
+    /** 13.5pt  28.5pt  30pt
+     * [height] 单位为pt(磅)
+     * */
+    fun setHeightInPoints(rowIndex: Int, height: Float) {
+        val row: Row = writer.sheet.getRow(rowIndex) ?: writer.sheet.createRow(rowIndex)
+        row.heightInPoints = height
     }
 
     //</editor-fold desc="样式操作">
