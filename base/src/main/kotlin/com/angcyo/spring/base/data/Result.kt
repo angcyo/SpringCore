@@ -34,7 +34,9 @@ import javax.validation.groups.Default
  */
 
 data class Result<T>(
-    var code: Int = SUCCESS_CODE, var msg: String? = "Success", var data: T? = null
+    var code: Int = SUCCESS_CODE,
+    var msg: String? = "Success",
+    var data: T? = null
 ) {
     companion object {
 

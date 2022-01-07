@@ -120,6 +120,18 @@ class ExcelHandle(destFilePath: String) {
         writer.currentRow = nextRowIndex
     }
 
+    fun setSheetName(name: String) {
+        writer.renameSheet(name)
+    }
+
+    /**sheet1
+     * 自定义需要读取或写出的Sheet，如果给定的sheet不存在，创建之。<br>
+     * 在读取中，此方法用于切换读取的sheet，在写出时，此方法用于新建或者切换sheet。
+     * */
+    fun selectSheet(name: String) {
+        writer.setSheet(name)
+    }
+
     //</editor-fold desc="数据操作">
 
     //<editor-fold desc="样式操作">
