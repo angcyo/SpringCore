@@ -209,6 +209,8 @@ class AutoParse<Table> {
         type: AutoType = AutoType.UPDATE
     ): UpdateWrapper<Table> {
         _handleQuery(type, updateWrapper, param)
+        val targetSql = updateWrapper.targetSql
+        L.i("parseUpdate sql->$targetSql")
         return updateWrapper
     }
 
@@ -218,6 +220,8 @@ class AutoParse<Table> {
         type: AutoType = AutoType.QUERY
     ): QueryWrapper<Table> {
         _handleQuery(type, queryWrapper, param)
+        val targetSql = queryWrapper.targetSql
+        L.i("parseQueryByUpdate sql->$targetSql")
         return queryWrapper
     }
 
@@ -462,6 +466,7 @@ class AutoParse<Table> {
             //跳过空查询
         } else {
             if (wrapper.isEmptyOfWhere) {
+                //空查询
                 _handleQueryGroup(wrapper, queryGroup, jumpField)
             } else {
                 wrapper.and {
@@ -471,6 +476,7 @@ class AutoParse<Table> {
         }
     }
 
+    /**处理[QueryGroup]*/
     fun <Wrapper : AbstractWrapper<Table, String, Wrapper>> _handleQueryGroup(
         wrapper: AbstractWrapper<Table, String, Wrapper>,
         group: QueryGroup,
@@ -480,6 +486,7 @@ class AutoParse<Table> {
         val childGroupList = group.childQueryGroupList
 
         if (group.isQueryEmpty()) {
+            //空查询时, 插入的sql
             wrapper.last("FALSE")
         } else {
             //需要组装查询
