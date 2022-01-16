@@ -37,6 +37,7 @@ interface IAuthorizationHandle {
 
             //3 Fire event
             try {
+                //发送授权成功的事件, 可用于权限验证
                 eventPublisher?.publishEvent(AuthenticationTokenEvent(authResult))
             } catch (e: PermissionException) {
                 e.printStackTrace()
