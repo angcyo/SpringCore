@@ -1,6 +1,6 @@
 package com.angcyo.spring.util
 
-import java.text.ParseException
+import com.angcyo.spring.util.TimeEx.simpleDateFormat
 import java.text.SimpleDateFormat
 import java.time.Duration
 import java.time.LocalDate
@@ -15,6 +15,11 @@ import kotlin.math.ceil
  * 修改备注：
  * Version: 1.0.0
  */
+
+object TimeEx {
+    val simpleDateFormat: SimpleDateFormat
+        get() = SimpleDateFormat.getDateInstance() as SimpleDateFormat
+}
 
 /**一天的毫秒数 72,000 72,000,000*/
 const val DAY_MILLIS = 24 * 60 * 60 * 1000L
@@ -77,23 +82,13 @@ fun Temporal.duration(end: Temporal): Duration {
 
 /**格式化时间输出*/
 fun Long.toTime(pattern: String = "yyyy-MM-dd HH:mm"): String {
-    val format: SimpleDateFormat = SimpleDateFormat.getDateInstance() as SimpleDateFormat
+    val format: SimpleDateFormat = simpleDateFormat
     format.applyPattern(pattern)
     return format.format(Date(this))
 }
 
 /**将字符串换算成毫秒*/
-fun String.toMillis(pattern: String = "yyyyMMdd"): Long {
-    val format: SimpleDateFormat = SimpleDateFormat.getDateInstance() as SimpleDateFormat
-    format.applyPattern(pattern)
-    var time = 0L
-    try {
-        time = format.parse(this)?.time ?: 0
-    } catch (e: Exception) {
-        e.printStackTrace()
-    }
-    return time
-}
+fun String.toMillis(pattern: String = "yyyyMMdd"): Long = toTime(pattern)
 
 fun Long.toCalendar(): Calendar {
     val cal = Calendar.getInstance()
@@ -172,16 +167,7 @@ fun Calendar.week(): Int {//1-7 周几
     return week
 }
 
-fun String.parseTime(pattern: String = "yyyy-MM-dd"): Long {
-    val format: SimpleDateFormat = SimpleDateFormat.getDateInstance() as SimpleDateFormat
-    format.applyPattern(pattern)
-    return try {
-        format.parse(this)?.time ?: -1
-    } catch (e: ParseException) {
-        e.printStackTrace()
-        -1
-    }
-}
+fun String.parseTime(pattern: String = "yyyy-MM-dd"): Long = toTime(pattern)
 
 /**将毫秒, 拆成 d h m s sss数组*/
 fun Long.toTimes(): LongArray {
@@ -314,7 +300,7 @@ fun String.diffTime(end: String, pattern: String = "yyyy-MM-dd HH:mm:ss"): Long 
 
 /**将2020-11-24 14:13:50转换成毫秒数*/
 fun String.toTime(pattern: String = "yyyy-MM-dd HH:mm:ss"): Long {
-    val format: SimpleDateFormat = SimpleDateFormat.getDateInstance() as SimpleDateFormat
+    val format: SimpleDateFormat = simpleDateFormat
     format.applyPattern(pattern)
     var time = 0L
     try {

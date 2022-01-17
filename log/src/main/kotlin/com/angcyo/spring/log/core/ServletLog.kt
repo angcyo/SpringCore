@@ -28,8 +28,8 @@ object ServletLog {
      * "false"*/
     val KEY_REQUEST_LOG = "requestLog"
 
-    /**100ms 很慢的请求*/
-    var REQUEST_LONG_TIME = 100
+    /**100ms 很慢的请求, 10秒的慢请求*/
+    var REQUEST_LONG_TIME = 10_000
 
     /**保存请求id*/
     val logRequestUuid = ThreadLocal<String>()
