@@ -12,6 +12,8 @@ import com.gitee.sunchenbin.mybatis.actable.annotation.Column
 import com.gitee.sunchenbin.mybatis.actable.annotation.TableComment
 
 /**
+ * 角色表, 记录了有哪些角色.
+ *
  * Email:angcyo@126.com
  * @author angcyo
  * @date 2021/05/28

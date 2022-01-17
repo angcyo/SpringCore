@@ -12,7 +12,7 @@ import com.gitee.sunchenbin.mybatis.actable.annotation.TableComment
  * @date 2021/05/28
  */
 
-@TableName("user_role")
+@TableName("user_role_re")
 @TableComment("用户和角色的关联表, 用户有那些角色")
 class UserRoleReTable : BaseAuditTable() {
 

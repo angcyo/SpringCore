@@ -28,11 +28,23 @@ class PermissionManager {
     fun havePermission(userId: Long, uri: String): Boolean {
         val list: List<PermissionTable> = currentUserOrNull()?.userPermissionList ?: emptyList()
 
+        //是否有权限
         var have = false
 
         for (p in list) {
             val permit = p.permit
             val deny = p.deny
+            val forceDeny = p.forceDeny
+
+            if (!forceDeny.isNullOrEmpty()) {
+                //一票拒绝的权限配置
+                if (uri.have(forceDeny, true)) {
+                    //禁止访问
+                    have = false
+                    break
+                }
+            }
+
             if (permit.isNullOrEmpty() && deny.isNullOrEmpty()) {
                 //允许和禁用 都没有配置
                 have = false

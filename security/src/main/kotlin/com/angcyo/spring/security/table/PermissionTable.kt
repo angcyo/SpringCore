@@ -1,7 +1,10 @@
 package com.angcyo.spring.security.table
 
 import com.angcyo.spring.mybatis.plus.auto.AutoType
-import com.angcyo.spring.mybatis.plus.auto.annotation.*
+import com.angcyo.spring.mybatis.plus.auto.annotation.AutoQuery
+import com.angcyo.spring.mybatis.plus.auto.annotation.AutoQueryConfig
+import com.angcyo.spring.mybatis.plus.auto.annotation.AutoUpdateBy
+import com.angcyo.spring.mybatis.plus.auto.annotation.Query
 import com.angcyo.spring.mybatis.plus.auto.param.IAutoParam
 import com.angcyo.spring.mybatis.plus.table.BaseAuditTable
 import com.baomidou.mybatisplus.annotation.TableName
@@ -9,8 +12,10 @@ import com.gitee.sunchenbin.mybatis.actable.annotation.Column
 import com.gitee.sunchenbin.mybatis.actable.annotation.TableComment
 
 /**
+ * 权限表, 记录了xxx权限, 能够访问的api接口
+ *
  * [com.angcyo.spring.security.jwt.JwtPermissionListener]
- * [com.angcyo.spring.security.service.PermissionManagerService.havePermission]
+ * [com.angcyo.spring.security.controller.PermissionManager.havePermission]
  *
  * 查询接口命名规则:
  *  查询详情: query.*$
@@ -53,6 +58,9 @@ class PermissionTable : BaseAuditTable(), IAutoParam {
 
     @Column(comment = "权限不能访问的资源, 支持正则匹配")
     var deny: String? = null
+
+    @Column(comment = "一票拒绝权限, 支持正则匹配, 这里尽量配置具体的强制禁止的权限")
+    var forceDeny: String? = null
 
     @Column(comment = "严格的权限校验规则, 只要[deny]不通过, 权限就不通过")
     var strict: Boolean? = null

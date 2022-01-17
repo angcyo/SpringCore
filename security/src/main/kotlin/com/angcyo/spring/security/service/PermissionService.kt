@@ -11,6 +11,8 @@ import com.angcyo.spring.security.table.UserRoleReTable
 import org.springframework.stereotype.Service
 
 /**
+ * [com.angcyo.spring.security.controller.PermissionManager.havePermission]
+ *
  * Email:angcyo@126.com
  * @author angcyo
  * @date 2021/05/28

@@ -12,12 +12,15 @@ import com.gitee.sunchenbin.mybatis.actable.annotation.Column
 import com.gitee.sunchenbin.mybatis.actable.annotation.TableComment
 
 /**
+ * 角色和权限关联表,
+ * 一个角色可以包含多个权限
+ *
  * Email:angcyo@126.com
  * @author angcyo
  * @date 2021/05/28
  */
 
-@TableName("role_permission")
+@TableName("role_permission_re")
 @TableComment("角色和权限的关联表, 角色有那些权限")
 @AutoQueryConfig(updateFailToSave = true)
 class RolePermissionReTable : BaseAuditTable(), IAutoParam {

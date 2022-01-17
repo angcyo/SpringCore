@@ -217,7 +217,7 @@ class AutoParse<Table> {
     fun parseQueryByUpdate(
         queryWrapper: QueryWrapper<Table>,
         param: IAutoParam,
-        type: AutoType = AutoType.QUERY
+        type: AutoType = AutoType.UPDATE
     ): QueryWrapper<Table> {
         _handleQuery(type, queryWrapper, param)
         val targetSql = queryWrapper.targetSql
