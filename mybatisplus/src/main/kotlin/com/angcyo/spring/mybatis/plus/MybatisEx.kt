@@ -123,6 +123,9 @@ fun KProperty<*>.c() = columnName()
 /**获取对象结构的主键属性名*/
 fun Any.keyName(def: String = "id") = FieldUtils.getKeyField(this)?.name?.toLowerName() ?: def
 
+/**主键的值*/
+fun Any.keyValue() = FieldUtils.getKeyField(this)?.get(this)
+
 /**获取对象结构的主键属性
  * [com.gitee.sunchenbin.mybatis.actable.annotation.IsKey]
  * [javax.persistence.Id]
@@ -133,8 +136,6 @@ fun Any.keyName(def: String = "id") = FieldUtils.getKeyField(this)?.name?.toLowe
 fun Any.keyField(defKey: String? = "id"): Field? {
     return FieldUtils.getKeyField(this) ?: getField(defKey)
 }
-
-fun Any.keyValue() = FieldUtils.getKeyField(this)?.get(this)
 
 /**清空一下不需要传递过来的字段*/
 fun Any.clearTableField(newTable: Boolean = true) {

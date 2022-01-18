@@ -3,6 +3,7 @@ package com.angcyo.spring.security.table
 import com.angcyo.spring.mybatis.plus.auto.AutoType
 import com.angcyo.spring.mybatis.plus.auto.annotation.AutoQuery
 import com.angcyo.spring.mybatis.plus.auto.annotation.Query
+import com.angcyo.spring.mybatis.plus.auto.param.IAutoParam
 import com.angcyo.spring.mybatis.plus.table.BaseAuditTable
 import com.baomidou.mybatisplus.annotation.TableName
 import com.gitee.sunchenbin.mybatis.actable.annotation.Column
@@ -21,7 +22,7 @@ import io.swagger.annotations.ApiModelProperty
 @TableName("user_info")
 @TableComment("用户信息表, 记录用户的一些信息")
 @ApiModel("用户表, 记录用户的一些信息")
-class UserInfoTable : BaseAuditTable() {
+class UserInfoTable : BaseAuditTable(), IAutoParam {
 
     @Column(comment = "对应用户表的id")
     @ApiModelProperty("用户的id")

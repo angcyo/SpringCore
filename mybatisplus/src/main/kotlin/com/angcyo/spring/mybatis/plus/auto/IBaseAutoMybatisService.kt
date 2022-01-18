@@ -105,6 +105,13 @@ interface IBaseAutoMybatisService<Table> : IBaseMybatisService<Table> {
         return param
     }
 
+    /**根据[param], 自动查询一条数据*/
+    @LogMethodTime
+    fun autoQuery(param: IAutoParam): Table? {
+        autoFill(param)
+        return list(buildAutoParse().parseQuery(queryWrapper(true).maxCountLimit(1), param)).firstOrNull()
+    }
+
     /**根据[param], 自动查询出所有数据*/
     @LogMethodTime
     @AutoFillRef("com.angcyo.spring.mybatis.plus.auto.core.AutoParse._handleFill")
@@ -215,6 +222,47 @@ interface IBaseAutoMybatisService<Table> : IBaseMybatisService<Table> {
 
     }
 
+    /**如果有主键, 则直接使用主键, 自动更新.
+     * 如果没有主键, 则通过查询条件自动更新
+     * [maxCountLimit] 允许更新的最大数据数量*/
+    @LogMethodTime
+    @Transactional
+    fun autoUpdate(table: Any, maxCountLimit: Long = 1): Boolean {
+        val autoParse = buildAutoParse()
+
+        if (table is IAutoParam) {
+            //自动填充数据
+            if (!autoParse.parseFill(table)) {
+                apiError("处理失败")
+            }
+        }
+
+        //操作的表对象
+        val targetTable: Table = table.toTable()
+        if (targetTable is IAutoParam) {
+            if (!autoParse.parseFill(targetTable as IAutoParam)) {
+                apiError("处理失败")
+            }
+        }
+
+        //主键的值
+        val keyValue = (targetTable as Any).keyValue()
+        val result = if (keyValue == null) {
+            //未指定主键
+            if (table is IAutoParam) {
+                update(targetTable, autoParse.parseUpdate(updateWrapper(), table).maxCountLimit(maxCountLimit))
+            } else if (targetTable is IAutoParam) {
+                update(targetTable, autoParse.parseUpdate(updateWrapper(), targetTable).maxCountLimit(maxCountLimit))
+            } else {
+                false
+            }
+        } else {
+            updateById(targetTable)
+        }
+
+        return result
+    }
+
     @LogMethodTime
     @Transactional
     fun autoSaveOrUpdates(vararg tables: Any): Boolean {
@@ -257,6 +305,9 @@ interface IBaseAutoMybatisService<Table> : IBaseMybatisService<Table> {
 
             //操作的表对象
             val targetTable: Table = table.toTable()
+            if (targetTable is IAutoParam) {
+                fillSuccess = autoParse.parseFill(targetTable as IAutoParam)
+            }
 
             if (targetTable is BaseAuditTable && (targetTable.id ?: 0) > 0) {
                 //通过id更新记录

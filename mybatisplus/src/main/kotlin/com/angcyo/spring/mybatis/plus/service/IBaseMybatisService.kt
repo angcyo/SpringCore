@@ -60,6 +60,15 @@ interface IBaseMybatisService<Table> : IService<Table> {
         }
     }
 
+    /**获取一个[UpdateWrapper]*/
+    fun updateWrapper(): UpdateWrapper<Table> {
+        return UpdateWrapper<Table>()
+    }
+
+    //</editor-fold desc="Base">
+
+    //<editor-fold desc="max count limit">
+
     fun QueryWrapper<Table>.maxCountLimit(maxCountLimit: Long? = beanOf(AppProperties::class.java).maxCountLimit): QueryWrapper<Table> {
         if ((maxCountLimit ?: 0) > 0) {
             last("LIMIT $maxCountLimit")
@@ -67,10 +76,16 @@ interface IBaseMybatisService<Table> : IService<Table> {
         return this
     }
 
-    /**获取一个[UpdateWrapper]*/
-    fun updateWrapper(): UpdateWrapper<Table> {
-        return UpdateWrapper<Table>()
+    fun UpdateWrapper<Table>.maxCountLimit(maxCountLimit: Long? = beanOf(AppProperties::class.java).maxCountLimit): UpdateWrapper<Table> {
+        if ((maxCountLimit ?: 0) > 0) {
+            last("LIMIT $maxCountLimit")
+        }
+        return this
     }
+
+    //</editor-fold desc="max count limit">
+
+    //<editor-fold desc="ex">
 
     fun noDelete2(wrapper: QueryWrapper<Table>): QueryWrapper<Table> {
         return wrapper.noDelete(tableClass())
@@ -95,7 +110,7 @@ interface IBaseMybatisService<Table> : IService<Table> {
         return wrapper
     }
 
-    //</editor-fold desc="Base">
+    //<editor-fold desc="ex">
 
     //<editor-fold desc="From">
 
@@ -369,7 +384,9 @@ interface IBaseMybatisService<Table> : IService<Table> {
 
     /**查询最新的一条数据*/
     fun listQueryNewOne(
-        limit: Long = 1, filterDelete: Boolean = true, dsl: QueryWrapper<Table>.() -> Unit
+        limit: Long = 1,
+        filterDelete: Boolean = true,
+        dsl: QueryWrapper<Table>.() -> Unit
     ): Table? {
         return list(queryWrapper(filterDelete).apply {
             orderByDesc(BaseAuditTable::id.columnName())
