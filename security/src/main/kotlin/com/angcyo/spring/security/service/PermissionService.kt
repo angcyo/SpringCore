@@ -2,6 +2,7 @@ package com.angcyo.spring.security.service
 
 import com.angcyo.spring.mybatis.plus.auto.BaseAutoMybatisServiceImpl
 import com.angcyo.spring.mybatis.plus.auto.annotation.AutoFillRef
+import com.angcyo.spring.mybatis.plus.c
 import com.angcyo.spring.mybatis.plus.columnName
 import com.angcyo.spring.mybatis.plus.tableName
 import com.angcyo.spring.security.mapper.IPermissionMapper
@@ -48,5 +49,16 @@ class PermissionService : BaseAutoMybatisServiceImpl<IPermissionMapper, Permissi
         })*/
 
         return list
+    }
+
+    fun queryPermission(code: String?): PermissionTable? {
+        return listQueryOne {
+            eq(PermissionTable::code.c(), code)
+        }
+    }
+
+    @AutoFillRef("com.angcyo.spring.spmt.api.init.RolePermissionUpdateBean")
+    fun queryPermissionId(code: String?): Long? {
+        return queryPermission(code)?.id
     }
 }

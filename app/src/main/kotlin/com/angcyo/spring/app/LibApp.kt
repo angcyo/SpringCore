@@ -1,7 +1,9 @@
 package com.angcyo.spring.app
 
 import com.angcyo.spring.base.AppProperties
+import com.angcyo.spring.base.beanOf
 import com.angcyo.spring.util.*
+import org.springframework.boot.info.BuildProperties
 import org.springframework.context.ConfigurableApplicationContext
 import java.io.File
 
@@ -28,7 +30,11 @@ object LibApp {
             val duration = (nowTime - startTime).toElapsedTime(intArrayOf(1, 1, 1))
             val file = File("")
             val path = file.absolutePath
-            L.w("${app.name ?: "SpringBoot"} 启动结束,耗时:${duration}☞ $path http://${getLocalHost()}:${getServerPort()} http://localhost:${getServerPort()}")
+
+            L.w(buildString {
+                appendLine("编译时间:${beanOf<BuildProperties>().get("buildTime")}")
+                append("${app.name ?: "SpringBoot"} 启动结束,耗时:${duration}☞ $path http://${getLocalHost()}:${getServerPort()} http://localhost:${getServerPort()}")
+            })
         }
     }
 }
