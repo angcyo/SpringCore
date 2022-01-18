@@ -12,7 +12,7 @@ import com.angcyo.spring.mybatis.plus.auto.param.BaseAutoPageParam
  */
 
 /**帐号表的查询参数
- * [com.angcyo.spring.security.table.AccountTable]*/
+ * [com.angcyo.spring.security.table.UserAccountTable]*/
 class AccountQueryParam : BaseAutoPageParam() {
 
     @AutoQuery(

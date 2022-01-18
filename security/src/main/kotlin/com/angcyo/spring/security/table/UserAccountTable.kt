@@ -6,14 +6,17 @@ import com.gitee.sunchenbin.mybatis.actable.annotation.Column
 import com.gitee.sunchenbin.mybatis.actable.annotation.TableComment
 
 /**
+ *
+ * 可用于登录的账号
+ *
  * Email:angcyo@126.com
  * @author angcyo
  * @date 2021/05/28
  */
 
-@TableName("account")
+@TableName("user_account")
 @TableComment("登录账户表, 可以是账号/邮箱/手机号/openId等, 账号表关联用户表")
-class AccountTable : BaseAuditTable() {
+class UserAccountTable : BaseAuditTable() {
 
     @Column(comment = "账号的名称, 比如邮箱/手机号等")
     var name: String? = null

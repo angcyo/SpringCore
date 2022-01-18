@@ -2,7 +2,7 @@ package com.angcyo.spring.security.service
 
 import com.angcyo.spring.base.aspect.LogMethodTime
 import com.angcyo.spring.mybatis.plus.auto.BaseAutoMybatisServiceImpl
-import com.angcyo.spring.mybatis.plus.auto.annotation.AutoFillRef
+import com.angcyo.spring.mybatis.plus.auto.annotation.AutoFillRefs
 import com.angcyo.spring.mybatis.plus.columnName
 import com.angcyo.spring.security.bean.UserRoleQueryBean
 import com.angcyo.spring.security.bean.UserRoleSaveBean
@@ -46,8 +46,8 @@ class UserRoleService : BaseAutoMybatisServiceImpl<IUserRoleMapper, UserRoleReTa
     }
 
     /**获取用户对应的角色列表*/
-    @AutoFillRef("com.angcyo.spring.security.bean.UserDetail.getUserRoleList")
-    fun getUserRoleList(userId: Long): List<RoleTable> {
+    @AutoFillRefs(["com.angcyo.spring.security.bean.UserDetail.getUserRoleList", "com.angcyo.spring.security.bean.AuthRepBean"])
+    fun getUserRoleList(userId: Long?): List<RoleTable> {
         val queryBean = UserRoleQueryBean().apply {
             this.userId = userId
         }

@@ -1,6 +1,5 @@
 package com.angcyo.spring.security.jwt
 
-import com.angcyo.spring.base.beanOf
 import com.angcyo.spring.base.data.ok
 import com.angcyo.spring.base.json.toJackson
 import com.angcyo.spring.base.servlet.fromJson
@@ -15,7 +14,6 @@ import com.angcyo.spring.security.jwt.provider.authError
 import com.angcyo.spring.security.jwt.token.RequestAuthenticationToken
 import com.angcyo.spring.security.jwt.token.ResponseAuthenticationToken
 import com.angcyo.spring.security.service.AuthService
-import com.angcyo.spring.security.service.UserRoleService
 import org.springframework.security.authentication.AuthenticationManager
 import org.springframework.security.core.Authentication
 import org.springframework.security.core.AuthenticationException
@@ -66,7 +64,7 @@ class JwtLoginFilter(
             return null
         }
 
-        if (!authService.accountService.isAccountExist(bean.account)) {
+        if (!authService.userAccountService.isAccountExist(bean.account)) {
             response.sendError("无效的账号或密码")
             return null
         }
@@ -110,7 +108,7 @@ class JwtLoginFilter(
             //send response
             val repBean = userDetail.userTable!!.toObj<AuthRepBean> {
                 this.token = SecurityConstants.TOKEN_PREFIX + token
-                this.roleList = beanOf(UserRoleService::class.java).getUserRoleList(userDetail.userTable!!.id!!)
+                authService.userService.autoFill(this)
             }
             response.send(repBean.ok<AuthRepBean>().toJackson())
         } else {

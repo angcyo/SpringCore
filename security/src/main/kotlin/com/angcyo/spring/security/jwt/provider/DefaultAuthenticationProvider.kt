@@ -9,7 +9,7 @@ import com.angcyo.spring.security.jwt.token.ResponseAuthenticationToken
 import com.angcyo.spring.security.service.AuthService
 import com.angcyo.spring.security.service.codeKey
 import com.angcyo.spring.security.service.currentClientUuid
-import com.angcyo.spring.security.table.AccountTable
+import com.angcyo.spring.security.table.UserAccountTable
 import org.springframework.security.core.Authentication
 import org.springframework.security.core.userdetails.UsernameNotFoundException
 import org.springframework.security.crypto.password.PasswordEncoder
@@ -28,7 +28,7 @@ open class DefaultAuthenticationProvider : BaseTokenAuthenticationProvider() {
     override fun auth(authReqBean: AuthReqBean): Authentication? {
 
         //查询到的账号列表
-        var accountList: List<AccountTable>? = null
+        var accountList: List<UserAccountTable>? = null
         var result: Authentication? = null
         val authService = beanOf<AuthService>()
         val redis = beanOf<Redis>()
@@ -61,7 +61,7 @@ open class DefaultAuthenticationProvider : BaseTokenAuthenticationProvider() {
             }
 
             //获取帐号
-            accountList = authService.accountService.autoList(AccountQueryParam().apply {
+            accountList = authService.userAccountService.autoList(AccountQueryParam().apply {
                 name = authReqBean.account
             })
         } else if (grantType == GrantType.Code.value) {
@@ -82,7 +82,7 @@ open class DefaultAuthenticationProvider : BaseTokenAuthenticationProvider() {
             }
 
             //获取帐号
-            accountList = authService.accountService.autoList(AccountQueryParam().apply {
+            accountList = authService.userAccountService.autoList(AccountQueryParam().apply {
                 name = authReqBean.account
             })
         }

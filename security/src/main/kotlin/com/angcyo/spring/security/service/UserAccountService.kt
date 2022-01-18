@@ -8,7 +8,7 @@ import com.angcyo.spring.security.bean.AccountQueryParam
 import com.angcyo.spring.security.bean.RegisterReqBean
 import com.angcyo.spring.security.bean.SaveAccountReqBean
 import com.angcyo.spring.security.mapper.IAccountMapper
-import com.angcyo.spring.security.table.AccountTable
+import com.angcyo.spring.security.table.UserAccountTable
 import com.angcyo.spring.security.table.UserTable
 import org.springframework.stereotype.Service
 
@@ -19,7 +19,7 @@ import org.springframework.stereotype.Service
  */
 
 @Service
-class AccountService : BaseAutoMybatisServiceImpl<IAccountMapper, AccountTable>() {
+class UserAccountService : BaseAutoMybatisServiceImpl<IAccountMapper, UserAccountTable>() {
 
     /**判断帐号是否存在*/
     fun isAccountExist(account: String?): Boolean {
@@ -59,9 +59,9 @@ class AccountService : BaseAutoMybatisServiceImpl<IAccountMapper, AccountTable>(
     }
 
     /**获取用户对应的所有帐号信息*/
-    fun getUserAccount(userId: Long): List<AccountTable> {
+    fun getUserAccount(userId: Long): List<UserAccountTable> {
         return listQuery {
-            eq(AccountTable::userId.columnName(), userId)
+            eq(UserAccountTable::userId.columnName(), userId)
         }
     }
 }

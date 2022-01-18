@@ -13,7 +13,8 @@ import com.angcyo.spring.security.jwt.currentUserId
 import com.angcyo.spring.security.jwt.event.RegisterAccountEvent
 import com.angcyo.spring.security.service.annotation.RegisterAccount
 import com.angcyo.spring.security.service.annotation.SaveAccount
-import com.angcyo.spring.security.table.AccountTable
+import com.angcyo.spring.security.table.UserAccountTable
+import com.angcyo.spring.security.table.UserInfoTable
 import com.angcyo.spring.security.table.UserRoleReTable
 import com.angcyo.spring.security.table.UserTable
 import com.angcyo.spring.util.ImageCode
@@ -101,7 +102,13 @@ class AuthService {
      * [type] 验证码类型
      * [length] 验证码位数
      * [time] 有效时长默认5分钟*/
-    fun sendCode(uuid: String, target: String, type: Int, length: Int, time: Long = appProperties.codeTime): Boolean {
+    fun sendCode(
+        uuid: String,
+        target: String,
+        type: Int,
+        length: Int,
+        time: Long = appProperties.codeTime
+    ): Boolean {
         //code: String
         //需要发送的验证码
         val code = ImageCode.generateCode(length)
@@ -137,10 +144,13 @@ class AuthService {
     //</editor-fold desc="验证码相关">
 
     @Autowired
-    lateinit var accountService: AccountService
+    lateinit var userAccountService: UserAccountService
 
     @Autowired
     lateinit var userService: UserService
+
+    @Autowired
+    lateinit var userInfoService: UserInfoService
 
     @Autowired
     lateinit var userRoleService: UserRoleService
@@ -158,19 +168,24 @@ class AuthService {
         //用户
         val user = UserTable()
         user.state = 1//用户状态
-        user.nickname = registerBean?.nickname ?: username
-        user.avatar = registerBean?.avatar
-        user.phone = registerBean?.phone
-        user.email = registerBean?.email
-        user.sex = registerBean?.sex
         user.password = passwordEncoder.encode(registerBean?.password ?: username)
         userService.save(user)
 
         //创建帐号,用户登录用户
-        val account = AccountTable()
+        val account = UserAccountTable()
         account.name = username
         account.userId = user.id //帐号关联用户
-        accountService.save(account)
+        userAccountService.save(account)
+
+        //用户信息
+        val userInfo = UserInfoTable()
+        userInfo.userId = user.id //帐号关联用户
+        userInfo.nickname = registerBean?.nickname ?: username
+        userInfo.avatar = registerBean?.avatar
+        userInfo.phone = registerBean?.phone
+        userInfo.email = registerBean?.email
+        userInfo.sex = registerBean?.sex
+        userInfoService.save(userInfo)
 
         //分配角色, 如果有
         if (!req.roleIdList.isNullOrEmpty()) {
@@ -226,7 +241,7 @@ class AuthService {
             else -> apiError("无效的注册方式")
         }
 
-        if (accountService.isAccountExist(bean.account)) {
+        if (userAccountService.isAccountExist(bean.account)) {
             apiError("帐号已存在")
         }
 
@@ -242,8 +257,9 @@ class AuthService {
 
     /**临时用户对象*/
     fun tempUserTable() = UserTable().apply {
-        nickname = "临时用户"
-        des = "临时用户"
+        //nickname = "临时用户"
+        //des = "临时用户"
+        state = -999
     }
 
     fun tempUserDetail(user: UserTable = tempUserTable()) = UserDetail().apply {

@@ -2,10 +2,10 @@ package com.angcyo.spring.security.bean
 
 import com.angcyo.spring.mybatis.plus.auto.annotation.AutoFill
 import com.angcyo.spring.mybatis.plus.auto.param.IAutoParam
-import com.angcyo.spring.security.service.AccountService
+import com.angcyo.spring.security.service.UserAccountService
 import com.angcyo.spring.security.service.PermissionService
 import com.angcyo.spring.security.service.UserRoleService
-import com.angcyo.spring.security.table.AccountTable
+import com.angcyo.spring.security.table.UserAccountTable
 import com.angcyo.spring.security.table.PermissionTable
 import com.angcyo.spring.security.table.RoleTable
 import com.angcyo.spring.security.table.UserTable
@@ -24,12 +24,12 @@ class UserDetail : IAutoParam {
 
     /**用户的账号列表*/
     @AutoFill(
-        service = AccountService::class,
+        service = UserAccountService::class,
         queryColumn = "userId",
         queryParamField = "userTable.id",
         targetField = ""
     )
-    var userAccountList: List<AccountTable>? = null
+    var userAccountList: List<UserAccountTable>? = null
 
     /**用户对应的角色列表*/
     @AutoFill(

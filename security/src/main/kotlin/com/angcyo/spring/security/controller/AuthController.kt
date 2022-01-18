@@ -1,6 +1,5 @@
 package com.angcyo.spring.security.controller
 
-import com.angcyo.spring.base.beanOf
 import com.angcyo.spring.base.data.Result
 import com.angcyo.spring.base.data.ok
 import com.angcyo.spring.base.data.result
@@ -13,7 +12,6 @@ import com.angcyo.spring.security.bean.*
 import com.angcyo.spring.security.jwt.JWT
 import com.angcyo.spring.security.jwt.event.LoginEvent
 import com.angcyo.spring.security.service.AuthService
-import com.angcyo.spring.security.service.UserRoleService
 import com.angcyo.spring.security.service.codeKey
 import com.angcyo.spring.util.ImageCode
 import com.angcyo.spring.util.L
@@ -83,7 +81,7 @@ class AuthController {
     fun sendCode(request: HttpServletRequest, @RequestBody req: SendCodeReqBean): Result<Boolean> {
 
         if (req.type == CodeType.Login.value) {
-            if (!authService.accountService.isAccountExist(req.target!!)) {
+            if (!authService.userAccountService.isAccountExist(req.target!!)) {
                 apiError("无效的账号")
             }
         }
@@ -115,21 +113,23 @@ class AuthController {
                     userTable = this@toObj
                 }
                 authService.userService.autoFill(userDetail)
+                authService.userService.autoFill(this)
+
+                //填充额外的数据返回值
+                this.token = SecurityConstants.TOKEN_PREFIX + token
 
                 //2 将token保存至redis
                 authService._loginEnd(userDetail, token)
 
                 //3 发布事件
                 eventPublisher.publishEvent(LoginEvent(userDetail))
-
-                //返回值复制
-                this.token = SecurityConstants.TOKEN_PREFIX + token
-                this.roleList = beanOf(UserRoleService::class.java).getUserRoleList(userDetail.userTable!!.id!!)
             }
         }
     }
 
-    /**登录接口, 用来生成Swagger文档*/
+    /**登录接口, 用来生成Swagger文档
+     * 真实在[com.angcyo.spring.security.jwt.JwtLoginFilter.successfulAuthentication]返回数据
+     * */
     @ApiOperation("授权登录")
     @PostMapping(SecurityConstants.AUTH_LOGIN_URL)
     fun login(@ApiParam("授权登录参数") @RequestBody authReqBean: AuthReqBean): Result<AuthRepBean>? {

@@ -34,13 +34,14 @@ fun HttpServletRequest.codeKey(): String {
 
 /**客户端类型*/
 fun currentClientType(def: String = ClientType.Web.value) = request()?.clientType() ?: def
+
 fun currentClientUuid() = request()?.clientUuid()
 
 /**客户端的uuid*/
-fun HttpServletRequest.clientUuid() = param("clientUuid")
+fun HttpServletRequest.clientUuid() = param("clientUuid") ?: param("client-uuid")
 
 /**从请求头中, 获取客户端类型*/
-fun HttpServletRequest.clientType() = param("clientType")
+fun HttpServletRequest.clientType() = param("clientType") ?: param("client-type")
 
 /**从字符串中解析用户id
  * xxxxxxxx.xxx*/

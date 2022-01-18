@@ -1,11 +1,11 @@
 package com.angcyo.spring.security.mapper
 
 import com.angcyo.spring.mybatis.plus.auto.IBaseAutoMapper
-import com.angcyo.spring.security.table.UserAccountTable
+import com.angcyo.spring.security.table.UserInfoTable
 
 /**
  * Email:angcyo@126.com
  * @author angcyo
- * @date 2021/05/28
+ * @date 2022/01/18
  */
-interface IAccountMapper : IBaseAutoMapper<UserAccountTable>
+interface IUserInfoMapper : IBaseAutoMapper<UserInfoTable>

@@ -7,7 +7,6 @@ import com.angcyo.spring.security.bean.UserDetail
 import com.angcyo.spring.security.bean.UserQueryParam
 import com.angcyo.spring.security.jwt.token.ResponseAuthenticationToken
 import com.angcyo.spring.security.service.AuthService
-import com.angcyo.spring.security.table.UserTable
 import com.angcyo.spring.util.L
 import org.springframework.context.ApplicationEventPublisher
 import org.springframework.context.ApplicationEventPublisherAware
@@ -34,7 +33,9 @@ class JwtAuthorizationFilter(
 
     /**请求拦截, 验证Token*/
     override fun doFilterInternal(
-        request: HttpServletRequest, response: HttpServletResponse, filterChain: FilterChain
+        request: HttpServletRequest,
+        response: HttpServletResponse,
+        filterChain: FilterChain
     ) {
         try {
             val authentication = getAuthentication(request)
@@ -70,11 +71,7 @@ class JwtAuthorizationFilter(
         if (token.isNullOrEmpty()) {
             //临时授权功能支持
             authService.authorizationTempToken(request)?.let {
-                authentication = ResponseAuthenticationToken(authService.tempUserDetail(UserTable().apply {
-                    id = it.first
-                    nickname = "临时用户"
-                    des = "临时用户"
-                }))
+                authentication = ResponseAuthenticationToken(authService.tempUserDetail())
             }
         } else {
             //1. token检查

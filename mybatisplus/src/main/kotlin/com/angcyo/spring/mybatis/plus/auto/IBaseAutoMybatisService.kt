@@ -520,7 +520,9 @@ interface IBaseAutoMybatisService<Table> : IBaseMybatisService<Table> {
      * */
     @Transactional
     fun autoUpdateByQuery(
-        param: IAutoParam, error: String? = null, dsl: UpdateWrapper<Table>.() -> Unit
+        param: IAutoParam,
+        error: String? = null,
+        dsl: UpdateWrapper<Table>.() -> Unit
     ): Boolean {
         autoFill(param)
         return updateQuery {
