@@ -396,7 +396,9 @@ interface IBaseMybatisService<Table> : IService<Table> {
     }
 
     fun listQueryIn(
-        coll: Collection<*>, filterDelete: Boolean = true, dsl: QueryWrapper<Table>.() -> Unit
+        coll: Collection<*>,
+        filterDelete: Boolean = true,
+        dsl: QueryWrapper<Table>.() -> Unit
     ): List<Table> {
         if (coll.isEmpty()) {
             return emptyList()

@@ -72,6 +72,7 @@ abstract class BaseAutoController<
         }
 
         if (newAny is IAutoParam) {
+            //填充
             autoService.autoFill(newAny)
         }
         return newAny
@@ -98,7 +99,6 @@ abstract class BaseAutoController<
     @ApiOperation("[通用]单表数据新增接口")
     @PostMapping("/save.auto")
     open fun autoSave(@RequestBody(required = true) param: SaveParam): Result<Return> {
-        autoService.autoFill(param)
         if (autoSaveBefore(param)) {
             return Result.ok()
         }
@@ -124,7 +124,6 @@ abstract class BaseAutoController<
     @ApiOperation("[通用]单表数据id软删除接口")
     @PostMapping("/delete.auto")
     open fun autoDelete(@RequestBody(required = true) param: QueryParam): Result<Boolean> {
-        autoService.autoFill(param)
         if (autoDeleteBefore(param)) {
             return Result.ok()
         }
@@ -150,7 +149,6 @@ abstract class BaseAutoController<
     @ApiOperation("[通用]单表数据id移除数据(真删除)接口", hidden = true)
     @PostMapping("/remove.auto")
     open fun autoRemove(@RequestBody(required = true) param: QueryParam): Result<Boolean> {
-        autoService.autoFill(param)
         if (autoRemoveBefore(param)) {
             return Result.ok()
         }
@@ -179,7 +177,6 @@ abstract class BaseAutoController<
     @ApiOperation("[通用]单表根据数据id更新接口")
     @PostMapping("/update.auto")
     open fun autoUpdate(@RequestBody(required = true) param: SaveParam): Result<Return> {
-        autoService.autoFill(param)
         if (autoUpdateBefore(param)) {
             return Result.ok()
         }
@@ -201,7 +198,6 @@ abstract class BaseAutoController<
     @ApiOperation("[通用]单表数据单条查询接口")
     @PostMapping("/query.auto")
     open fun autoQuery(@RequestBody(required = true) param: QueryParam): Result<Return> {
-        autoService.autoFill(param)
         if (autoQueryBefore(param)) {
             return Result.ok()
         }
@@ -233,7 +229,6 @@ abstract class BaseAutoController<
     @PostMapping("/list.auto")
     open fun autoList(@RequestBody(required = false) param: QueryParam?): Result<List<Return>> {
         val queryParam = param ?: getQueryClass().newInstance() as QueryParam
-        autoService.autoFill(queryParam)
         if (autoListBefore(queryParam)) {
             return Result.ok()
         }
@@ -259,7 +254,6 @@ abstract class BaseAutoController<
     @PostMapping("/page.auto")
     open fun autoPage(@RequestBody(required = false) param: QueryParam?): Result<IPage<Return>> {
         val queryParam = param ?: getQueryClass().newInstance() as QueryParam
-        autoService.autoFill(queryParam)
         if (autoPageBefore(queryParam)) {
             return Result.ok()
         }

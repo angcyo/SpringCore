@@ -186,13 +186,14 @@ class AutoParse<Table> {
     fun parseQuery(
         queryWrapper: QueryWrapper<Table>,
         param: IAutoParam,
+        jumpEmptyQuery: Boolean = false,
         type: AutoType = AutoType.QUERY
     ): QueryWrapper<Table> {
         //选择列
         _handleSelector(queryWrapper, param)
 
         //查询
-        _handleQuery(type, queryWrapper, param)
+        _handleQuery(type, queryWrapper, param, jumpEmptyQuery)
 
         //排序
         _handleOrder(queryWrapper, param)
@@ -206,9 +207,10 @@ class AutoParse<Table> {
     fun parseUpdate(
         updateWrapper: UpdateWrapper<Table>,
         param: IAutoParam,
+        jumpEmptyQuery: Boolean = false,
         type: AutoType = AutoType.UPDATE
     ): UpdateWrapper<Table> {
-        _handleQuery(type, updateWrapper, param)
+        _handleQuery(type, updateWrapper, param, jumpEmptyQuery)
         val targetSql = updateWrapper.targetSql
         L.i("parseUpdate sql->$targetSql")
         return updateWrapper
@@ -217,9 +219,10 @@ class AutoParse<Table> {
     fun parseQueryByUpdate(
         queryWrapper: QueryWrapper<Table>,
         param: IAutoParam,
+        jumpEmptyQuery: Boolean = false,
         type: AutoType = AutoType.UPDATE
     ): QueryWrapper<Table> {
-        _handleQuery(type, queryWrapper, param)
+        _handleQuery(type, queryWrapper, param, jumpEmptyQuery)
         val targetSql = queryWrapper.targetSql
         L.i("parseQueryByUpdate sql->$targetSql")
         return queryWrapper
@@ -260,6 +263,7 @@ class AutoParse<Table> {
             val fieldValue = field.get(param)
             if (fieldValue == null && defaultValue.isNotEmpty()) {
                 //需要设置默认值
+                //Spring类型转换
                 val value = DefaultConversionService.getSharedInstance().convert(defaultValue, field.type)
                 field.set(param, value)
             }
@@ -272,10 +276,11 @@ class AutoParse<Table> {
     fun parseSaveCheck(
         queryWrapper: QueryWrapper<Table>,
         param: IAutoParam,
+        jumpEmptyQuery: Boolean = false,
         type: AutoType = AutoType.SAVE
     ): QueryWrapper<Table> {
         //查询
-        _handleQuery(type, queryWrapper, param)
+        _handleQuery(type, queryWrapper, param, jumpEmptyQuery)
 
         val targetSql = queryWrapper.targetSql
         L.i("parseSaveCheck sql->$targetSql")
@@ -289,10 +294,11 @@ class AutoParse<Table> {
     fun parseDeleteCheck(
         queryWrapper: QueryWrapper<Table>,
         param: IAutoParam,
+        jumpEmptyQuery: Boolean = false,
         type: AutoType = AutoType.DELETE
     ): QueryWrapper<Table> {
         //查询
-        _handleQuery(type, queryWrapper, param)
+        _handleQuery(type, queryWrapper, param, jumpEmptyQuery)
 
         val targetSql = queryWrapper.targetSql
         L.i("parseDeleteCheck sql->$targetSql")
@@ -306,10 +312,11 @@ class AutoParse<Table> {
     fun parseUpdateCheck(
         queryWrapper: QueryWrapper<Table>,
         param: IAutoParam,
+        jumpEmptyQuery: Boolean = false,
         type: AutoType = AutoType.UPDATE
     ): QueryWrapper<Table> {
         //查询
-        _handleQuery(type, queryWrapper, param)
+        _handleQuery(type, queryWrapper, param, jumpEmptyQuery)
 
         val targetSql = queryWrapper.targetSql
         L.i("parseUpdateCheck sql->$targetSql")
@@ -332,9 +339,12 @@ class AutoParse<Table> {
             //取出解析结果
             val context = StandardEvaluationContext(obj)
             context.setBeanResolver(BeanFactoryResolver(app))
+            //@userAccountService.test(#this, #root, id) //当前对象
             val result = exp.getValue(context)
 
-            field.set(obj, result)
+            //Spring类型转换
+            val value = DefaultConversionService.getSharedInstance().convert(result, field.type)
+            field.set(obj, value)
             return true
         } else if (fill.service !is PlaceholderAutoMybatisService) {
             serviceClass = fill.service.java
@@ -458,19 +468,20 @@ class AutoParse<Table> {
         type: AutoType,
         wrapper: AbstractWrapper<Table, String, Wrapper>,
         param: IAutoParam,
+        jumpEmptyQuery: Boolean = false,
         jumpField: (field: Field) -> Boolean = { false }
     ) {
         val queryGroup = AutoGroupHelper.parseAutoQuery(param, type) ?: apiError("无法处理的查询")
 
-        if (queryGroup.jumpEmpty && queryGroup.isQueryEmpty()) {
+        if (queryGroup.isQueryEmpty() && (queryGroup.jumpEmpty || jumpEmptyQuery)) {
             //跳过空查询
         } else {
             if (wrapper.isEmptyOfWhere) {
                 //空查询
-                _handleQueryGroup(wrapper, queryGroup, jumpField)
+                _handleQueryGroup(wrapper, queryGroup, jumpEmptyQuery, jumpField)
             } else {
                 wrapper.and {
-                    _handleQueryGroup(it, queryGroup, jumpField)
+                    _handleQueryGroup(it, queryGroup, jumpEmptyQuery, jumpField)
                 }
             }
         }
@@ -480,6 +491,7 @@ class AutoParse<Table> {
     fun <Wrapper : AbstractWrapper<Table, String, Wrapper>> _handleQueryGroup(
         wrapper: AbstractWrapper<Table, String, Wrapper>,
         group: QueryGroup,
+        jumpEmptyQuery: Boolean = false, //空查询时, 是否不拼接false
         jumpField: (field: Field) -> Boolean = { false }
     ) {
         val queryFieldList = group.queryFieldList?.filter { !jumpField(it.field) }
@@ -487,7 +499,11 @@ class AutoParse<Table> {
 
         if (group.isQueryEmpty()) {
             //空查询时, 插入的sql
-            wrapper.last("FALSE")
+            if (group.jumpEmpty || jumpEmptyQuery) {
+                //jump
+            } else {
+                wrapper.last("FALSE")
+            }
         } else {
             //需要组装查询
 
@@ -527,15 +543,15 @@ class AutoParse<Table> {
 
             //查询分组拼装
             childGroupList?.forEach { queryGroup ->
-                if (queryGroup.jumpEmpty && queryGroup.isQueryEmpty()) {
+                if (queryGroup.isQueryEmpty() && (queryGroup.jumpEmpty || jumpEmptyQuery)) {
                     //跳过空查询
                 } else {
                     if (group.or) {
                         wrapper.or {
-                            _handleQueryGroup(it, queryGroup, jumpField)
+                            _handleQueryGroup(it, queryGroup, jumpEmptyQuery, jumpField)
                         }
                     } else {
-                        _handleQueryGroup(wrapper, queryGroup, jumpField)
+                        _handleQueryGroup(wrapper, queryGroup, jumpEmptyQuery, jumpField)
                     }
                 }
             }

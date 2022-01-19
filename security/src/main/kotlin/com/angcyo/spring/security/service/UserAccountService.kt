@@ -3,6 +3,7 @@ package com.angcyo.spring.security.service
 import com.angcyo.spring.base.beanOf
 import com.angcyo.spring.base.extension.apiError
 import com.angcyo.spring.mybatis.plus.auto.BaseAutoMybatisServiceImpl
+import com.angcyo.spring.mybatis.plus.auto.annotation.AutoFillRef
 import com.angcyo.spring.mybatis.plus.columnName
 import com.angcyo.spring.security.bean.AccountQueryParam
 import com.angcyo.spring.security.bean.RegisterReqBean
@@ -59,7 +60,8 @@ class UserAccountService : BaseAutoMybatisServiceImpl<IAccountMapper, UserAccoun
     }
 
     /**获取用户对应的所有帐号信息*/
-    fun getUserAccount(userId: Long): List<UserAccountTable> {
+    @AutoFillRef("com.angcyo.spring.security.bean.AuthRepBean")
+    fun getUserAccountList(userId: Long): List<UserAccountTable> {
         return listQuery {
             eq(UserAccountTable::userId.columnName(), userId)
         }

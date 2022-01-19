@@ -109,7 +109,7 @@ interface IBaseAutoMybatisService<Table> : IBaseMybatisService<Table> {
     @LogMethodTime
     fun autoQuery(param: IAutoParam): Table? {
         autoFill(param)
-        return list(buildAutoParse().parseQuery(queryWrapper(true).maxCountLimit(1), param)).firstOrNull()
+        return list(buildAutoParse().parseQuery(queryWrapper(true), param).maxCountLimit(1)).firstOrNull()
     }
 
     /**根据[param], 自动查询出所有数据*/
@@ -117,7 +117,7 @@ interface IBaseAutoMybatisService<Table> : IBaseMybatisService<Table> {
     @AutoFillRef("com.angcyo.spring.mybatis.plus.auto.core.AutoParse._handleFill")
     fun autoList(param: IAutoParam): List<Table> {
         autoFill(param)
-        return list(buildAutoParse().parseQuery(queryWrapper(true).maxCountLimit(), param))
+        return list(buildAutoParse().parseQuery(queryWrapper(true), param, true).maxCountLimit())
     }
 
     /**根据[param], 自动分页查询出数据*/
@@ -125,7 +125,7 @@ interface IBaseAutoMybatisService<Table> : IBaseMybatisService<Table> {
     fun autoPage(param: BaseAutoPageParam): IPage<Table> {
         val autoParse = buildAutoParse()
         autoFill(param)
-        return page(autoParse.page(param), autoParse.parseQuery(queryWrapper(true), param))
+        return page(autoParse.page(param), autoParse.parseQuery(queryWrapper(true), param, true))
     }
 
     /**根据[param], 自动保存数据*/
@@ -187,7 +187,7 @@ interface IBaseAutoMybatisService<Table> : IBaseMybatisService<Table> {
         val type = if (remove) AutoType.REMOVE else AutoType.DELETE
 
         //否则检查数据是否合法, 保存数据
-        val count = count(autoParse.parseDeleteCheck(queryWrapper(true), param, type))
+        val count = count(autoParse.parseDeleteCheck(queryWrapper(true), param, true, type))
 
         if (count > 0) {
             //查询后, 有数据则删除
@@ -537,7 +537,7 @@ interface IBaseAutoMybatisService<Table> : IBaseMybatisService<Table> {
                 }
 
                 //检查数据是否能被更新
-                count = count(autoParse.parseSaveCheck(queryWrapper(true), table, AutoType.UPDATE_CHECK))
+                count = count(autoParse.parseSaveCheck(queryWrapper(true), table, true, AutoType.UPDATE_CHECK))
                 if (count > 0) {
                     //数据已存在, 抛出异常
                     AutoParse.handleExistError(table, AutoType.UPDATE_CHECK)

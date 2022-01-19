@@ -19,14 +19,14 @@ import kotlin.reflect.KClass
 @MustBeDocumented
 annotation class AutoFill(
 
-    /**描述信息*/
-    val des: String = "",
-
     /**使用Spring表达式语言（简称SpEL）解析
      * "@roleService.queryRoleId(roleCode)"
      * "@permissionService.queryPermissionId(permissionCode)"
      * */
     val spEL: String = "",
+
+    /**描述信息*/
+    val des: String = "",
 
     /**不管字段是否已经有值, 都强制填充.
      * 默认只有字段为null时, 才填充*/

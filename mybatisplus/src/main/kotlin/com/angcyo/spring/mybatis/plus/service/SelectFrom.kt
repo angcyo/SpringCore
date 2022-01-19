@@ -25,6 +25,7 @@ class SelectFrom {
     /**递归*/
     var from: SelectFrom? = null
 
-    /**当前表需要查询的列, 默认是id, 如果为空则查询所有*/
+    /**当前表需要查询的列, 默认是id
+     * 决定当前语句, 是否需要使用 in 包含*/
     var column: String = BaseAuditTable::id.columnName()
 }
