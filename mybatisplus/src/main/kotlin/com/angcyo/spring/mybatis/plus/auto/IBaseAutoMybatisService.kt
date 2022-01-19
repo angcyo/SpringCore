@@ -537,7 +537,7 @@ interface IBaseAutoMybatisService<Table> : IBaseMybatisService<Table> {
                 }
 
                 //检查数据是否能被更新
-                count = count(autoParse.parseSaveCheck(queryWrapper(true), table, true, AutoType.UPDATE_CHECK))
+                count = count(autoParse.parseSaveCheck(queryWrapper(true), table, false, AutoType.UPDATE_CHECK))
                 if (count > 0) {
                     //数据已存在, 抛出异常
                     AutoParse.handleExistError(table, AutoType.UPDATE_CHECK)
