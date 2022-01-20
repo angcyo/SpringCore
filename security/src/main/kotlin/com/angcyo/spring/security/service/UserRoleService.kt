@@ -29,7 +29,7 @@ class UserRoleService : BaseAutoMybatisServiceImpl<IUserRoleMapper, UserRoleReTa
     }
 
     @Transactional
-    fun resetUserRole(userId: Long, roleIdList: List<Long>) {
+    fun resetUserRole(userId: Long, roleIdList: List<Long>): Boolean {
         val roleList = mutableListOf<UserRoleReTable>()
         roleIdList.forEach {
             roleList.add(UserRoleReTable().apply {
@@ -37,7 +37,7 @@ class UserRoleService : BaseAutoMybatisServiceImpl<IUserRoleMapper, UserRoleReTa
                 this.roleId = it
             })
         }
-        resetFrom(roleList, UserRoleReTable::userId.columnName(), userId, UserRoleReTable::roleId.name)
+        return resetFrom(roleList, UserRoleReTable::userId.columnName(), userId, UserRoleReTable::roleId.name)
     }
 
     /**用户是否有指定的角色名*/

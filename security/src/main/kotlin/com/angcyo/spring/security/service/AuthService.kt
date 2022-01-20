@@ -3,6 +3,7 @@ package com.angcyo.spring.security.service
 import com.angcyo.java.mail.dslSendMail
 import com.angcyo.spring.base.AppProperties
 import com.angcyo.spring.base.beanOf
+import com.angcyo.spring.base.data.toBean
 import com.angcyo.spring.base.extension.apiError
 import com.angcyo.spring.base.servlet.param
 import com.angcyo.spring.base.servlet.request
@@ -158,17 +159,25 @@ class AuthService {
     @Autowired
     lateinit var applicationEventPublisher: ApplicationEventPublisher
 
+    /**加密密码*/
+    fun encodePassword(password: CharSequence?): String? {
+        if (password.isNullOrEmpty()) {
+            return null
+        }
+        return passwordEncoder.encode(password)
+    }
+
     /**保存一个帐号*/
     @SaveAccount
     @Transactional
     fun saveAccount(req: SaveAccountReqBean): UserTable {
-        val registerBean = req.registerReqBean
-        val username = registerBean?.account
+        val username = req.account
 
         //用户
         val user = UserTable()
         user.state = 1//用户状态
-        user.password = passwordEncoder.encode(registerBean?.password ?: username)
+        //默认密码就是账号
+        user.password = encodePassword(req.password ?: username)
         userService.save(user)
 
         //创建帐号,用户登录用户
@@ -178,13 +187,13 @@ class AuthService {
         userAccountService.save(account)
 
         //用户信息
-        val userInfo = UserInfoTable()
+        val userInfo = req.toBean(UserInfoTable::class.java) //UserInfoTable()
         userInfo.userId = user.id //帐号关联用户
-        userInfo.nickname = registerBean?.nickname ?: username
-        userInfo.avatar = registerBean?.avatar
-        userInfo.phone = registerBean?.phone
-        userInfo.email = registerBean?.email
-        userInfo.sex = registerBean?.sex
+        userInfo.nickname = req.nickname ?: username
+        /*userInfo.avatar = req.avatar
+        userInfo.phone = req.phone
+        userInfo.email = req.email
+        userInfo.sex = req.sex*/
         userInfoService.save(userInfo)
 
         //分配角色, 如果有
@@ -245,9 +254,7 @@ class AuthService {
             apiError("帐号已存在")
         }
 
-        val user = beanOf<AuthService>().saveAccount(SaveAccountReqBean().apply {
-            registerReqBean = bean
-        })
+        val user = beanOf<AuthService>().saveAccount(bean.toBean(SaveAccountReqBean::class.java))
 
         //发送注册账号成功事件
         applicationEventPublisher.publishEvent(RegisterAccountEvent(bean, user))

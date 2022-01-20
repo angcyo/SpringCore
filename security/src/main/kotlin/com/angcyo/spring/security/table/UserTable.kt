@@ -19,8 +19,8 @@ import io.swagger.annotations.ApiModelProperty
 @ApiModel("用户表, 记录用户的关键信息")
 class UserTable : BaseAuditTable() {
 
-    @Column(comment = "用户密码, 密文")
-    @ApiModelProperty("用户密码, 密文")
+    @Column(comment = "用户密码, 密文后")
+    @ApiModelProperty("用户密码, 明文")
     @JsonIgnore
     var password: String? = null
 

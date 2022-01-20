@@ -6,7 +6,6 @@ import com.angcyo.spring.mybatis.plus.auto.BaseAutoMybatisServiceImpl
 import com.angcyo.spring.mybatis.plus.auto.annotation.AutoFillRef
 import com.angcyo.spring.mybatis.plus.columnName
 import com.angcyo.spring.security.bean.AccountQueryParam
-import com.angcyo.spring.security.bean.RegisterReqBean
 import com.angcyo.spring.security.bean.SaveAccountReqBean
 import com.angcyo.spring.security.mapper.IAccountMapper
 import com.angcyo.spring.security.table.UserAccountTable
@@ -40,10 +39,8 @@ class UserAccountService : BaseAutoMybatisServiceImpl<IAccountMapper, UserAccoun
         }
         val authService = beanOf(AuthService::class.java)
         val userTable = authService.saveAccount(SaveAccountReqBean().apply {
-            registerReqBean = RegisterReqBean().apply {
-                this.account = account
-                this.password = password
-            }
+            this.account = account
+            this.password = password
             this.roleIdList = roleIdList
         })
         return userTable
@@ -51,7 +48,7 @@ class UserAccountService : BaseAutoMybatisServiceImpl<IAccountMapper, UserAccoun
 
     /**添加一个账号*/
     fun saveAccount(bean: SaveAccountReqBean): UserTable {
-        if (isAccountExist(bean.registerReqBean?.account)) {
+        if (isAccountExist(bean.account)) {
             apiError("帐号已存在")
         }
         val authService = beanOf(AuthService::class.java)

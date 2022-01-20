@@ -2,12 +2,14 @@ package com.angcyo.spring.mybatis.plus.auto
 
 import com.angcyo.spring.base.aspect.LogMethodTime
 import com.angcyo.spring.base.data.ifError
+import com.angcyo.spring.base.data.toBeanList
 import com.angcyo.spring.base.extension.apiError
 import com.angcyo.spring.base.logName
 import com.angcyo.spring.mybatis.plus.*
 import com.angcyo.spring.mybatis.plus.auto.annotation.*
 import com.angcyo.spring.mybatis.plus.auto.core.AutoParse
 import com.angcyo.spring.mybatis.plus.auto.param.BaseAutoPageParam
+import com.angcyo.spring.mybatis.plus.auto.param.BaseAutoQueryParam
 import com.angcyo.spring.mybatis.plus.auto.param.IAutoParam
 import com.angcyo.spring.mybatis.plus.auto.param.PlaceholderAutoParam
 import com.angcyo.spring.mybatis.plus.service.IBaseMybatisService
@@ -106,27 +108,37 @@ interface IBaseAutoMybatisService<Table> : IBaseMybatisService<Table> {
         return param
     }
 
-    /**根据[param], 自动查询一条数据*/
+    /**根据[req], 自动查询一条数据*/
     @LogMethodTime
-    fun autoQuery(param: IAutoParam = PlaceholderAutoParam()): Table? {
+    fun autoQuery(req: IAutoParam? = null): Table? {
+        val param = req ?: PlaceholderAutoParam()
         autoFill(param)
         return list(buildAutoParse().parseQuery(queryWrapper(true), param).maxCountLimit(1)).firstOrNull()
     }
 
-    /**根据[param], 自动查询出所有数据*/
+    /**根据[req], 自动查询出所有数据*/
     @LogMethodTime
     @AutoFillRef("com.angcyo.spring.mybatis.plus.auto.core.AutoParse._handleFill")
-    fun autoList(param: IAutoParam = PlaceholderAutoParam()): List<Table> {
+    fun autoList(req: IAutoParam? = null): List<Table> {
+        val param = req ?: BaseAutoQueryParam()
         autoFill(param)
         return list(buildAutoParse().parseQuery(queryWrapper(true), param, true).maxCountLimit())
     }
 
-    /**根据[param], 自动分页查询出数据*/
+    /**根据[req], 自动分页查询出数据*/
     @LogMethodTime
-    fun autoPage(param: BaseAutoPageParam = BaseAutoPageParam()): IPage<Table> {
+    fun autoPage(req: BaseAutoPageParam? = null): IPage<Table> {
+        val param = req ?: BaseAutoPageParam()
         val autoParse = buildAutoParse()
         autoFill(param)
         return page(autoParse.page(param), autoParse.parseQuery(queryWrapper(true), param, true))
+    }
+
+    fun <R> autoPage2(req: BaseAutoPageParam?, cls: Class<R>, initBean: R.(Table) -> Unit = {}): IPage<R> {
+        val page = autoPage(req)
+        val result = page.records.toBeanList(cls, initBean)
+        val resultPage = result.toIPage(page)
+        return resultPage
     }
 
     /**根据[param], 自动保存数据*/
@@ -577,7 +589,7 @@ interface IBaseAutoMybatisService<Table> : IBaseMybatisService<Table> {
     fun autoUpdateByQuery(
         param: IAutoParam,
         error: String? = null,
-        dsl: UpdateWrapper<Table>.() -> Unit
+        dsl: UpdateWrapper<Table>.() -> Unit = {}
     ): Boolean {
         autoFill(param)
         return updateQuery {

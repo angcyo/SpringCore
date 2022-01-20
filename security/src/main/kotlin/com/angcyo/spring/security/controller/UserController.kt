@@ -3,10 +3,7 @@ package com.angcyo.spring.security.controller
 import com.angcyo.spring.base.data.Result
 import com.angcyo.spring.base.data.ok
 import com.angcyo.spring.base.data.result
-import com.angcyo.spring.security.bean.UserInfoRepBean
-import com.angcyo.spring.security.bean.UserPermissionQueryBean
-import com.angcyo.spring.security.bean.UserQueryParam
-import com.angcyo.spring.security.bean.UserRoleQueryBean
+import com.angcyo.spring.security.bean.*
 import com.angcyo.spring.security.jwt.currentUser
 import com.angcyo.spring.security.jwt.currentUserId
 import com.angcyo.spring.security.service.UserInfoService
@@ -14,6 +11,7 @@ import com.angcyo.spring.security.service.UserService
 import com.angcyo.spring.security.table.PermissionTable
 import com.angcyo.spring.security.table.RoleTable
 import com.angcyo.spring.security.table.UserInfoTable
+import com.baomidou.mybatisplus.core.metadata.IPage
 import io.swagger.annotations.Api
 import io.swagger.annotations.ApiImplicitParam
 import io.swagger.annotations.ApiOperation
@@ -69,10 +67,35 @@ class UserController {
         return userInfoService.queryUserInfo(req).ok()
     }
 
+    @PostMapping("/update")
+    @ApiOperation("更新用户,包括密码和信息")
+    fun update(@RequestBody req: UserReqBean): Result<Boolean>? {
+        return userService.updateUser(req).ok()
+    }
+
     @PostMapping("/updateSelf")
+    @ApiOperation("更新自己的用户信息")
+    fun updateSelfUserInfo(@RequestBody req: UserInfoTable): Result<Boolean>? {
+        req.userId = currentUserId()
+        return userInfoService.autoUpdate(req).ok()
+    }
+
+    @PostMapping("/updateInfo")
     @ApiOperation("更新用户信息")
     fun updateUserInfo(@RequestBody req: UserInfoTable): Result<Boolean>? {
-        req.userId = currentUserId()//只能更新自己的用户信息
+        req.userId = req.userId ?: currentUserId()//默认更新自己的用户信息
         return userInfoService.autoUpdate(req).ok()
+    }
+
+    @PostMapping("/list")
+    @ApiOperation("获取用户列表", hidden = true)
+    fun list(@RequestBody(required = false) param: UserQueryParam?): Result<List<AuthRepBean>> {
+        return userService.listUser(param).ok()
+    }
+
+    @PostMapping("/page")
+    @ApiOperation("获取用户列表分页", hidden = true)
+    fun page(@RequestBody(required = false) param: UserQueryParam?): Result<IPage<AuthRepBean>> {
+        return userService.pageUser(param).ok()
     }
 }

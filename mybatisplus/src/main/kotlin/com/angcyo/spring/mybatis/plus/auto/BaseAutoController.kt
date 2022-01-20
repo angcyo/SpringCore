@@ -79,10 +79,10 @@ abstract class BaseAutoController<
     }
 
     /**数据结构转换*/
-    fun List<Table>.toReturnList(): List<Return> {
+    fun List<Table>.toReturnList(init: Return.() -> Unit): List<Return> {
         val result = mutableListOf<Return>()
         forEach {
-            result.add(it.toReturn())
+            result.add(it.toReturn().apply(init))
         }
         return result
     }
@@ -183,7 +183,7 @@ abstract class BaseAutoController<
         autoService.autoCheck(param, AutoType.UPDATE)
         val result = autoService.autoUpdateByKey(param)
         autoUpdateAfter(param, result)
-        return result?.toReturnList()?.lastOrNull().result()
+        return result?.toReturnList {}?.lastOrNull().result()
     }
 
     //</editor-fold desc="update">
@@ -208,7 +208,7 @@ abstract class BaseAutoController<
         param.pageSize = 1
         val page = autoService.autoPage(param)
         autoQueryAfter(param, page)
-        val result = page.records.toReturnList()
+        val result = page.records.toReturnList {}
         return result.firstOrNull().ok()
     }
 
@@ -234,7 +234,7 @@ abstract class BaseAutoController<
         }
         val list = autoService.autoList(queryParam)
         autoListAfter(queryParam, list)
-        return list.toReturnList().result()
+        return list.toReturnList {}.result()
     }
 
     open fun autoListAfter(param: QueryParam, list: List<Table>) {
@@ -265,7 +265,7 @@ abstract class BaseAutoController<
         val page = autoService.autoPage(queryParam)
         autoPageAfter(queryParam, page)
 
-        val result = page.records.toReturnList()
+        val result = page.records.toReturnList {}
         val resultPage = result.toIPage(page)
         return resultPage.result()
     }

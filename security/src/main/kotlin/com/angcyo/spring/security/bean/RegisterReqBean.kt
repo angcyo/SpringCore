@@ -14,7 +14,7 @@ import javax.validation.constraints.Size
  */
 
 @ApiModel("注册账号请求参数")
-class RegisterReqBean {
+open class RegisterReqBean {
 
     @ApiModelProperty("注册的账号, 也是默认的用户昵称", required = true)
     @NotBlank(message = "账号不能为空")

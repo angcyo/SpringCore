@@ -202,7 +202,7 @@ interface IBaseMybatisService<Table> : IService<Table> {
         list: List<Table>,
         queryList: QueryWrapper<Table>.() -> Unit,
         equalTo: (existTable: Table, table: Table) -> Boolean
-    ) {
+    ): Boolean {
         //获取所有已存在的数据
         val existTableList = list(queryWrapper(true).apply(queryList))
         val targetTableList = mutableListOf<Table>()
@@ -235,16 +235,17 @@ interface IBaseMybatisService<Table> : IService<Table> {
 
         //开始操作
         if (removeList.isNotEmpty()) {
-            removeByIds(removeList.mapTo(mutableListOf()) {
+            return removeByIds(removeList.mapTo(mutableListOf()) {
                 it.getMember(it!!.keyName()) as Serializable
             }).ifError("移除数据失败[${removeList}]")
         }
         if (updateList.isNotEmpty()) {
-            updateBatchById(updateList).ifError("更新数据失败[${updateList}]")
+            return updateBatchById(updateList).ifError("更新数据失败[${updateList}]")
         }
         if (saveList.isNotEmpty()) {
-            saveBatch(saveList).ifError("保存数据失败[${saveList}]")
+            return saveBatch(saveList).ifError("保存数据失败[${saveList}]")
         }
+        return true
     }
 
     /**[queryColumn] 需要查询的列
@@ -260,8 +261,8 @@ interface IBaseMybatisService<Table> : IService<Table> {
      * ```
      * */
     @Transactional
-    fun resetFrom(list: List<Table>, queryColumn: String, queryValue: Any, equalField: String) {
-        resetFrom(list, queryList = {
+    fun resetFrom(list: List<Table>, queryColumn: String, queryValue: Any, equalField: String): Boolean {
+        return resetFrom(list, queryList = {
             eq(queryColumn.toLowerName(), queryValue)
         }, { existTable, table ->
             existTable.getMember(equalField) == table.getMember(equalField)
@@ -277,8 +278,8 @@ interface IBaseMybatisService<Table> : IService<Table> {
      * ```
      * */
     @Transactional
-    fun resetFrom(list: List<Table>, equalField: String, queryList: QueryWrapper<Table>.() -> Unit) {
-        resetFrom(list, queryList) { existTable, table ->
+    fun resetFrom(list: List<Table>, equalField: String, queryList: QueryWrapper<Table>.() -> Unit): Boolean {
+        return resetFrom(list, queryList) { existTable, table ->
             existTable.getMember(equalField) == table.getMember(equalField)
         }
     }

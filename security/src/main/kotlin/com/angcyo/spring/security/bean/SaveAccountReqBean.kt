@@ -10,10 +10,7 @@ import io.swagger.annotations.ApiModelProperty
  */
 
 @ApiModel("新增帐号参数")
-class SaveAccountReqBean {
-
-    @ApiModelProperty("注册账号的数据")
-    var registerReqBean: RegisterReqBean? = null
+open class SaveAccountReqBean : RegisterReqBean() {
 
     @ApiModelProperty("需要分配的角色id")
     var roleIdList: List<Long>? = null

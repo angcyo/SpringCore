@@ -7,6 +7,7 @@ import com.angcyo.spring.base.json.fromJackson
 import com.angcyo.spring.base.json.toJackson
 import com.angcyo.spring.util.L
 import com.angcyo.spring.util.str
+import org.springframework.core.convert.support.DefaultConversionService
 import org.springframework.validation.BindingResult
 import org.springframework.validation.FieldError
 import javax.validation.ConstraintViolation
@@ -250,6 +251,24 @@ fun <T, R> List<T>.toBeanList(cls: Class<R>, initBean: R.(T) -> Unit = {}): List
     val result = mutableListOf<R>()
     forEach {
         it.toBean(cls)?.let { bean ->
+            result.add(bean.apply {
+                initBean(it)
+            })
+        }
+    }
+    return result
+}
+
+/**使用Spring提供的类型转换
+ * No converter found capable of converting from type [com.angcyo.spring.security.table.UserTable] to type [com.angcyo.spring.spmt.api.service.UserRepBean]*/
+fun <T, R> T.toBean2(cls: Class<R>): R {
+    return DefaultConversionService.getSharedInstance().convert(this, cls) as R
+}
+
+fun <T, R> List<T>.toBeanList2(cls: Class<R>, initBean: R.(T) -> Unit = {}): List<R> {
+    val result = mutableListOf<R>()
+    forEach {
+        it.toBean2(cls)?.let { bean ->
             result.add(bean.apply {
                 initBean(it)
             })
