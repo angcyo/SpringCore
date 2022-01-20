@@ -199,7 +199,7 @@ class AutoParse<Table> {
         _handleOrder(queryWrapper, param)
 
         val targetSql = queryWrapper.targetSql
-        L.i("parseQuery sql->$targetSql")
+        L.i("parseSql sql->$targetSql")
         return queryWrapper
     }
 
@@ -214,18 +214,6 @@ class AutoParse<Table> {
         val targetSql = updateWrapper.targetSql
         L.i("parseUpdate sql->$targetSql")
         return updateWrapper
-    }
-
-    fun parseQueryByUpdate(
-        queryWrapper: QueryWrapper<Table>,
-        param: IAutoParam,
-        jumpEmptyQuery: Boolean = false,
-        type: AutoType = AutoType.UPDATE
-    ): QueryWrapper<Table> {
-        _handleQuery(type, queryWrapper, param, jumpEmptyQuery)
-        val targetSql = queryWrapper.targetSql
-        L.i("parseQueryByUpdate sql->$targetSql")
-        return queryWrapper
     }
 
     /**自动解析并填充对象
@@ -268,60 +256,6 @@ class AutoParse<Table> {
                 field.set(param, value)
             }
         }
-    }
-
-    /**
-     * 检查数据是否已存在
-     * [com.angcyo.spring.mybatis.plus.auto.annotation.AutoSave]*/
-    fun parseSaveCheck(
-        queryWrapper: QueryWrapper<Table>,
-        param: IAutoParam,
-        jumpEmptyQuery: Boolean = false,
-        type: AutoType = AutoType.SAVE
-    ): QueryWrapper<Table> {
-        //查询
-        _handleQuery(type, queryWrapper, param, jumpEmptyQuery)
-
-        val targetSql = queryWrapper.targetSql
-        L.i("parseSaveCheck sql->$targetSql")
-
-        return queryWrapper
-    }
-
-    /**
-     * 检查数据是否已存在
-     * [com.angcyo.spring.mybatis.plus.auto.annotation.AutoDelete]*/
-    fun parseDeleteCheck(
-        queryWrapper: QueryWrapper<Table>,
-        param: IAutoParam,
-        jumpEmptyQuery: Boolean = false,
-        type: AutoType = AutoType.DELETE
-    ): QueryWrapper<Table> {
-        //查询
-        _handleQuery(type, queryWrapper, param, jumpEmptyQuery)
-
-        val targetSql = queryWrapper.targetSql
-        L.i("parseDeleteCheck sql->$targetSql")
-
-        return queryWrapper
-    }
-
-    /**
-     * 更新检查数据是否已存在
-     * [com.angcyo.spring.mybatis.plus.auto.annotation.AutoUpdate]*/
-    fun parseUpdateCheck(
-        queryWrapper: QueryWrapper<Table>,
-        param: IAutoParam,
-        jumpEmptyQuery: Boolean = false,
-        type: AutoType = AutoType.UPDATE
-    ): QueryWrapper<Table> {
-        //查询
-        _handleQuery(type, queryWrapper, param, jumpEmptyQuery)
-
-        val targetSql = queryWrapper.targetSql
-        L.i("parseUpdateCheck sql->$targetSql")
-
-        return queryWrapper
     }
 
     fun _handleFill(fill: AutoFill, field: Field, obj: IAutoParam): Boolean {

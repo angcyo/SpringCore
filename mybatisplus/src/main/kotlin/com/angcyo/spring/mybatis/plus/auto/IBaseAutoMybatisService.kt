@@ -156,7 +156,7 @@ interface IBaseAutoMybatisService<Table> : IBaseMybatisService<Table> {
         }
 
         //否则检查数据是否合法, 保存数据
-        val count = count(autoParse.parseSaveCheck(queryWrapper(true), param))
+        val count = count(autoParse.parseQuery(queryWrapper(true), param, false, AutoType.SAVE))
         if (count > 0) {
             //数据已存在, 抛出异常
             AutoParse.handleExistError(param, AutoType.SAVE)
@@ -189,7 +189,7 @@ interface IBaseAutoMybatisService<Table> : IBaseMybatisService<Table> {
         return autoRemove(param, false)
     }
 
-    /**真删除, 必须指定主键
+    /**真/软删除, 必须指定主键
      * [remove] 硬删除, 否则就是软删除*/
     @LogMethodTime
     @Transactional
@@ -203,7 +203,7 @@ interface IBaseAutoMybatisService<Table> : IBaseMybatisService<Table> {
         val type = if (remove) AutoType.REMOVE else AutoType.DELETE
 
         //否则检查数据是否合法, 保存数据
-        val count = count(autoParse.parseDeleteCheck(queryWrapper(true), param, true, type))
+        val count = count(autoParse.parseQuery(queryWrapper(true), param, true, type))
 
         if (count > 0) {
             //查询后, 有数据则删除
@@ -253,6 +253,9 @@ interface IBaseAutoMybatisService<Table> : IBaseMybatisService<Table> {
             }
         }
 
+        //检查
+        checkCanUpdate(table)
+
         //操作的表对象
         val targetTable: Table = table.toTable()
         if (targetTable != table && targetTable is IAutoParam) {
@@ -273,10 +276,32 @@ interface IBaseAutoMybatisService<Table> : IBaseMybatisService<Table> {
                 false
             }
         } else {
+            //指定了主键
             updateById(targetTable)
         }
 
         return result
+    }
+
+    /**检查数据是否可以被更新*/
+    fun checkCanUpdate(param: Any) {
+        if (param is IAutoParam) {
+            val autoParse = buildAutoParse()
+
+            //先检查需要查询的数据是否存在
+            //查询数据有效性
+            var count = count(autoParse.parseQuery(queryWrapper(true), param, false, AutoType.UPDATE))
+            if (count <= 0) {
+                apiError("数据不存在, 无法更新")
+            }
+
+            //检查数据是否能被更新
+            count = count(autoParse.parseQuery(queryWrapper(true), param, false, AutoType.UPDATE_CHECK))
+            if (count > 0) {
+                //数据已存在, 抛出异常
+                AutoParse.handleExistError(param, AutoType.UPDATE_CHECK)
+            }
+        }
     }
 
     @LogMethodTime
@@ -335,7 +360,7 @@ interface IBaseAutoMybatisService<Table> : IBaseMybatisService<Table> {
                 }
             } else if (targetTable is IAutoParam && targetTable.haveAnnotation<AutoUpdateBy>(true)) {
                 //根据条件更新记录
-                val count = count(autoParse.parseQueryByUpdate(queryWrapper(true), targetTable))
+                val count = count(autoParse.parseQuery(queryWrapper(true), targetTable, false, AutoType.UPDATE))
 
                 if (count > 0) {
                     //存在数据
@@ -521,8 +546,6 @@ interface IBaseAutoMybatisService<Table> : IBaseMybatisService<Table> {
             return null
         }
 
-        val autoParse = buildAutoParse()
-
         //需要更新的表数据
         val updateTableList = mutableListOf<Table>()
 
@@ -545,20 +568,8 @@ interface IBaseAutoMybatisService<Table> : IBaseMybatisService<Table> {
                 keyList.add(keyFieldValue as Serializable)
             }
 
-            if (table is IAutoParam) {
-                //查询数据有效性
-                var count = count(autoParse.parseUpdateCheck(queryWrapper(true), table))
-                if (count <= 0) {
-                    apiError("数据[$keyFieldValue]不存在, 无法更新")
-                }
-
-                //检查数据是否能被更新
-                count = count(autoParse.parseSaveCheck(queryWrapper(true), table, false, AutoType.UPDATE_CHECK))
-                if (count > 0) {
-                    //数据已存在, 抛出异常
-                    AutoParse.handleExistError(table, AutoType.UPDATE_CHECK)
-                }
-            }
+            //检查是否能更新数据
+            checkCanUpdate(table)
 
             updateTableList.add(table.toTable())
         }

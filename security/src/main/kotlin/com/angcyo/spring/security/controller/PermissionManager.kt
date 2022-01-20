@@ -9,6 +9,9 @@ import org.springframework.stereotype.Service
 /**
  * 权限管理服务
  *
+ * [com.angcyo.spring.security.table.PermissionTable]
+ * [com.angcyo.spring.security.service.PermissionService]
+ *
  * Email:angcyo@126.com
  * @author angcyo
  * @date 2021/06/01
