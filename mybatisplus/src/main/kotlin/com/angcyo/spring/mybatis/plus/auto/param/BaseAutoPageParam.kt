@@ -9,7 +9,7 @@ import io.swagger.annotations.ApiModelProperty
  * @author angcyo
  * @date 2021/05/29
  */
-abstract class BaseAutoPageParam : BaseAutoQueryParam() {
+class BaseAutoPageParam : BaseAutoQueryParam() {
 
     companion object {
 

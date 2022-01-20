@@ -105,7 +105,7 @@ class JwtLoginFilter(
                 authError(e.message ?: "授权异常失败")
             }
 
-            //send response
+            //6. send response 返回登录成功后的数据
             val repBean = userDetail.userTable!!.toObj<AuthRepBean> {
                 this.token = SecurityConstants.TOKEN_PREFIX + token
                 authService.userService.autoFill(this)

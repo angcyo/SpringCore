@@ -58,7 +58,7 @@ class PermissionManager {
                 have = false
             } else if (permit.isEmpty() || permit == "*") {
                 have = true
-            } else if (!permit.isNullOrEmpty()) {
+            } else if (permit.isNotEmpty()) {
                 //放行的uri
                 have = uri.have(permit, true)
                 permitWildcard = permit.haveWildcard()

@@ -9,6 +9,7 @@ import com.angcyo.spring.mybatis.plus.auto.annotation.*
 import com.angcyo.spring.mybatis.plus.auto.core.AutoParse
 import com.angcyo.spring.mybatis.plus.auto.param.BaseAutoPageParam
 import com.angcyo.spring.mybatis.plus.auto.param.IAutoParam
+import com.angcyo.spring.mybatis.plus.auto.param.PlaceholderAutoParam
 import com.angcyo.spring.mybatis.plus.service.IBaseMybatisService
 import com.angcyo.spring.mybatis.plus.table.BaseAuditTable
 import com.angcyo.spring.util.size
@@ -107,7 +108,7 @@ interface IBaseAutoMybatisService<Table> : IBaseMybatisService<Table> {
 
     /**根据[param], 自动查询一条数据*/
     @LogMethodTime
-    fun autoQuery(param: IAutoParam): Table? {
+    fun autoQuery(param: IAutoParam = PlaceholderAutoParam()): Table? {
         autoFill(param)
         return list(buildAutoParse().parseQuery(queryWrapper(true), param).maxCountLimit(1)).firstOrNull()
     }
@@ -115,14 +116,14 @@ interface IBaseAutoMybatisService<Table> : IBaseMybatisService<Table> {
     /**根据[param], 自动查询出所有数据*/
     @LogMethodTime
     @AutoFillRef("com.angcyo.spring.mybatis.plus.auto.core.AutoParse._handleFill")
-    fun autoList(param: IAutoParam): List<Table> {
+    fun autoList(param: IAutoParam = PlaceholderAutoParam()): List<Table> {
         autoFill(param)
         return list(buildAutoParse().parseQuery(queryWrapper(true), param, true).maxCountLimit())
     }
 
     /**根据[param], 自动分页查询出数据*/
     @LogMethodTime
-    fun autoPage(param: BaseAutoPageParam): IPage<Table> {
+    fun autoPage(param: BaseAutoPageParam = BaseAutoPageParam()): IPage<Table> {
         val autoParse = buildAutoParse()
         autoFill(param)
         return page(autoParse.page(param), autoParse.parseQuery(queryWrapper(true), param, true))
@@ -133,7 +134,7 @@ interface IBaseAutoMybatisService<Table> : IBaseMybatisService<Table> {
     @Transactional
     fun autoSave(param: IAutoParam): Table {
         val autoParse = buildAutoParse()
-        autoFill(param)
+        autoParse.parseFill(param)
 
         val keyValue = param.keyValue()
         if (keyValue != null) {
@@ -152,6 +153,9 @@ interface IBaseAutoMybatisService<Table> : IBaseMybatisService<Table> {
             autoParse.parseDefaultValue(param)
         }
         val table = param.toTable()
+        if (table != param && table is IAutoParam) {
+            autoParse.parseFill(table)
+        }
         if (save(table)) {
             onSaveTable(listOf(table))
         } else {
@@ -239,7 +243,7 @@ interface IBaseAutoMybatisService<Table> : IBaseMybatisService<Table> {
 
         //操作的表对象
         val targetTable: Table = table.toTable()
-        if (targetTable is IAutoParam) {
+        if (targetTable != table && targetTable is IAutoParam) {
             if (!autoParse.parseFill(targetTable as IAutoParam)) {
                 apiError("处理失败")
             }
@@ -305,7 +309,7 @@ interface IBaseAutoMybatisService<Table> : IBaseMybatisService<Table> {
 
             //操作的表对象
             val targetTable: Table = table.toTable()
-            if (targetTable is IAutoParam) {
+            if (targetTable != table && targetTable is IAutoParam) {
                 fillSuccess = autoParse.parseFill(targetTable as IAutoParam)
             }
 
