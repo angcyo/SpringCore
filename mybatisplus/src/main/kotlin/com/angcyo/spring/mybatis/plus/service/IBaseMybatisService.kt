@@ -396,6 +396,7 @@ interface IBaseMybatisService<Table> : IService<Table> {
         }).firstOrNull()
     }
 
+    /**in语句不能使用空数据, 这里只是做了一个提前的空数据判断返回*/
     fun listQueryIn(
         coll: Collection<*>,
         filterDelete: Boolean = true,
@@ -509,12 +510,10 @@ interface IBaseMybatisService<Table> : IService<Table> {
         return if (parentId.isTopId()) {
             listQuery {
                 eq(IBaseTree::parentId.columnName(), parentId)
-                noDelete()
             }
         } else {
             val parent = getById(parentId).ifError("parentId[$parentId]不存在") as IBaseTree
             listQuery {
-                noDelete()
                 likeRight(IBaseTree::parentIds.columnName(), parent.parentIds)
             }.dropWhile {
                 (it as Any).keyValue() == parentId
@@ -532,7 +531,6 @@ interface IBaseMybatisService<Table> : IService<Table> {
             }
             val idList = parentIds.split(IBaseTree.PARENT_SPLIT).filter { it.isNotBlank() }
             return listQuery {
-                noDelete()
                 `in`(table.keyName(), idList)
             }
         } else {

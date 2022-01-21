@@ -8,6 +8,7 @@ import com.baomidou.mybatisplus.annotation.TableField
 import com.baomidou.mybatisplus.annotation.TableId
 import com.fasterxml.jackson.annotation.JsonFormat
 import com.fasterxml.jackson.annotation.JsonIgnore
+import com.fasterxml.jackson.annotation.JsonInclude
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize
 import com.fasterxml.jackson.databind.annotation.JsonSerialize
 import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateTimeDeserializer
@@ -32,6 +33,7 @@ import java.time.LocalDateTime
 
 @ApiModel("基础表结构信息")
 @Cacheable
+@JsonInclude(JsonInclude.Include.NON_NULL)
 abstract class BaseAuditTable {
 
     companion object {

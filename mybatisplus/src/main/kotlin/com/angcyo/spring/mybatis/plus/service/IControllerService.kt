@@ -60,7 +60,6 @@ interface IControllerService<
 
     fun listTable(): List<Table> {
         return listQuery {
-            noDelete()
         }
     }
 
@@ -76,7 +75,6 @@ interface IControllerService<
     ): IPage<Table> {
         return pageQuery(pageIndex, pageSize, searchCount) {
             sort(param)
-            noDelete()
         }
     }
 
