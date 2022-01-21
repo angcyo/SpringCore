@@ -4,6 +4,8 @@ import com.angcyo.spring.mybatis.plus.auto.AutoType
 import com.angcyo.spring.mybatis.plus.auto.annotation.AutoQuery
 import com.angcyo.spring.mybatis.plus.auto.annotation.AutoUpdateBy
 import com.angcyo.spring.mybatis.plus.auto.annotation.Query
+import com.angcyo.spring.mybatis.plus.table.BaseAuditTable
+import com.fasterxml.jackson.annotation.JsonIgnore
 import com.gitee.sunchenbin.mybatis.actable.annotation.IsKey
 import io.swagger.annotations.ApiModelProperty
 
@@ -29,5 +31,6 @@ class BaseAutoParam : IAutoParam {
     var id: Long? = null
 
     @ApiModelProperty("[通用参数]逻辑删除(0:未删除 1:删除)", hidden = true)
-    var deleteFlag: Int? = 0
+    @JsonIgnore
+    var deleteFlag: Int? = BaseAuditTable.NO_DELETE
 }
