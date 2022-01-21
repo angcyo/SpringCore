@@ -98,7 +98,7 @@ abstract class BaseController<
     open fun saveTableAfter(param: SaveParam, table: Table) {
     }
 
-    @ApiOperation("[通用接口]保存数据Base")
+    @ApiOperation("[通用]保存数据Base")
     @PostMapping("/save.base")
     open fun saveTable(@RequestBody(required = true) param: SaveParam): Result<Return> {
         if (saveTableBefore(param)) {
@@ -121,7 +121,7 @@ abstract class BaseController<
     open fun deleteTableAfter(param: SaveParam, delete: Boolean) {
     }
 
-    @ApiOperation("[通用接口]使用id软删除数据Base")
+    @ApiOperation("[通用]使用id软删除数据Base")
     @PostMapping("/delete.base")
     open fun deleteTable(@RequestBody(required = true) param: SaveParam): Result<Boolean> {
         if (deleteTableBefore(param)) {
@@ -144,7 +144,7 @@ abstract class BaseController<
     open fun removeTableAfter(param: SaveParam, remove: Boolean) {
     }
 
-    @ApiOperation("[通用接口]使用id移除数据(真删除)Base")
+    @ApiOperation("[通用]使用id移除数据(真删除)Base")
     @PostMapping("/remove.base")
     open fun removeTable(@RequestBody(required = true) param: SaveParam): Result<Boolean> {
         if (removeTableBefore(param)) {
