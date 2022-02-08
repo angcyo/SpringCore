@@ -397,7 +397,7 @@ class AutoParse<Table> {
 
     /**处理查询语句
      * [jumpField] 是否要跳过当前的字段
-     * [com.angcyo.spring.mybatis.plus.auto.AutoParse._handleWhere]*/
+     * [com.angcyo.spring.mybatis.plus.auto.core.AutoParse._handleWhere]*/
     fun <Wrapper : AbstractWrapper<Table, String, Wrapper>> _handleQuery(
         type: AutoType,
         wrapper: AbstractWrapper<Table, String, Wrapper>,
