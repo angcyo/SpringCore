@@ -8,6 +8,7 @@ import cn.hutool.poi.excel.style.StyleUtil
 import com.angcyo.spring.util.encode
 import org.apache.poi.ss.usermodel.*
 import java.io.File
+import java.io.InputStream
 import javax.servlet.http.HttpServletResponse
 import kotlin.math.max
 import kotlin.math.min
@@ -264,9 +265,29 @@ class ExcelHandle(destFilePath: String) {
 
 /**默认格式 xlsx.*/
 fun excelHandle(destFilePath: String = "temp.xlsx", dsl: ExcelHandle.() -> Unit): ExcelHandle {
+    return excelWrite(destFilePath, dsl)
+}
+
+/**写入Excel*/
+fun excelWrite(destFilePath: String = "temp.xlsx", dsl: ExcelHandle.() -> Unit): ExcelHandle {
     return ExcelHandle(destFilePath).apply {
         dsl()
         doIt()
     }
 }
 
+/**读取Excel, 读取Excel中所有行和列，都用列表表示
+ * https://www.hutool.cn/docs/#/poi/Excel%E8%AF%BB%E5%8F%96-ExcelReader*/
+fun excelReadList(bookStream: InputStream, sheetIndex: Int = 0): List<List<Any>>? {
+    return ExcelUtil.getReader(bookStream, sheetIndex).read()
+}
+
+/**读取为Map列表，默认第一行为标题行，Map中的key为标题，value为标题对应的单元格值。*/
+fun excelReadMap(bookStream: InputStream, sheetIndex: Int = 0): List<Map<String, Any>>? {
+    return ExcelUtil.getReader(bookStream, sheetIndex).readAll()
+}
+
+/**读取为Bean列表，Bean中的字段名为标题，字段值为标题对应的单元格值。*/
+fun <T> excelReadBean(bookStream: InputStream, beanType: Class<T>, sheetIndex: Int = 0): List<T>? {
+    return ExcelUtil.getReader(bookStream, sheetIndex).readAll(beanType)
+}
