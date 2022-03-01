@@ -32,7 +32,7 @@ open class DefaultAuthenticationProvider : BaseTokenAuthenticationProvider() {
         var result: Authentication? = null
         val authService = beanOf<AuthService>()
         val redis = beanOf<Redis>()
-        val grantType = authReqBean.grantType?.lowercase()
+        val grantType = authReqBean.grantType?.toLowerCase()
 
         //-------------------------验证码检查---------------------------
 
@@ -42,8 +42,8 @@ open class DefaultAuthenticationProvider : BaseTokenAuthenticationProvider() {
             if (!authReqBean.imageCode.isNullOrEmpty() ||
                 redis.hasKey(authService.imageCodeKey(codeKey, CodeType.Login.value))
             ) {
-                if (authReqBean.imageCode?.lowercase() !=
-                    authService.getImageCode(codeKey, CodeType.Login.value)?.lowercase()
+                if (authReqBean.imageCode?.toLowerCase() !=
+                    authService.getImageCode(codeKey, CodeType.Login.value)?.toLowerCase()
                 ) {
                     //如果获取了图形验证码, 但是不匹配
                     codeError("验证码不正确")
@@ -76,8 +76,8 @@ open class DefaultAuthenticationProvider : BaseTokenAuthenticationProvider() {
                 error("无效的账号")
             }
 
-            val code = authService.getSendCode(uuid, account, CodeType.Login.value)?.lowercase()
-            if (code == null || code != authReqBean.code?.lowercase()) {
+            val code = authService.getSendCode(uuid, account, CodeType.Login.value)?.toLowerCase()
+            if (code == null || code != authReqBean.code?.toLowerCase()) {
                 error("验证码不正确")
             }
 

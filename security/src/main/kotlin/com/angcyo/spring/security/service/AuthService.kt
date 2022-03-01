@@ -216,15 +216,15 @@ class AuthService {
     @Transactional
     fun register(bean: RegisterReqBean): UserTable? {
 
-        val grantType = bean.grantType?.lowercase()
+        val grantType = bean.grantType?.toLowerCase()
         val imageCodeyType = CodeType.Register.value
 
         request()?.let {
             val codeKey = it.codeKey()
             //优先验证图形验证码, 如果有. 或者传入了图形验证码
             if (!bean.imageCode.isNullOrEmpty() || redis.hasKey(imageCodeKey(codeKey, imageCodeyType))) {
-                val imageCode1 = bean.imageCode?.lowercase()
-                val imageCode2 = getImageCode(codeKey, imageCodeyType)?.lowercase()
+                val imageCode1 = bean.imageCode?.toLowerCase()
+                val imageCode2 = getImageCode(codeKey, imageCodeyType)?.toLowerCase()
                 if (imageCode1 != imageCode2) {
                     //如果获取了图形验证码, 但是不匹配
                     apiError("验证码不正确")
@@ -242,8 +242,8 @@ class AuthService {
                 if (uuid.isNullOrEmpty()) {
                     apiError("无效的客户端")
                 }
-                val code = getSendCode(uuid, bean.account!!, imageCodeyType)?.lowercase()
-                if (code == null || code != bean.code?.lowercase()) {
+                val code = getSendCode(uuid, bean.account!!, imageCodeyType)?.toLowerCase()
+                if (code == null || code != bean.code?.toLowerCase()) {
                     apiError("验证码不正确")
                 }
             }

@@ -100,7 +100,7 @@ fun QueryWrapper<*>.in2(column: String, value: Collection<Any?>?) {
  * [com.gitee.sunchenbin.mybatis.actable.utils.ColumnUtils.getTableName]*/
 fun lowerName(value: String) = CaseFormat.LOWER_CAMEL.to(
     CaseFormat.LOWER_UNDERSCORE, value.replace(ColumnUtils.SQL_ESCAPE_CHARACTER, "")
-).lowercase()
+).toLowerCase()
 
 fun String.toLowerName() = lowerName(this)
 

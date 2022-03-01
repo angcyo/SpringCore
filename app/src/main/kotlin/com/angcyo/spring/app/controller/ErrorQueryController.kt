@@ -30,7 +30,7 @@ class ErrorQueryController {
     @ApiOperation("根据错误UUID, 查询错误信息")
     @GetMapping("/{errorUuid}")
     fun query(@PathVariable(required = true) errorUuid: String): String? {
-        val list = if (errorUuid.lowercase() == "last") {
+        val list = if (errorUuid.toLowerCase() == "last") {
             jdbc.queryForList("SELECT * FROM logging_event ORDER BY timestmp DESC LIMIT 1")
         } else {
             jdbc.queryForList("SELECT * FROM logging_event WHERE arg0 = '${errorUuid}'")
